@@ -1,0 +1,690 @@
+﻿@using SCG.ARS.BOI.WEB.Security
+@inject ISecurityService sec
+@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles{
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/regular.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/solid.min.css" />
+
+    <style>
+        .link-padding {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .add-icon {
+            color: #007bff;
+            cursor: pointer;
+        }
+
+            .add-icon:hover {
+                color: green;
+                cursor: pointer;
+            }
+
+        .edit-icon:hover {
+            color: blue;
+        }
+
+        .criteria-permission-icon:hover {
+            color: orangered;
+        }
+
+        .change-pass-icon:hover {
+            color: goldenrod;
+        }
+
+        .delete-icon:hover {
+            color: red;
+        }
+
+        .far {
+            padding-right: 5px;
+        }
+
+        .permission-container {
+            height: 400px;
+            overflow-y: scroll;
+        }
+
+        .padding-lvl-1 {
+            margin-left: 2rem !important;
+        }
+
+        .padding-lvl-2 {
+            margin-left: 4rem !important;
+        }
+
+        .padding-lvl-3 {
+            margin-left: 6rem !important;
+        }
+
+        .padding-lvl-4 {
+            margin-left: 8rem !important;
+        }
+        .padding-lvl-5 {
+            margin-left: 10rem !important;
+        }
+    </style>
+}
+
+@section Scripts{
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/permissionDialogClass.js"></script>
+
+    <script type="text/javascript">
+        var roleDetailColumns = [];
+        var userInRoleColumns = [];
+
+        function createRoleDetailColumns() {
+            var action = '';
+            var canAdd = 1 == @sec.IsAllow(SCG.ARS.BOI.WEB.Attributes.ScreenID.WEB_ROLE, SCG.ARS.BOI.WEB.Attributes.Permission.Add);
+            if (canAdd)
+                action = "<div class='text-center' title='Add'><i class='fas fa-plus add-icon' data-toggle='modal' data-target='#roleDialog' onclick='openCreateRole(); return false;' title='Create'></i></div>";
+            roleDetailColumns = [
+                { "data": "roleName", "name": "action", "title": action, "autoWidth": true, "className": "text-nowrap" },
+                { "data": "roleName", "name": "roleName", "title": "Role", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "category", "name": "category", "title": "Category", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "createdBy", "name": "createdBy", "title": "Created By", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "createdDate", "name": "createdDate", "title": "Created Date", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderDateTime },
+                { "data": "updatedBy", "name": "updatedBy", "title": "Updated By", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "updatedDate", "name": "updatedDate", "title": "Updated Date", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderDateTime },
+            ]
+        }
+
+        function createUserInRoleColumns() {
+            userInRoleColumns = [
+                { "data": "userName", "name": "action", "title": "<div class='text-center' title='Add'><i class='fas fa-user-plus add-icon' onclick='openAddUserSection(); return false;' title='Add User'></i></div>", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "userName", "name": "UserName", "title": "Username", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "firstName", "name": "category", "title": "First Name", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "lastName", "name": "createdBy", "title": "Last Name", "autoWidth": true, "className": "text-nowrap" },
+            ]
+        }
+
+        var permissionDialog;
+        $(document).ready(function () {
+            permissionDialog = new PermissionDialogClass('#permissionDialog', '@Url.Action("RolePermission", "Security")', '@Url.Action("SetRolePermission", "Security")', search);
+            $('#roleDialog .user-dropdown').select2(
+                {
+                    ajax: {
+                        url: '@Url.Action("SearchUser", "Security")',
+                        dataType: 'json',
+                        data: function (params) {
+                            var query = {
+                                criteria: params.term,
+                                page: params.page || 1
+                            }
+
+                            return query;
+                        },
+                        processResults: function (result) {
+                            var options = [];
+                            result.data.forEach(function (item, index, array) {
+                                options.push({ "id": item.userName, "text": item.userName + ': ' + item.firstName + ' ' + item.lastName, "raw": item });
+                            });
+                            return {
+                                results: options
+                            };
+                        },
+                    },
+                    templateResult: function (state) {
+                        return state.text;
+                    },
+                    multiple: true,
+                    placeholder: "Select user",
+                    matcher: function (params, data) {
+                        if ($.trim(params.term) === '') {
+                            return data;
+                        }
+                        var filteredChildren = [];
+                        $.each(data.children, function (idx, child) {
+                            if (child.raw.firstName.toUpperCase().indexOf(params.term.toUpperCase()) == 0 ||
+                                child.raw.lastName.toUpperCase().indexOf(params.term.toUpperCase()) == 0 ||
+                                child.raw.userName.toUpperCase().indexOf(params.term.toUpperCase()) == 0 ||
+                                child.raw.customerCode.toUpperCase().indexOf(params.term.toUpperCase()) == 0) {
+                                filteredChildren.push(child);
+                            }
+                        });
+                    },
+                }
+            );
+            createRoleDetailColumns();
+            createUserInRoleColumns();
+            search();
+        });
+
+        function getCriteria() {
+            return {"criteria": ''};
+        }
+
+        function search() {
+            generateTable('#RoleDetail', '@Url.Action("SearchRole", "Security")', getCriteria(), null, roleDetailColumns, createdRoleDetail_row);
+        }
+
+        function openAddUserSection() {
+            $('#roleDialog .normal-section').hide();
+            $('#roleDialog .add-user-section').show();
+            $('#roleDialog .user-dropdown').val(null).trigger('change');
+        }
+
+        function openCreateRole() {
+            $('#roleDialog .modal-title').text('Create Role');
+            $('#roleDialog .RoleName').prop('role-id', null);
+            $('#roleDialog .RoleName').val('');
+            $('#roleDialog .Category').val('');
+            $('#roleDialog .RoleName').prop('deleteUsers', null);
+            $('#roleDialog .RoleName').prop('addUsers', null);
+
+            //$('#roleDialog').find('#userInRoleDetail').hide();
+            $('#roleDialog').find('#userInRoleDetail').show();
+            $('#roleDialog .RoleName').attr('readonly', false);
+
+            $('#roleDialog .normal-section').show();
+            $('#roleDialog .add-user-section').hide();
+        }
+
+        function getCreateRoleModel() {
+            var deleteUsers = $('#roleDialog .RoleName').prop('deleteUsers');
+            var addUsers = $('#roleDialog .RoleName').prop('addUsers');
+            if (deleteUsers == null)
+                deleteUsers = [];
+            else
+                deleteUsers = JSON.parse(deleteUsers);
+            if (addUsers == null)
+                addUsers = [];
+            else
+                addUsers = JSON.parse(addUsers);
+
+            return {
+                "RoleName": $('#roleDialog .RoleName').val(),
+                "Category": $('#roleDialog .Category').val(),
+                "DeleteUsers": deleteUsers,
+                "AddUsers": addUsers
+            }
+        }
+
+        function ValidateCreateRole() {
+            var result = true;
+            $('#roleDialog .RoleName').removeClass('is-invalid');
+            //$('#roleDialog .Category').removeClass('is-invalid');
+            if ($('#roleDialog .RoleName').val() == '') {
+                $('#roleDialog .RoleName').addClass('is-invalid');
+                result = false;
+            }
+            //if ($('#roleDialog .Category').val() == '') {
+            //    $('#roleDialog .Category').addClass('is-invalid');
+            //    result = false;
+            //}
+            return result;
+        }
+
+        function createRole() {
+            if (ValidateCreateRole()) {
+                $('#roleDialog .section-loading').show();
+                var jqxhr = $.post('@Url.Action("CreateRole", "Security")', getCreateRoleModel())
+                    .done(function (result) {
+                        if (uiHelpers.errorHandler(result)) {
+                            toastr["success"]('Save role complete.');
+                            $('#roleDialog').modal('hide');
+                            search();
+                        }
+                    })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function () {
+                        $('#roleDialog .section-loading').hide();
+                    });
+            }
+            else {
+                toastr["error"]('Please input mandatory field.');
+            }
+        }
+
+        function openEditRole(role) {
+            $('#roleDialog .modal-title').text('Edit Role');
+            $('#roleDialog .RoleName').prop('role-id', role.roleID);
+            $('#roleDialog .RoleName').val(role.roleName);
+            $('#roleDialog .Category').val(role.category);
+            if (role.roleName == '@sec.GetAdminRole()') {
+                $('#roleDialog .RoleName').attr('readonly', true);
+            }
+            $('#roleDialog').find('#userInRoleDetail').show();
+
+            generateTableInDialog('#userInRoleDetail', '@Url.Action("GetUserInRole", "Security")', { "roleid": role.roleID }, 'Users in role', userInRoleColumns, createdUsersInRole_row);
+
+            $('#roleDialog .RoleName').prop('deleteUsers', null);
+            $('#roleDialog .RoleName').prop('addUsers', null);
+
+            $('#roleDialog .normal-section').show();
+            $('#roleDialog .add-user-section').hide();
+        }
+
+        function getEditRoleModel() {
+            var deleteUsers = $('#roleDialog .RoleName').prop('deleteUsers');
+            var addUsers = $('#roleDialog .RoleName').prop('addUsers');
+            if (deleteUsers == null)
+                deleteUsers = [];
+            else
+                deleteUsers = JSON.parse(deleteUsers);
+            if (addUsers == null)
+                addUsers = [];
+            else
+                addUsers = JSON.parse(addUsers);
+
+            return {
+                "RoleID": $('#roleDialog .RoleName').prop('role-id'),
+                "RoleName": $('#roleDialog .RoleName').val(),
+                "Category": $('#roleDialog .Category').val(),
+                "DeleteUsers": deleteUsers,
+                "AddUsers": addUsers
+            }
+        }
+
+        function ValidateEditRole() {
+            var result = true;
+            $('#roleDialog .RoleName').removeClass('is-invalid');
+            //$('#roleDialog .Category').removeClass('is-invalid');
+            if ($('#roleDialog .RoleName').val() == '') {
+                $('#roleDialog .RoleName').addClass('is-invalid');
+                result = false;
+            }
+            //if ($('#roleDialog .Category').val() == '') {
+            //    $('#roleDialog .Category').addClass('is-invalid');
+            //    result = false;
+            //}
+            return result;
+        }
+
+        function editRole() {
+            if (ValidateEditRole()) {
+                $('#roleDialog .section-loading').show();
+                var jqxhr = $.post('@Url.Action("EditRole", "Security")', getEditRoleModel())
+                    .done(function (result) {
+                        if (uiHelpers.errorHandler(result)) {
+                            toastr["success"]('Save role complete.');
+                            $('#roleDialog').modal('hide');
+                            search();
+                        }
+                    })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function () {
+                        $('#roleDialog .section-loading').hide();
+                    });
+            }
+            else {
+                toastr["error"]('Please input mandatory field.');
+            }
+        }
+
+        function saveRole() {
+            if ($('#roleDialog .RoleName').prop('role-id') == null)
+                createRole();
+            else
+                editRole();
+        }
+
+        function deleteRole(roleID, roleName) {
+            if (confirm('Are you sure you want to delete role "' + roleName + '"?')) {
+                var jqxhr = $.post('@Url.Action("DeleteRole", "Security")', { "roleID": roleID })
+                    .done(function (result) {
+                        if (uiHelpers.errorHandler(result)) {
+                            toastr["success"]('Delete complete.');
+                            search();
+                        }
+                    })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function () {
+
+                    });
+            }
+        }
+
+        function createdRoleDetail_row(row, data, dataIndex) {
+            var canEdit = 1 == @sec.IsAllow(SCG.ARS.BOI.WEB.Attributes.ScreenID.WEB_ROLE, SCG.ARS.BOI.WEB.Attributes.Permission.Edit);
+            var canDelete = 1 == @sec.IsAllow(SCG.ARS.BOI.WEB.Attributes.ScreenID.WEB_ROLE, SCG.ARS.BOI.WEB.Attributes.Permission.Delete);
+            var editElement = '<a href="#" class="link-padding edit-icon" data-toggle="modal" data-target="#roleDialog" onclick=\'openEditRole(' + JSON.stringify(data) + '); return false;\' title="Edit"><i class="fas fa-edit"></i></a>';
+            var criteriaPermissionHtml = '<a href="#" class="link-padding criteria-permission-icon" onclick="openCriteriaPermissionDialog(\'#criteriaPermissionDialog\', \'' + data.roleName + '\', \'@Url.Action("ListCriteriaPermissionByRole", "Security")\', \'@Url.Action("SaveCriteriaPermissionByRole", "Security")\'); return false;" title="Data Permission"><i class="fas fa-shield-alt"></i></a>';
+            var permissionElement = '<a href="#" class="link-padding permission-icon" onclick="permissionDialog.openPermission(\'' + data.roleID + '\'); return false;" title="Permission"><i class="fas fa-lock"></i></a>';
+            var deleteElement = '<a href="#" class="link-padding delete-icon" onclick="deleteRole(\'' + data.roleID + '\', \'' + data.roleName + '\'); return false;" title="Delete"><i class="fas fa-trash-alt"></i></a>';
+
+            var element = ''
+            if (data.roleName != '@sec.GetAdminRole()') {
+                element += editElement;
+                element += permissionElement;
+                element += criteriaPermissionHtml;
+                element += deleteElement;
+            }
+            else {
+                element += editElement;
+            }
+
+            $($(row).find('td')[0]).html(element);
+        }
+
+        function createdUsersInRole_row(row, data, dataIndex) {
+            $($(row).find('td')[0]).empty();
+            //if (data.userName != '@sec.GetAdminUser()') {
+            $($(row).find('td')[0]).html('<a href="#" class="link-padding delete-icon" onclick="deleteUserInRole(\'' + data.userName + '\' , ' + dataIndex + '); return false;" title="Delete"><i class="fas fa-user-minus"></i></a>');
+            //}
+        }
+
+        function addUserInRole() {
+            var deleteUsers = $('#roleDialog .RoleName').prop('deleteUsers');
+            var addUsers = $('#roleDialog .RoleName').prop('addUsers');
+            if (deleteUsers == null)
+                deleteUsers = [];
+            else
+                deleteUsers = JSON.parse(deleteUsers);
+            if (addUsers == null)
+                addUsers = [];
+            else
+                addUsers = JSON.parse(addUsers);
+
+            var userList = $('#roleDialog .user-dropdown').select2('data');
+            userList.forEach(function (item, index, array) {
+                username = item.raw.userName;
+                if (deleteUsers.includes(username)) {
+                    deleteUsers.splice(deleteUsers.indexOf(username), 1);
+                }
+                else if (!addUsers.includes(username)) {
+                    addUsers.push(username);
+                    $('#userInRoleDetail .section-table-render').DataTable().row.add({ "userName": item.raw.userName, "firstName": item.raw.firstName, "lastName": item.raw.lastName }).draw(false);
+                }
+            });
+
+            $('#roleDialog .RoleName').prop('deleteUsers', JSON.stringify(deleteUsers));
+            $('#roleDialog .RoleName').prop('addUsers', JSON.stringify(addUsers));
+
+            $('#roleDialog .normal-section').show();
+            $('#roleDialog .add-user-section').hide();
+        }
+
+        function deleteUserInRole(username, idx) {
+            var deleteUsers = $('#roleDialog .RoleName').prop('deleteUsers');
+            var addUsers = $('#roleDialog .RoleName').prop('addUsers');
+            if (deleteUsers == null)
+                deleteUsers = [];
+            else
+                deleteUsers = JSON.parse(deleteUsers);
+            if (addUsers == null)
+                addUsers = [];
+            else
+                addUsers = JSON.parse(addUsers);
+
+            if (addUsers.includes(username)) {
+                addUsers.splice(addUsers.indexOf(username), 1);
+            }
+            else if (!deleteUsers.includes(username)) {
+                deleteUsers.push(username);
+            }
+
+            //'#userInRoleDetail .section-table-render').DataTable()
+            $('#roleDialog .RoleName').prop('deleteUsers', JSON.stringify(deleteUsers));
+            $('#roleDialog .RoleName').prop('addUsers', JSON.stringify(addUsers));
+
+            $('#userInRoleDetail .section-table-render').DataTable().row(idx).remove().draw()
+        }
+
+        function generateTable(controlID, serviceUrl, criteria, title, column, created_row_callback) {
+            $(controlID + ' .section-loading').show();
+            $(controlID + ' .section-title').text(title);
+            var jqxhr = $.post(serviceUrl, criteria)
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                            $(controlID + ' .section-table-render').DataTable({
+                                dom: 'lTf<"html5buttons"B > gtip',
+                                buttons: [
+                                    'copy', //'csv',
+                                    'excel'//, 'pdf', 'print'
+                                ],
+                                fixedHeader: true,
+                                scrollX: true,
+                                ordering: false,
+                                responsive: true,
+                                pageLength: 10,
+                                filter: true,
+                                data: result.data,
+                                columns: column,
+                                createdRow: created_row_callback
+                            });
+                        }
+                        else {
+                            var table = $(controlID + ' .section-table-render').DataTable();
+                            table.clear();
+                            $.each(result.data, function (idx, obj) {
+                                table.row.add(result.data[idx]);
+                            });
+                            table.draw();
+                        }
+                    }
+                    else {
+                        if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                            //create empty table
+                            $(controlID + ' .section-table-render').DataTable({
+                                dom: 'lTf<"html5buttons"B > gtip',
+                                buttons: [
+                                    'copy', //'csv',
+                                    'excel'//, 'pdf', 'print'
+                                ],
+                                fixedHeader: true,
+                                scrollX: true,
+                                ordering: false,
+                                responsive: true,
+                                pageLength: 10,
+                                filter: true,
+                                columns: column
+                            });
+                        }
+                        else {
+                            //empty
+                            var table = $(controlID + ' .section-table-render').DataTable();
+                            table.clear();
+                            table.draw();
+                        }
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function () {
+                    setTimeout(function () {
+                        $(controlID + ' .section-table-render').DataTable().columns.adjust().draw();
+                    }, 50);
+                    $(controlID + ' .section-loading').hide();
+                });
+            return jqxhr;
+        }
+
+        function generateTableInDialog(controlID, serviceUrl, criteria, title, column, created_row_callback) {
+            $(controlID + ' .section-loading').show();
+            $(controlID + ' .section-title').text(title);
+            var jqxhr = $.post(serviceUrl, criteria)
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                            $(controlID + ' .section-table-render').DataTable({
+                                dom: 'T gt',
+                                fixedHeader: true,
+                                scrollX: true,
+                                ordering: false,
+                                responsive: true,
+                                filter: true,
+                                data: result.data,
+                                columns: column,
+                                createdRow: created_row_callback
+                            });
+                        }
+                        else {
+                            var table = $(controlID + ' .section-table-render').DataTable();
+                            table.clear();
+                            $.each(result.data, function (idx, obj) {
+                                table.row.add(result.data[idx]);
+                            });
+                            table.draw();
+                        }
+                    }
+                    else {
+                        if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                            //create empty table
+                            $(controlID + ' .section-table-render').DataTable({
+                                dom: 't',
+                                fixedHeader: true,
+                                scrollX: true,
+                                ordering: false,
+                                responsive: true,
+                                filter: true,
+                                columns: column
+                            });
+                        }
+                        else {
+                            //empty
+                            var table = $(controlID + ' .section-table-render').DataTable();
+                            table.clear();
+                            table.draw();
+                        }
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function () {
+                    setTimeout(function () {
+                        $(controlID + ' .section-table-render').DataTable().columns.adjust().draw();
+                    }, 50);
+                    $(controlID + ' .section-loading').hide();
+                });
+            return jqxhr;
+        }
+    </script>
+}
+
+<!-- Modal -->
+<div class="modal fade" id="roleDialog" tabindex="-1" role="dialog" aria-labelledby="Create" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="overlay section-loading">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header">
+                <h5 class="modal-title">Create Role</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row normal-section">
+                    <div class="col-6">
+                        <label for="RoleName">Role Name</label>
+                        <input type="text" class="form-control RoleName" placeholder="Role Name">
+                    </div>
+                    <div class="col-6">
+                        <label for="Category">Category (optional)</label>
+                        <input type="text" class="form-control Category" placeholder="Category">
+                    </div>
+                </div>
+                <div class="row add-user-section">
+                    <div class="col-9">
+                        <select class="user-dropdown" name="user" style="width: 100%;">
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <div style="float:right;">
+                            <button type="button" class="btn btn-primary" onclick="addUserInRole(); return false;">Add</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                    </div>
+                </div>
+                <div class="row" id="userInRoleDetail">
+                    <div class="col-12">
+                        <article class="card mb-4">
+                            <div class="card-body">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display: inline-block;">
+                                    <h4 class="card-title section-title"></h4>
+                                </div>
+                                <div style="display: inline-block; float: right;">
+                                    &nbsp;
+                                </div>
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveRole(); return false;">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="permissionDialog">
+    @{
+        await Html.RenderPartialAsync("_SetPermissionDialog");
+    }
+</div>
+<div id="criteriaPermissionDialog">
+    @{
+        await Html.RenderPartialAsync("_CriteriaPermissionDialog");
+    }
+</div>
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Security</h1>
+            <h4 class="card-title">Role Maintenance</h4>
+        </div>
+    </div>
+    <div class="row" id="RoleDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table class="table table-striped section-table-render" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

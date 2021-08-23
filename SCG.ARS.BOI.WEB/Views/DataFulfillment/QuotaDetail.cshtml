@@ -1,0 +1,289 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Quota Detail";
+}
+
+@section OverrideStyles {
+    <link rel="stylesheet" href="~/assets/vendor/chosen/chosen.bs4.css" />
+}
+@section Scripts{
+    <script src="~/assets/vendor/chosen/chosen.jquery.min.js"></script>
+    <script src="~/assets/js/ChartJSHelper.js"></script>
+
+    <script type="text/javascript">
+        var isRtl = $('html').attr('dir') === 'rtl';
+    var listTable = $("#DataList");
+
+    function goToQuota() {
+        window.location = '@Url.Action("Index", "Quota")?fg=' + $('#ddlGroup').val() + '&f=' + $('#ddlFleet').val();
+    }
+
+    function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    var initialFleet = null;
+
+    $(document).ready(function () {
+
+        $.ajax({
+            url: '@Url.Action("GetData", "DataFulfillment")?service=/AutoSplitReport/LoadProfileGroup',
+            type: 'POST',
+            data: null,
+            dataType: 'json',
+            success: function (result) {
+                result = JSON.parse(result.data);
+                result.forEach(function (item) {
+                    $('#ddlGroup').append($('<option></option>').html(item.Name).val(item.ProfileCode));
+                });
+                $('#ddlGroup').chosen({ width: '100%' });
+
+                if (getParameterByName('fg') != null) {
+                    $('#ddlGroup').val(getParameterByName('fg')).trigger('chosen:updated');
+                    initialFleet = getParameterByName('f');
+                }
+            },
+            error: function (e) {
+                alert(e.message);
+            }
+        });
+
+        $('#ddlGroup').on('change', function () {
+            $('#ddlFleet').chosen('destroy');
+            $('#ddlFleet').empty();
+            $('#ddlFleet').append($('<option></option>').html('-').val(0));
+            if ($('#ddlGroup').val() == '0') {
+                $.ajax({
+                    url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadProfile',
+                    type: 'POST',
+                    data: null,
+                    dataType: 'json',
+                    success: function (result) {
+                        result = JSON.parse(result.data);
+                        result.forEach(function (item) {
+                            $('#ddlFleet').append($('<option></option>').html(item.Name).val(item.ID));
+                        });
+                        $('#ddlFleet').chosen({ width: '100%' });
+                        if (initialFleet != null)
+                            $('#ddlFleet').val(initialFleet).trigger('chosen:updated').trigger('change');
+                        initialFleet = null;
+                    },
+                    error: function (e) {
+                        alert(e.message);
+                    }
+                });
+            }
+            else {
+                $.ajax({
+                    url: '@Url.Action("GetData", "DataFulfillment")?service=/AutoSplitReport/LoadProfile',
+                    type: 'POST',
+                    data: { date: JSON.stringify({ inParentCode: $('#ddlGroup').val() }) },
+                    dataType: 'json',
+                    success: function (result) {
+                        result = JSON.parse(result.data);
+                        result.forEach(function (item) {
+                            $('#ddlFleet').append($('<option></option>').html(item.Name).val(item.ID));
+                        });
+                        $('#ddlFleet').chosen({ width: '100%' });
+                        if (initialFleet != null)
+                            $('#ddlFleet').val(initialFleet).trigger('chosen:updated').trigger('change');
+                        initialFleet = null;
+                    },
+                    error: function (e) {
+                        alert(e.message);
+                    }
+                });
+            }
+        });
+
+        $('#ddlFleet').chosen({ width: '100%' });
+        $('#ddlGroup').trigger('change');
+
+        $.ajax({
+            url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadVehicle',
+            type: "POST",
+            data: null,
+            dataType: "json",
+            success: function (result) {
+                result = JSON.parse(result.data);
+                result.forEach(function (item) {
+                    $("#ddlVehicle").append($("<option></option>").html(item.Name).val(item.Code));
+                });
+                $("#ddlVehicle").chosen({ width: "100%" });
+            },
+            error: function (e) {
+                alert(e.message);
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadCarrier',
+            type: "POST",
+            data: null,
+            dataType: "json",
+            success: function (result) {
+                result = JSON.parse(result.data);
+                result.forEach(function (item) {
+                    $("#ddlCarrier").append($("<option></option>").html(item.Name).val(item.Code));
+                });
+                $("#ddlCarrier").chosen({ width: "100%" });
+            },
+            error: function (e) {
+                alert(e.message);
+            }
+        });
+
+
+        $("#txtDate").daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            locale: {
+                format: "DD/MM/YYYY"
+            },
+            opens: (isRtl ? "left" : "right")
+        });
+
+        listTable.DataTable({
+            dom: "lTf<'html5buttons'B>gtip",
+            buttons: [
+                "copy", "csv", "excel", "pdf", "print"
+            ],
+            scrollX: true,
+            scrollY: "40em",
+            language: {
+                paginate: {
+                    previous: "&nbsp",
+                    next: "&nbsp"
+                }
+            },
+            searching: true,
+            columns: [
+                { data: "ProfileName", title: "Profile Name" },
+                { data: "CarrierCode", title: "Carrier Code" },
+                { data: "CarrierName", title: "Carrier Name", },
+                { data: "CarrierType", title: "Carrier Type", },
+                { data: "VehicleCode", title: "Vehicle Code" },
+                { data: "VehicleName", title: "Vehicle Name" },
+                { data: "Optional", title: "Optional" },
+                { data: "Service", title: "Service" },
+                { data: "EffectiveFrom", title: "Effective From", visible: false },
+                { data: "EffectiveTo", title: "Effective To", visible: false },
+                { data: "LimitQty", title: "Quota" },
+                { data: "CurrentQty", title: "Current" },
+                { data: "AvailableQty", title: "Available" }
+            ],
+            "order": [[2, "asc"]],
+            columnDefs: [
+                { targets: [7, 8, 9], className: "text-right" }
+            ]
+
+        });
+
+
+        $("#btnFind").on("click", function () {
+            if ($('#ddlFleet').val() == '0' || $('#ddlFleet').val() == null || $('#ddlFleet').val() == '') {
+                toastr.warning('กรุณาเลือก Fleet');
+                return;
+            }
+
+            LoadQuota();
+        });
+
+        SetDefaultValue();
+    });
+
+    function SetDefaultValue() {
+        if ($("#txtDate").val() == "") { $("#txtDate").val() = moment(); }
+    }
+
+    function LoadQuota() {
+        let date = moment($('#txtDate').data('daterangepicker').startDate).format('YYYY-MM-DD')
+        let vehicle = String($("#ddlVehicle").chosen().val());
+        let carrier = String($("#ddlCarrier").chosen().val());
+        let profileID = $("#ddlFleet").val();
+        let parameter = {
+            ProfileID: profileID,
+            Date: date,
+            InVehicleCode: vehicle,
+            InCarrierCode: carrier
+        }
+
+        $.ajax({
+            url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadQuota',
+            type: "POST",
+            data: { data: JSON.stringify(parameter) },
+            dataType: "json",
+            success: function (result) {
+                result = JSON.parse(result.data);
+                if (result == null || result.length == 0) {
+                    toastr.warning('ไม่พบข้อมูล');
+                }
+                ShowList(result);
+            },
+            error: function (e) {
+                alert(e.message);
+            }
+        });
+    }
+
+    function ShowList(result) {
+        listTable.DataTable().clear().draw();
+        result.forEach(function (item) {
+            listTable.DataTable().row.add(item).draw(false);
+        });
+    }
+    </script>
+}
+<div class="content-wrapper">
+    <article class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlGroup">Fleet Group</label><br />
+                    <select id="ddlGroup" class="form-control" data-placeholder=" . . . ">
+                        <option value="0">-</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlFleet">Fleet</label>
+                    <select id="ddlFleet" class="form-control" data-placeholder=" . . . ">
+                        <option value="0">-</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="txtDate">วันที่</label>
+                    <input id="txtDate" class="form-control" />
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlVehicle">ประเภทรถ</label><br />
+                    <select id="ddlVehicle" class="form-control" data-placeholder=" . . . " multiple></select>
+                </div>
+                <div class="col-12 col-lg-6 form-group">
+                    <label for="ddlCarrier">ผู้รับเหมา</label><br />
+                    <select id="ddlCarrier" class="form-control" data-placeholder=" . . . " multiple></select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 form-group">
+                    <a href="#" class="btn btn-secondary" role="button" onclick="goToQuota()">Back</a>
+                    <input id="btnFind" type="button" class="btn btn-primary float-right" value="Find" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table id="DataList" class="table table-striped table-bordered table-sm w-100"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>

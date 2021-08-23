@@ -1,0 +1,551 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Upload Limit Quota";
+}
+
+<div class="content-wrapper">
+    <article class="card mb-4" id="UploadFile">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlGroup">Fleet Group</label><br />
+                    <select id="ddlGroup" class="form-control" data-placeholder=" . . . ">
+                        <option value="0">-</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlFleet">Fleet</label>
+                    <select id="ddlFleet" class="form-control" data-placeholder=" . . . ">
+                        <option value="0">-</option>
+                    </select>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-12 col-md-6 form-group">
+                        <input id="inputFiles" name="inputFiles" type="file" />
+                    </div>
+                    <div class="col-12 col-md-6 form-group">
+                        <input id="btnUpload" type="button" value="Upload" class="btn btn-primary" />
+                    </div>
+                </div>
+            </form>
+
+            <hr />
+            <h4>Last upload</h4>
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="txtFleet">ฟลีท</label>
+                    <input id="txtFleet" class="form-control" disabled />
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="txtDate">วันที่</label>
+                    <input id="txtDate" class="form-control" disabled />
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="txtUploadDate">วันที่นำเข้า</label>
+                    <input id="txtUploadDate" class="form-control" disabled />
+                </div>
+
+                <div class="col-12 form-group">
+                    <label for="txtFile">ไฟล์</label>
+                    <input id="txtFile" class="form-control" disabled />
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table id="HistoryList" class="table table-striped w-100 m-0 p-0"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="card mb-4" id="UploadVerify" style="display:none">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-lg-6 form-group">
+                    <label for="txtFileName">ไฟล์</label>
+                    <input id="txtFileName" class="form-control" disabled />
+                    <input id="txtHeaderID" class="form-control" hidden />
+                </div>
+                <div class="col-6 col-lg-3 form-group">
+                    <label for="txtFileCount">จำนวน</label>
+                    <input id="txtFileCount" class="form-control" disabled />
+                </div>
+                <div class="col-6 col-lg-3 form-group">
+                    <label for="txtFileSize">ขนาด</label>
+                    <input id="txtFileSize" class="form-control" disabled />
+                </div>
+
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table id="DataList" class="table table-striped w-100 m-0 p-0"></table>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-12">
+                    <input id="btnOK" type="button" value="Ok" class="btn btn-primary" disabled />
+                    <input id="btnCancel" type="button" value="Cancel" class="btn btn-secondary" />
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div class="row">
+        <div class="col-12">
+            <a href="#" class="btn btn-secondary" role="button" onclick="goToQuota()">Back</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-default" id="modalStatus">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><label id="modalTitle"></label></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <p><label id="modalMessage"></label></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>   
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var listTable = $('#DataList');
+    var listHistory = $('#HistoryList');
+
+
+    function goToQuota() {
+        window.location = '@Url.Action("Index", "Quota")?fg=' + $('#ddlGroup').val() + '&f=' + $('#ddlFleet').val();
+    }
+
+    function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    var initialFleet = null;
+    $(document).ready(function () {
+
+        $.ajax({
+            url: '@Url.Action("LoadProfileGroup", "AutoSplitReport")',
+            type: 'POST',
+            data: null,
+            dataType: 'json',
+            success: function (result) {
+                result.forEach(function (item) {
+                    $('#ddlGroup').append($('<option></option>').html(item.Name).val(item.ProfileCode));
+                });
+                $('#ddlGroup').chosen({ width: '100%' });
+
+                if (getParameterByName('fg') != null) {
+                    $('#ddlGroup').val(getParameterByName('fg')).trigger('chosen:updated');
+                    initialFleet = getParameterByName('f');
+                }
+            },
+            error: function (e) {
+                alert(e.message);
+            }
+        });
+
+        $('#ddlGroup').on('change', function () {
+            $('#ddlFleet').chosen('destroy');
+            $('#ddlFleet').empty();
+            $('#ddlFleet').append($('<option></option>').html('-').val(0));
+            if ($('#ddlGroup').val() == '0') {
+                $.ajax({
+                    url: '@Url.Action("LoadProfile", "Quota")',
+                    type: 'POST',
+                    data: null,
+                    dataType: 'json',
+                    //traditional: true,
+                    //contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        //$('#ddlFleet').append($('<option></option>').html(null).val(null));
+                        result.forEach(function (item) {
+                            $('#ddlFleet').append($('<option></option>').html(item.Name).val(item.ID));
+                        });
+                        $('#ddlFleet').chosen({ width: '100%' });
+                        if (initialFleet != null)
+                            $('#ddlFleet').val(initialFleet).trigger('chosen:updated').trigger('change');
+                        initialFleet = null;
+                    },
+                    error: function (e) {
+                        alert(e.message);
+                    }
+                });
+            }
+            else {
+                $.ajax({
+                    url: '@Url.Action("LoadProfile", "AutoSplitReport")',
+                    type: 'POST',
+                    data: { inParentCode: [$('#ddlGroup').val()] },
+                    dataType: 'json',
+                    success: function (result) {
+                        result.forEach(function (item) {
+                            $('#ddlFleet').append($('<option></option>').html(item.Name).val(item.ID));
+                        });
+                        $('#ddlFleet').chosen({ width: '100%' });
+                        if (initialFleet != null)
+                            $('#ddlFleet').val(initialFleet).trigger('chosen:updated').trigger('change');
+                        initialFleet = null;
+                    },
+                    error: function (e) {
+                        alert(e.message);
+                    }
+                });
+            }
+        });
+
+        $('#ddlFleet').chosen({ width: '100%' });
+        $('#ddlGroup').trigger('change');
+
+        @*$.ajax({
+            url: '@Url.Action("LoadProfile", "Quota")',
+            type: 'POST',
+            data: null,
+            dataType: 'json',
+            //traditional: true,
+            //contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                //$('#ddlFleet').append($('<option></option>').html(null).val(null));
+                result.forEach(function (item) {
+                    $('#ddlFleet').append($('<option></option>').html(item.Name).val(item.ID));
+                });
+                $('#ddlFleet').chosen({ width: '100%' });
+            },
+            error: function (e) {
+                alert(e.message);
+            }
+        });*@
+
+        listTable.DataTable({
+            //dom: 'lTf<"html5buttons"B>gtip',
+            //buttons: [
+            //    'copy', 'csv', 'excel', 'pdf', 'print'
+            //],
+            scrollX: true,
+            //scrollY: "40em",
+            language: {
+                paginate: {
+                    previous: '&nbsp',
+                    next: '&nbsp'
+                }
+            },
+            searching: true,
+            columns: [
+                //{
+                //    'data': function (data, type, full, meta) {
+                //        return meta.row;
+                //    },
+                //    'checkboxes': true
+                //},
+                { data: 'id', title: 'ID', visible: false },
+                { data: 'headerID', title: 'HeaderID', visible: false },
+                //{ data: 'MaterialFreightGroup', title: 'Material Freight Group', 'className': 'text-nowrap' },
+                { data: 'carrierCode', title: 'Carrier Code', 'className': 'text-nowrap' },
+                { data: 'carrierName', title: 'Carrier Name', 'className': 'text-nowrap' },
+                { data: 'vehicleCode', title: 'Vehicle Code', 'className': 'text-nowrap' },
+                { data: 'vehicleName', title: 'Vehicle Name', 'className': 'text-nowrap' },
+                {
+                    data: 'date', title: 'Date', 'className': 'text-nowrap',
+                    //render: function (data, type, row, meta) {
+                    //    data = row.Date;
+                    //    return data;
+                    //}
+                    render: function (data, type, row, meta) {
+                        return data == null ? '' : moment(new Date(data)).utcOffset(0, true).format('DD/MM/YYYY');
+                    }
+                },
+                { data: 'fuel', title: 'เชื้อเพลิง', 'className': 'text-nowrap' },
+                { data: 'optional', title: 'อุปกรณ์-แรงงานเสริม', 'className': 'text-nowrap' },
+                { data: 'service', title: 'Service', 'className': 'text-nowrap' },
+                { data: 'qty1', title: 'Quota 1', 'className': 'text-nowrap'},
+                { data: 'qty2', title: 'Quota 2', 'className': 'text-nowrap'},
+                { data: 'qty3', title: 'Quota 3', 'className': 'text-nowrap'},
+                { data: 'qty4', title: 'Quota 4', 'className': 'text-nowrap'},
+                { data: 'qty5', title: 'Quota 5', 'className': 'text-nowrap'},
+                { data: 'qty', title: 'Total', 'className': 'text-nowrap'},
+                { data: 'priority', title: 'Priority', 'className': 'text-nowrap' },
+                {
+                    data: 'verifyStatus', title: 'Status', 'className': 'text-nowrap',
+                    render: function (data, type, row, meta) {
+                        if (row.verifyStatus == true) data = '<h4><span class="fa fa-check-circle text-success"></span></h4>';
+                        else data = '<h4><span class="fa fa-times-circle text-danger"></span></h4>';
+                        return data;
+                    }
+                }
+            ],
+            'order': [[2, 'asc']],
+            columnDefs: [
+                { targets: [6], className: 'text-right' }
+            ]
+
+        });
+
+        listHistory.DataTable({
+
+            scrollX: true,
+            //scrollY: '40em',
+            language: {
+                paginate: {
+                    previous: '&nbsp',
+                    next: '&nbsp'
+                }
+            },
+            searching: true,
+            columns: [
+                //{
+                //    'data': function (data, type, full, meta) {
+                //        return meta.row;
+                //    },
+                //    'checkboxes': true
+                //},
+                { data: 'ID', title: 'ID', visible: false },
+                { data: 'HeaderID', title: 'HeaderID', visible: false },
+                //{ data: 'MaterialFreightGroup', title: 'Material Freight Group', 'className': 'text-nowrap' },
+                { data: 'CarrierCode', title: 'Carrier Code', 'className': 'text-nowrap' },
+                { data: 'CarrierName', title: 'Carrier Name', 'className': 'text-nowrap' },
+                { data: 'VehicleCode', title: 'Vehicle Code', 'className': 'text-nowrap' },
+                { data: 'VehicleName', title: 'Vehicle Name', 'className': 'text-nowrap' },
+                //{
+                //    data: 'Date', title: 'Date', 'className': 'text-nowrap',
+                //    //render: function (data, type, row, meta) {
+                //    //    data = row.Date;
+                //    //    return data;
+                //    //}
+                //    render: function (data, type, row, meta) {
+                //        return data == null ? '' : moment(new Date(data)).utcOffset(0, true).format('DD/MM/YYYY');
+                //    }
+                //},
+                { data: 'Fuel', title: 'เชื้อเพลิง', 'className': 'text-nowrap' },
+                { data: 'Optional', title: 'อุปกรณ์-แรงงานเสริม', 'className': 'text-nowrap' },
+                { data: 'Service', title: 'Service', 'className': 'text-nowrap' },
+                { data: 'Qty1', title: 'Quota 1', 'className': 'text-nowrap' },
+                { data: 'Qty2', title: 'Quota 2', 'className': 'text-nowrap' },
+                { data: 'Qty3', title: 'Quota 3', 'className': 'text-nowrap' },
+                { data: 'Qty4', title: 'Quota 4', 'className': 'text-nowrap' },
+                { data: 'Qty5', title: 'Quota 5', 'className': 'text-nowrap' },
+                { data: 'Qty', title: 'Total', 'className': 'text-nowrap' },
+                { data: 'Priority', title: 'Priority', 'className': 'text-nowrap' },
+                //{
+                //    data: 'VerifyStatus', title: 'Status', 'className': 'text-nowrap',
+                //    render: function (data, type, row, meta) {
+                //        if (row.VerifyStatus == true) data = '<h4><span class="fa fa-check-circle text-success"></span></h4>';
+                //        else data = '<h4><span class="fa fa-times-circle text-danger"></span></h4>';
+                //        return data;
+                //    }
+                //}
+            ],
+            'order': [[2, 'asc']],
+
+        });
+
+        $('#btnUpload').on('click', function () {
+            if ($('#ddlFleet').val() == '0' || $('#ddlFleet').val() == null || $('#ddlFleet').val() == '') {
+                toastr.warning('กรุณาเลือก Fleet');
+                return;
+            }
+            if ($('#inputFiles').val() == null || $('#inputFiles').val() == '') {
+                toastr.warning('กรุณาเลือกไฟล์');
+                return;
+            }
+            uploadFiles('inputFiles');
+        });
+
+        $('#btnCancel').on('click', function () {
+            UploadMode();
+        });
+
+        $('#btnOK').on('click', function () {
+            ConfirmQuota();
+        });
+
+        $('#ddlFleet').on('change', function () {
+            LoadImportHistory();
+        });
+    });
+
+    function uploadFiles(inputName) {
+        let input = document.getElementById(inputName);
+        let files = input.files;
+        let formData = new FormData();
+
+        for (let i = 0; i != files.length; i++) {
+            formData.append('files', files[i]);
+        }
+        formData.append('ProfileID', $('#ddlFleet').val());
+        //console.log(formData);
+        $.ajax(
+            {
+                url: '@Url.Action("UploadFile", "Quota")',
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: 'POST',
+                success: function (result) {
+                    if (result.errorMessage == null) {
+                        ShowUploadResult(result);
+                        VerifyMode();
+                    }
+                    else {
+                        alert(result.errorMessage);
+                    }
+                },
+                error: function (result) {
+                    alert(result);
+                }
+            }
+        );
+    }
+
+    function UploadMode() {
+        $('#UploadFile').show();
+        $('#UploadVerify').hide();
+        $('#txtFileName').val('');
+        $('#txtFileCount').val('');
+        $('#txtFileSize').val('');
+        $('#txtHeaderID').val('');
+        $('#inputFiles').val('');
+    }
+
+    function VerifyMode() {
+        $('#UploadFile').hide();
+        $('#UploadVerify').show();
+    }
+
+    function ShowUploadResult(data) {
+
+        $('#txtFileName').val(data.fileName);
+        $('#txtFileCount').val(data.fileCount);
+        $('#txtFileSize').val(data.fileSize);
+        $('#txtHeaderID').val(data.headerID);
+        ShowList(data.importData);
+
+        if (data.failCount == 0) $('#btnOK').prop('disabled', false);
+        else $('#btnOK').prop('disabled', true);
+    }
+
+    function ShowList(result) {
+        listTable.DataTable().clear().draw();
+        result.forEach(function (item) {
+            listTable.DataTable().row.add(item).draw(false);
+        });
+
+        $('.dataTables_scrollHeadInner')[0].setAttribute('style', 'width:100%');
+    }
+
+    function ConfirmQuota() {
+
+
+        let parameter = { HeaderID: $('#txtHeaderID').val() }
+        let controller = '@Url.Action("ConfirmQuota", "Quota")';
+
+        $.ajax({
+            url: controller,
+            type: 'POST',
+            data: parameter,
+            dataType: 'json',
+            success: function (result) {
+                console.log(result);
+                if (result.Error > 0)
+                    ShowMessage('Import Quota', result.ErrMessage);
+                else {
+                    ShowMessage('Import Quota', 'Import Completed.');
+                }
+                UploadMode();
+            },
+            error: function (e) {
+                alert(e.message);
+            }
+        });
+    }
+
+    function LoadImportHistory() {
+
+        if ($('#ddlFleet').val() != 0)
+        {
+            let parameter = { ProfileID: $('#ddlFleet').val() }
+            let controller = '@Url.Action("LoadImportHistory", "Quota")';
+
+            $.ajax({
+                url: controller,
+                type: 'POST',
+                data: parameter,
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result);
+                    if (result.Error > 0)
+                    {
+                        ShowMessage('LoadImportHistory', result.ErrMessage);
+                        ClearHistory();
+                    }
+                    else
+                    {
+                        //console.log(result);
+                        ShowHistory(result.Header);
+                        ShowHistoryDetail(result.Detail);
+                    }
+                },
+                error: function (e) {
+                    alert(e.message);
+                }
+            });
+        }
+        else
+        {
+            ClearHistory();
+        }
+
+    }
+
+
+    function ShowHistory(result) {
+        $("#txtDate").val(moment(new Date(result.Date)).utcOffset(0, true).format('DD/MM/YYYY'));
+        $("#txtUploadDate").val(moment(new Date(result.CreateDate)).utcOffset(0, true).format('DD/MM/YYYY HH:mm'));
+        $("#txtFile").val(result.FileName);
+        $("#txtFleet").val(result.Name);
+    }
+
+    function ClearHistory() {
+        $("#txtDate").val('');
+        $("#txtUploadDate").val('');
+        $("#txtFile").val('');
+        $("#txtFleet").val('');
+    }
+
+    function ShowHistoryDetail(result) {
+        listHistory.DataTable().clear().draw();
+        result.forEach(function (item) {
+            listHistory.DataTable().row.add(item).draw(false);
+        });
+
+        $('.dataTables_scrollHeadInner')[0].setAttribute('style', 'width:100%');
+    }
+
+
+    function ShowMessage(title, message) {
+        $('#modalTitle').text(title);
+        $('#modalMessage').text(message);
+        $('#modalStatus').modal();
+    }
+
+
+</script>

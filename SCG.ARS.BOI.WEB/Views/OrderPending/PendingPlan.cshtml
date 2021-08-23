@@ -1,0 +1,424 @@
+﻿
+@{
+    ViewData["Title"] = "PendingPlan";
+}
+
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/fixedHeader.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/select.dataTables.min.css" rel="stylesheet" />
+
+<style>
+
+    .table-bordered td, .table-bordered th {
+        border: 1px solid #030303 !important;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+    thead tr td {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+</style>
+@*<div id="dvOverlay" class="overlay">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>*@
+
+<div class="content-wrapper">
+
+    <!-- Heading Start -->
+    <section class="heading">
+        <h4 class="mb-2">Pending Plan</h4>
+    </section><!-- Heading End -->
+
+    <div id="accordionOne" class="accordion">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseOne"
+                   aria-expanded="false" aria-controls="collapseOne">
+                    Search Parameter
+                </a>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
+                <div class="card-body">
+
+
+
+                    <form id="formSearch">
+                        <div class="col-12">
+                            <div class="row" style="padding:7px">
+                                <div class="col-4">
+                                    <label class=""><b>Truck Type</b><span class="text-danger">*</span></label>
+                                    <select id="ddlTrucktype" class="form-control">
+                                        <option value="S04,S06,S06K,S06L">6W</option>
+                                        <option value="S10A">10W</option>
+                                        <option value="S10B">10Bulk</option>
+                                        <option value="S18B">18Bulk</option>
+                                        <option value="S18S,S22,S22N,S22S,S24">18W</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-4">
+                                    <label><b>Origin Region</b></label>
+                                        <select multiple="" class="form-control chosen-select" id="ddloriginregion" placeholder="Choose origin region"></select>
+                                </div>
+                                <div class="col-4">
+                                    <label><b>Destination Region</b></label>
+                                    <select multiple="" class="form-control chosen-select" id="ddldestinationregion" placeholder="Choose destination region"></select>
+                                </div>
+                            </div>
+                            <div class="row" style="padding:7px">
+                                <div class="col-4">
+                                    <label class=""><b>Business group</b><span class="text-danger">*</span></label>
+                                    <select id="ddlBusinessGroup" class="form-control">
+                                        <option value="">--- Select ---</option>
+                                        <option value="BuildingMat">Building Mat</option>
+                                        <option value="Cement">Cement</option>
+                                        <option value="Dura">Dura</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <label class="control-label"><b>Customer group</b><span class="text-danger">*</span></label>
+                                    <select id="ddlCustomerGroup" style="width:100%" class="form-control"></select>
+                                </div>
+                                <div class="col-4">
+                                    <label class="control-label"><b>Product group</b><span class="text-danger">*</span></label>
+                                    <select id="ddlProductGroup" style="width:100%" class="form-control"></select>
+                                </div>
+                            </div>
+
+
+                            <div class="row" style="padding:7px">
+                                <div class="col-4">
+                                </div>
+                                <div class="col-4">
+                                </div>
+                                <div class="col-4" style="text-align:right;padding:7px;">
+                                    <label class="col-12"></label>
+                                    <div class="col-sm-12">
+                                        <button type="button" class="btn btn-warning" onclick="LoadOrderList();">Search</button>
+                                        <button type="reset" class="btn btn-secondary" onclick="CearOrderList();">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <table id="dtPendingPlanList" class="table" style="width:100%" border="1">
+                        <thead style="background-color: #dfdfdf">
+                            <tr>
+                                <td colspan="3" rowspan="2">Destination</td>
+                                <td colspan="3" rowspan="4">
+                                    Customer
+                                    (Sold to)
+                                </td>
+                                <td colspan="3" rowspan="4">
+                                    Ship to
+                                </td>
+                                <td colspan="3" rowspan="4">
+                                    Last Tender -3
+                                </td>
+                                <td colspan="3" rowspan="4">
+                                    Last Tender -2
+                                </td>
+                                <td colspan="3" rowspan="4">
+                                    Last Tender -1
+                                </td>
+                                <td colspan="4">Booking (จองคิวแล้ว + Split order)</td>
+                                <td colspan="3">Waiting list</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">Pending</td>
+                                <td rowspan="3">Tender</td>
+                                <td colspan="2">Pending</td>
+                                <td rowspan="4">
+                                    Tender
+                                    (order ที่ tednder จากกลุ่ม waiting list)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td rowspan="2">Zone</td>
+                                <td rowspan="2">Province</td>
+                                <td rowspan="2">
+                                    วิธีขึ้นรถ
+                                    (Material)
+                                </td>
+                                <td colspan="3">Requested Date</td>
+                                <td>Create Order (sap)</td>
+                                <td>Create Order (sap)</td>
+                            </tr>
+                            <tr>
+                                <td>Today -7</td>
+                                <td>Order Same Day</td>
+                                <td>Order Leadtime</td>
+                                <td>Today -14</td>
+                                <td>Today -13</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="~/assets/vendor/data-table/js/jquery.dataTables.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.bootstrap.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.buttons.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.rowsGroup.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        // LoadOrderList();
+
+        $('#ddloriginregion, #ddldestinationregion').select2();
+        $('#ddloriginregion, #ddldestinationregion').empty();
+
+        $("#ddlCustomerGroup").prop("disabled", true);
+        $("#ddlProductGroup").prop("disabled", true);
+        //$(".js-example-disabled-multi").prop("disabled", true);
+
+        for (var i = 1; i <= 7; i++) {
+            if (i == 7) {
+                $("#ddloriginregion").append('<option value=' + i + '>' + "MA" + '</option>');
+            } else {
+                $("#ddloriginregion").append('<option value=' + i + '>' + "M" + i + '</option>');
+            }
+        }
+
+        for (var i = 1; i <= 7; i++) {
+            if (i == 7) {
+                $("#ddldestinationregion").append('<option value=' + i + '>' + "MA" + '</option>');
+            } else {
+                $("#ddldestinationregion").append('<option value=' + i + '>' + "M" + i + '</option>');
+            }
+        }
+
+        
+
+    });
+
+
+    $("#ddlBusinessGroup").change(function () {
+
+        $('#ddlCustomerGroup').empty();
+        $('#ddlProductGroup').empty();
+        $("#ddlCustomerGroup").prop("disabled", true);
+        $("#ddlProductGroup").prop("disabled", true);
+
+        if ($("#ddlBusinessGroup").val() == "BuildingMat") {
+
+            $('#ddlCustomerGroup').empty();
+            $("#ddlCustomerGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlCustomerGroup").append('<option value=' + 'Agent' + '>' + 'Agent' + '</option>');
+            $("#ddlCustomerGroup").append('<option value=' + 'VMI' + '>' + 'VMI' + '</option>');
+            $("#ddlCustomerGroup").prop("disabled", false);
+
+            //$.each(list, function (index, value) {
+            //    $("ddl").append('<option value=' + value.id + '>' + value.name + '</option>');
+            //});
+
+        }
+        else if ($("#ddlBusinessGroup").val() == "Cement") {
+            $('#ddlCustomerGroup').empty();
+            $("#ddlCustomerGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlCustomerGroup").append('<option value=' + 'Agent' + '>' + 'Agent' + '</option>');
+            $("#ddlCustomerGroup").append('<option value=' + 'Distribution' + '>' + 'Distribution' + '</option>');
+            $("#ddlCustomerGroup").prop("disabled", false);
+        }
+        else if ($("#ddlBusinessGroup").val() == "Dura") {
+            $('#ddlCustomerGroup').empty();
+            $("#ddlCustomerGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlCustomerGroup").append('<option value=' + 'Agent' + '>' + 'Agent' + '</option>');
+            $("#ddlCustomerGroup").append('<option value=' + 'Moderntrade' + '>' + 'Moderntrade' + '</option>');
+            $("#ddlCustomerGroup").prop("disabled", false);
+
+        }
+       
+
+    });
+
+    $("#ddlCustomerGroup").change(function () {
+
+        $('#ddlProductGroup').empty();
+        $("#ddlProductGroup").prop("disabled", true);
+
+        if ($("#ddlBusinessGroup").val() == "BuildingMat" && $("#ddlCustomerGroup").val() == "Agent") {
+            $('#ddlProductGroup').empty();
+            $("#ddlProductGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Q-Con' + '>' + 'Q-Con' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Monier' + '>' + 'Monier' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Block' + '>' + 'Block' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'SFCG' + '>' + 'SFCG' + '</option>');
+            $("#ddlProductGroup").prop("disabled", false);
+
+        }
+        else if ($("#ddlBusinessGroup").val() == "BuildingMat" && $("#ddlCustomerGroup").val() == "VMI") {
+            $('#ddlProductGroup').empty();
+            $("#ddlProductGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'VMI' + '>' + 'VMI' + '</option>');
+            $("#ddlProductGroup").prop("disabled", false);
+        }
+        else if ($("#ddlBusinessGroup").val() == "Cement" && $("#ddlCustomerGroup").val() == "Agent") {
+            $('#ddlProductGroup').empty();
+            $("#ddlProductGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Cement' + '>' + 'Cement' + '</option>');
+            $("#ddlProductGroup").prop("disabled", false);
+        }
+        else if ($("#ddlBusinessGroup").val() == "Cement" && $("#ddlCustomerGroup").val() == "Distribution") {
+            $('#ddlProductGroup').empty();
+            $("#ddlProductGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Cement' + '>' + 'Cement' + '</option>');
+            $("#ddlProductGroup").prop("disabled", false);
+        }
+        else if ($("#ddlBusinessGroup").val() == "Dura" && $("#ddlCustomerGroup").val() == "Agent") {
+            $('#ddlProductGroup').empty();
+            $("#ddlProductGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Q-Con' + '>' + 'Q-Con' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Monier' + '>' + 'Monier' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Block' + '>' + 'Block' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'SFCG' + '>' + 'SFCG' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Cement' + '>' + 'Cement' + '</option>');
+            $("#ddlProductGroup").prop("disabled", false);
+        }
+        else if ($("#ddlBusinessGroup").val() == "Dura" && $("#ddlCustomerGroup").val() == "Moderntrade") {
+            $('#ddlProductGroup').empty();
+            $("#ddlProductGroup").append('<option value=' + '' + '>' + '--- Select ---' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Q-Con' + '>' + 'Q-Con' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Monier' + '>' + 'Monier' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'Block' + '>' + 'Block' + '</option>');
+            $("#ddlProductGroup").append('<option value=' + 'SFCG' + '>' + 'SFCG' + '</option>');
+            $("#ddlProductGroup").prop("disabled", false);
+        }
+
+    });
+   
+
+
+
+    function LoadOrderList() {
+    
+        if ($('#ddlTrucktype').val() == "" || $('#ddlBusinessGroup').val() == "" ||
+            $('#ddlCustomerGroup').val() == "" || $('#ddlProductGroup').val() == "") {
+            alert("กรุณากรอกข้อมูลให้ครบ!");
+            return;
+        }
+
+        var origin = $('#ddloriginregion').val();
+        var shipto = $('#ddldestinationregion').val();
+        var originlist = "";
+        var shiptolist = "";
+        if (origin.length > 0) {
+            for (var i = 0; i < origin.length; i++) {
+                if (i != 0) {
+                    originlist = originlist + "|";
+                }
+
+                originlist += origin[i];
+
+            }
+
+        } else {
+            originlist = "1|2|3|4|5|6|7";
+        }
+
+        if (shipto.length > 0) {
+            for (var i = 0; i < shipto.length; i++) {
+                if (i != 0) {
+                    shiptolist = shiptolist + "|";
+                }
+
+                shiptolist += shipto[i];
+
+            }
+            origin
+        } else {
+            shiptolist = "1|2|3|4|5|6|7";
+        }
+
+        //request.trucktype = $('#ddlTrucktype').val();
+        //request.origin = originlist;
+        //request.shipto = shiptolist;
+
+
+
+        //$('#dvOverlay').show();
+        //var jqxhr = $.post("/OrderPending/LoadOrderPending")
+        //    .done(function (result) {
+        //        //console.log(result);
+        //        if (result.status) {
+        //            data = result.data;
+        //            bindPendingGroup(data);
+        //        }
+        //    })
+        //    .fail(function (e) {
+        //        console.log(e);
+        //    })
+        //    .always(function () {
+        //        $('#dvOverlay').hide();
+        //    });
+    }
+
+    function bindPendingGroup(data) {
+        //$('#dvOverlay').hide();
+        //var table = $('#dtPendingPlanList').DataTable({
+        //    destroy: true,
+        //    scrollX: true,
+        //    searching: false,
+        //    paging: false,
+        //    info: false,
+        //    lengthChange: false,
+        //    ordering: false,
+        //    data: data,
+        //    columns: [
+        //        { data: "" },
+        //        { data: "" },
+        //        { data: "" },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' },
+        //        { data: "", className: 'text-center' }
+        //        { data: "", className: 'text-center' }
+        //        { data: "", className: 'text-center' }
+        //        { data: "", className: 'text-center' }
+        //        
+        //    ],
+        //});
+    }
+
+
+</script>

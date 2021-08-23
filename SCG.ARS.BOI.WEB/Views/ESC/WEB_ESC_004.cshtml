@@ -1,0 +1,833 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Index";
+}
+    <script src="~/assets/js/warehouse.js"></script>
+    <link href="~/assets/css/warehouse.css" rel="stylesheet" />
+<style>
+    #CheckMoveByLoactionSummaryDataTable th, td {
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #CheckMoveByLoactionSummaryDataTable th {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    .dataTables_wrapper .dataTable thead th {
+        padding: 5px 30px;
+    }
+
+
+    table[aria-describedby="TodayReceiving_Table_info"] thead th {
+        border: 1px #eee solid;
+        text-align: center;
+    }
+
+    .dataTables_wrapper .dataTable {
+        margin: 0 !important;
+    }
+
+    hr.myhrline {
+        margin: 0px;
+    }
+
+    h4, h5, h6, p {
+        margin: 2px;
+    }
+
+    div.card-body {
+        padding: 1% !important;
+    }
+
+    .BlankRow {
+        border-left: 0px solid #4cff00 !important;
+        border-right: 0px solid #4cff00 !important;
+        border-top: 0px solid #4cff00 !important;
+        border-bottom: 0px solid #4cff00 !important;
+    }
+</style>
+<script>
+    /*-----------------------*/
+    /*Initial on Webpage Load*/
+    /*-----------------------*/
+    var isFirstLoad = 1;
+    var table = null;
+    var summary_table = null;
+    var selected_customer = [];
+    var selected_dc = [];
+    var submitCriteria = [];
+    var screenID = 'WEB_ESC_004';
+    var column = [
+        { "data": "doc_no", "name": "doc_no", "title": "Phys. Inventory Doc.", "autoWidth": false, width: 500, "className": "text-nowrap" },
+        { "data": "item", "name": "item", "title": "Item", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "doc_year", "name": "doc_year", "title": "Document Year", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "inventory_status", "name": "inventory_status", "title": "Physical Inventory Status", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "storage_bin", "name": "storage_bin", "title": "Storage Bin", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "product", "name": "product", "title": "Product", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "product_desc", "name": "product_desc", "title": "Product Description", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "high_level_hu", "name": "high_level_hu", "title": "Higher-Level HU", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "inventory_qty", "name": "inventory_qty", "title": "Inventory Quatity", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "book_qty", "name": "book_qty", "title": "Book Quanitity", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "counted_qty", "name": "counted_qty", "title": "Counted Quantity", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "diff_qty", "name": "diff_qty", "title": "Difference Quantity", "autoWidth": true, "className": "text-nowrap text-right" },
+        {"data": "counted_date", "name": "counted_date", "title": "Count Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate },
+        { "data": "counted_time", "name": "counted_time", "title": "Count Time", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "count_user", "name": "count_user", "title": "Counter", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "zero_count", "name": "zero_count", "title": "Zero Count", "autoWidth": true, "className": "text-nowrap" }
+    ];
+
+    function initialSearchCriteria() {
+        var ajax = [];
+        $('#CriteriaOveray').show();
+        ajax.push(GetCustomerESC('ESC'));
+        ajax.push(GetDCESC('ESC'));
+        var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+        return result;
+    }
+
+    $(document).ready(function () {
+        //Report Type
+        var type = "Barite";
+        init_datepicker_week_criteria();
+        document.getElementById('reporttype').value = type;
+
+        $('#cboDC').on("change", function (element, checked) {
+            GetCustomerESC('ESC', $('#cboDC').select2('data').map(x => x.id));
+        });
+
+        initialControl().then(() => {
+            //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+            uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+        });
+
+    });
+
+
+</script>
+
+<script>
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+            submitCriteria = getRequest();
+            GetSummary(submitCriteria);
+            GetStorageByLocationChart(submitCriteria);
+            GetStorageByLocationSummaryTable(submitCriteria);
+            DrawTableDetail(submitCriteria);
+    }
+
+    function genTableModal(filter) {
+        $('#modals-transaction').modal('show');
+        generateTableLeadModal_SR('#CheckMoveDetailModal', '@Url.Action("RPTESC004_CheckMoveReport", "Warehouse")',
+            filter, '', column);
+    }
+
+    function getSubmitRequest(filter) {
+        if (!filter) {
+            filter = {
+                selectStartDate: submitCriteria.selectStartDate,
+                selectEndDate: submitCriteria.selectEndDate,
+                selectLocationType: null
+            };
+        }
+        else {
+            filter = {
+                selectStartDate: moment(filter.checkmoveDate).format('YYYY/MM/DD') ?? submitCriteria.selectStartDate,
+                selectEndDate: moment(filter.checkmoveDate).format('YYYY/MM/DD') ?? submitCriteria.selectEndDate,
+                LocationType: LocationType ?? null
+            };
+        }
+
+        $('#ModalTransactionDate').text(moment(filter.selectStartDate).format('DD/MM/YYYY') + '-' + moment(filter.selectEndDate).format('DD/MM/YYYY'));
+        return {
+            ...submitCriteria,
+            selectStartDate: filter.selectStartDate,
+            selectEndDate: filter.selectEndDate,
+            selectLocationType: filter.LocationType
+        }
+    }
+
+    function setCriteria(data) {
+        if (data == null) return;
+        $('#daterange-99').data('daterangepicker').setStartDate(new Date(data.criteria.selectStartDate));
+        $('#daterange-99').data('daterangepicker').setEndDate(new Date(data.criteria.selectEndDate));
+        console.log('SetCriteria');
+        console.log(data.criteria.selectCheckMove);
+        $('#cboDC').val(data.criteria.selectDc).trigger('change');
+        $('#cboCustomer').val(data.criteria.selectCustomer).trigger('change');
+    }
+
+    function getRequest(LocationType = null) {
+        var customer = $('#cboCustomer').select2('data').map(x => x.id);
+        var dc = $('#cboDC').select2('data').map(x => x.id);
+        var tmpStartDate = $('#daterange-99').data('daterangepicker').startDate._d;
+        var tmpEndDate = $('#daterange-99').data('daterangepicker').endDate._d;
+        var startDate = tmpStartDate.getFullYear() + "/" + (tmpStartDate.getMonth() + 1) + "/" + tmpStartDate.getDate();
+        var endDate = tmpEndDate.getFullYear() + "/" + (tmpEndDate.getMonth() + 1) + "/" + tmpEndDate.getDate();
+        var StrCheckmove = document.getElementById('cboCheckMove').value;
+        var BoolCheckmove = null;
+        if (StrCheckmove == "true") {
+            BoolCheckmove = true;
+        } else if(StrCheckmove == "false"){
+            BoolCheckmove = false;
+        }
+        if (!customer) {
+            customer = null;
+        }
+        if (!dc) {
+            dc = null;
+        }
+        var request = {
+            selectStartDate: startDate,
+            selectEndDate: endDate,
+            selectDc: dc,
+            selectCustomer: customer,
+            selectCheckMove: BoolCheckmove,
+            selectLocationType: LocationType
+        };
+        return request;
+    }
+
+    function GetStorageByLocationChart(request) {
+        $('#barChartStorageByLocation').remove();
+        $('#barChartStorageByLocationContainer').append('<canvas id="barChartStorageByLocation"><canvas>');
+
+            //Placeholder for input parameters
+
+        $('#SectionStorageByLocation').show();
+        var sectionStorageByLocationText = document.getElementById('StorageByLocationDate');
+        var DateDis = GetDateDisplay();
+        sectionStorageByLocationText.innerText = "สรุปการตรวจนับสินค้า วันที่ " + DateDis.StartDate + " - " + DateDis.EndDate;
+        $.ajax({
+            url: '@Url.Action("RPTESC004_CheckMoveByLocation", "Warehouse")',
+            type: 'POST',
+            data: request,
+            dataType: 'Json'
+        }).done(function (response) {
+            //Populate chart data and show the modal
+            console.log(response);
+            //PopulateDataShipmentStatus(response, reporttype);
+
+            var ctx = document.getElementById("barChartStorageByLocation").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: response,
+                options: {
+                    plugins: {
+                        datalabels: {
+                            color: 'black',
+                            display: function (context) {
+                                return context.dataset.data[context.dataIndex] + '%';
+                            },
+                            font: {
+                                weight: 'bold'
+                            },
+                            formatter: Math.round
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            id: 'xAxis1',
+                            barPercentage: 0.4,
+                            stacked: false,
+                            //ticks: {
+                            //    min: 60
+                            //},
+                            scaleLabel: {
+                                display: true,
+                                labelString: ""
+                            },
+                            ticks: {
+                                stepSize: 4,
+                                autoSkip: false,
+                                maxRotation: 90,
+                                minRotation: 0,
+                                callback: function (label) {
+                                    var type = label.split(";")[0];
+                                    var date = label.split(";")[1];
+                                    return type
+                                }
+
+                            }
+                        },
+                        {
+                            id: 'xAxis2',
+                            gridLines: {
+                                drawOnChartArea: false, // only want the grid lines for one axis to show up
+                            },
+                            scaleLabel: {
+                                display: true
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                callback: function (label) {
+                                    var type = label.split(";")[0];
+                                    var date = label.split(";")[1];
+                                    if (type === "Rack") {
+
+                                        return date
+                                    }
+                                    else {
+                                        return ""
+                                    }
+                                }
+                            }
+                        }
+
+                        ],
+                        yAxes: [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวนสินค้า (ชิ้น)"
+                                },
+                                ticks:{
+                                    fontColor: ['green','red','blue','black','white','orange','green','red']
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Storage Utilization"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                    },
+                    elements: {
+                        rectangle: {
+                            borderWidth: 1,
+                        },
+                        line: {
+                            fill: false,
+                            tension: 0
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: '',
+                        fontSize:18
+                    },
+                    tooltips: {
+                        mode: 'x',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'x',
+                        intersect: false
+                    },
+                }
+            });
+            var canvas = document.getElementById('barChartStorageByLocation');
+            canvas.onclick = function (evt) {
+                var activePoints = myChart.getElementsAtEvent(evt);
+                if (activePoints[0]) {
+
+                    //label
+                    var chartData = activePoints[0]['_chart'].config.data;
+                    var idx = activePoints[0]['_index'];
+                    var data = chartData.labels[idx];
+
+                    @*LocationType = LocationType.split(";")[0]*@
+                    LocationType = data.split(";")[0];
+                    checkmoveDate = moment(data.split(";")[1], 'YYYY-MM-DD').format('YYYY/MM/DD');
+                }
+                genTableModal({ checkmoveDate: checkmoveDate, LocationType: LocationType });
+                @*DrawTableDetail(getRequest(LocationType));*@
+            };
+        }).fail(function (error) {
+            console.log(error);
+        }).always(function () {
+            $('#SectionStorageByLocation').hide();
+            //console.log( "finished" );
+        });
+
+    }
+
+
+
+    function DrawTableDetail(request) {
+
+            //ESC Text
+        var sectionCheckMoveText = document.getElementById('CheckMoveDetailText');
+        var DateDis = GetDateDisplay();
+        sectionCheckMoveText.innerText = "รายละเอียดการตรวจนับสินค้า วันที่ " + DateDis.StartDate + " - " + DateDis.EndDate;
+
+        $('#SectionCheckMoveDetail').show();
+        var jqxhr = $.post("/Warehouse/RPTESC004_CheckMoveReport", request)
+                .done(function (result) {
+                    //if (result.status) {
+                    if (table == null) {
+                        GenerateDatatable(result.data, column);
+                    }
+                    else {
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                    //} else {
+                    //toastr["error"](result.message);
+                    //}
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function (e) {
+                    $('#SectionCheckMoveDetail').hide();
+                });
+
+        }
+
+        function isEmpty(obj) {
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key))
+                    return false;
+            }
+            return true;
+        }
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-base').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+</script>
+
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Warehouse</h1>
+    <h4 class="card-title">รายงานการตรวจนับสินค้า (Check Move)</h4>
+    <ul class="nav filled-tabs">
+        <li class="nav-item">
+            <a class="nav-link active show" data-toggle="tab" href="#filled-dashboard" onclick="isActive()">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#filled-rawdata" onclick="isActive()">Raw Data</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        @{
+            await Html.RenderPartialAsync("_Common_WH_ESC_Criteria_06");
+        }
+        <div class="tab-pane active show" id="filled-dashboard">
+            <div class="row" style="margin-top:2%;">
+                <div class="col-12 card-statistics">
+                    <h4>
+                        Count by Pick Today
+                    </h4>
+                    <div id="SectionSummaryCheckMove" class="overlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="div_summary" data-bind="foreach: summary">
+                        <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                            <div class="card">
+                                <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                                    <div class="row mb-1 mt-1">
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-center">
+                                                <b data-bind="text:dc_name"></b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="myhrline" />
+                                    <div class="row">
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-start">
+                                                <p style="text-align:left">Plan(Pcs.)</p>
+                                            </div>
+                                        </div>
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-end">
+                                                <p style="text-align:right">Count(Pcs.)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="background-color:rgb(234,248,222)">
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-center">
+                                                    <b>Location</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-start">
+                                                    <b data-bind="text: formatCurrency(plan_location)">1000</b>
+                                                </div>
+                                            </div>
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-end">
+                                                    <b data-bind="text: formatCurrency(count_location)">2000</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="background-color:rgb(222,242,250)">
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-center">
+                                                    <b>Weight(Ton)</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-start">
+                                                    <b data-bind="text: formatCurrency(plan_weight)">1000</b>
+                                                </div>
+                                            </div>
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-end">
+                                                    <b data-bind="text: formatCurrency(count_weight)">2000</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title"><span id="StorageByLocationDate"></span></h4>
+                            <div class="row" id="StorageByLocation">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div id="SectionStorageByLocation" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center justify-content-between">
+                                            <h4 class="card-title" id="StorageByLocationText"></h4>
+                                            <div class="d-flex align-items-center">
+                                                <div class="wrapper">
+                                                    <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartStorageByLocation','StorageByLocationText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                        <div class="card-body" id="barChartStorageByLocationLayout">
+                                            <div id="barChartStorageByLocationContainer" class="chart-container" style="position: relative; height:40vh;">
+                                                <canvas id="barChartStorageByLocation"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="CheckMoveSummaryDetail">
+                <div class="col-12">
+                    <article class="card mb-4">
+                        <div id="SectionCheckMoveSummaryDetail" class="overlay">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" style="overflow-x: auto;">
+                            <h4 class="card-title" id="CheckMoveSummaryDetailText"></h4>
+                            <div>
+                                <div class="dataTables_wrapper">
+                                    <table id="CheckMoveByLoactionSummaryDataTable" class="table table-striped" style="width:100%">
+                                        <thead id="header_summary">
+                                            <tr id="header_date">
+                                            </tr>
+                                            <tr id="header_locationtype">
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detail_summary">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="filled-rawdata">
+            <div class="row" id="CheckMoveDetail">
+                <div class="col-12">
+                    <article class="card mb-4">
+                        <div id="SectionCheckMoveDetail" class="overlay">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title" id="CheckMoveDetailText"></h4>
+                            <div>
+                                <div class="dataTables_wrapper">
+                                    <table id="dtList" class="table table-striped" style="width:100%"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+        <!-- Content End -->
+        <div class="modal modal-default" id="modals-transaction">
+            <div class="modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;margin:auto">
+                <form class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">
+                            รายละเอียดการ Pack สินค้า ประจำวันที่ <span id="ModalTransactionDate"></span>
+                        </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <div class="row" id="CheckMoveDetailModal">
+                                    <div class="col-12">
+                                        <div class="overlay section-loading">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h4 class="card-title section-title"></h4>
+                                        <div class="table-responsive">
+                                            <div class="dataTables_wrapper">
+                                                <table class="table table-striped section-table-render" style="width:100%"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>var model = {
+                summary: ko.observableArray([])
+            }
+            //var model_detail = {
+
+            //}
+
+            ko.applyBindings(model, document.getElementById("div_summary"));
+            function GetSummary(request) {
+                $('#SectionSummaryCheckMove').show();
+                //var A = document.getElementById('SomeID');
+                //A.innerText = "PCs.";
+
+                var jqxhr = $.post("/Warehouse/RPTESC004_CheckMoveQty", request)
+                    .done(function (result) {
+
+                        model.summary(result.data);
+
+                    })
+                    .fail(function (e) {
+                        console.log(e);
+                    })
+                    .always(function () {
+                        $('#SectionSummaryCheckMove').hide();
+                        //console.log( "finished" );
+                    });
+            }
+
+            function GetStorageByLocationSummaryTable(request) {
+
+                var jqxhr = $.post("/Warehouse/RPTESC004_CheckMoveByLocationSummaryDetailTable", request)
+                    .done(function (result) {
+                        console.log(result.header.date);
+                        genTable(result.header.location_type, result.header, result.data);
+                    })
+                    .fail(function (e) {
+                        console.log(e);
+                    })
+                    .always(function () {
+
+                    });
+
+            }
+
+            function genTable(locationType, header, data) {
+                //var thead = document.getElementById("header_summary");
+                var tr = document.getElementById("header_locationtype");
+                var tr_date = document.getElementById("header_date");
+                var tbody = document.getElementById("detail_summary");
+                var thRowType = document.createElement("th");
+                var thDate = document.createElement("th");
+                thRowType.innerText = "";
+                thRowType.className = "BlankRow";
+                thDate.className = "BlankRow";
+                tr.appendChild(thRowType);
+                tr_date.appendChild(thDate);
+
+                if (summary_table == null) {
+
+                    $.each(header.date, function (index, dataDate) {
+                        var th = document.createElement("th");
+                        th.innerText = dataDate;
+                        th.colSpan = header.countColDate[index];
+                        th.className = "text-center";
+                        tr_date.appendChild(th);
+                    });
+
+                    $.each(locationType, function (index, dataLocationType) {
+                        var th = document.createElement("th");
+                        th.innerText = dataLocationType;
+                        th.className = "text-center";
+                        tr.appendChild(th);
+                    });
+
+                    $.each(data, function (index, dataRowType) {
+                        var tr_detail = document.createElement("tr");
+                        var td = document.createElement("td");
+                        td.innerText = dataRowType.rowType;
+                        td.className = "text-nowrap";
+                        tr_detail.appendChild(td);
+
+                        $.each(dataRowType.qty, function (index, dataQty) {
+                            var td_qty = document.createElement("td");
+                            td_qty.innerText = dataQty;
+                            tr_detail.appendChild(td_qty);
+                        });
+
+                        tbody.appendChild(tr_detail);
+                    });
+
+                    summary_table = $('#CheckMoveByLoactionSummaryDataTable').DataTable({ responsive: true, bSort: false, paging: false, "dom": 'lrtip', "info": false });
+
+                }
+                else {
+                    $('#header_locationtype').html('');
+                    $('#detail_summary').html('');
+                    $('#header_date').html('');
+                    tr_date.appendChild(thDate);
+                    tr.appendChild(thRowType);
+
+                    $.each(header.date, function (index, dataDate) {
+                        var th = document.createElement("th");
+                        th.innerText = dataDate;
+                        th.colSpan = header.countColDate[index];
+                        th.className = "text-center";
+                        tr_date.appendChild(th);
+                    });
+
+                    $.each(locationType, function (index, data) {
+                        var th = document.createElement("th");
+                        th.innerText = data;
+                        th.className = "text-center";
+                        tr.appendChild(th);
+                        //thead.appendChild(tr);
+                    });
+
+                    $.each(data, function (index, data) {
+                        var tr_detail = document.createElement("tr");
+                        var td = document.createElement("td");
+                        td.innerText = data.rowType;
+                        td.className = "text-nowrap";
+                        tr_detail.appendChild(td);
+
+                        $.each(data.qty, function (index, data) {
+                            var td_qty = document.createElement("td");
+                            td_qty.innerText = data;
+                            tr_detail.appendChild(td_qty);
+                        });
+
+                        tbody.appendChild(tr_detail);
+                    });
+
+
+                }
+
+            }
+            var formatCurrency = function (amount) {
+                if (!amount) {
+                    return "0";
+                }
+                amount += '';
+                x = amount.split('.');
+                x1 = x[0];
+                x2 = x.length > 1 ? '.' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return "" + x1 + x2;
+            }</script>

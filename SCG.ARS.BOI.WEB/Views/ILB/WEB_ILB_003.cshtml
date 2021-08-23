@@ -1,0 +1,391 @@
+﻿
+@{
+    ViewBag.Title = "WEB_ILB_003";
+}
+@section OverrideStyles{
+    <style>
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable .percent {
+                padding: 0px !important;
+            }
+
+            .dataTables_wrapper .dataTable thead th {
+                padding: 5px 30px;
+            }
+
+        .pointer {
+            cursor: pointer;
+        }
+    </style>
+}
+@section Scripts{
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>*@
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/ilb.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var screenID = 'WEB_ILB_003';
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        var column = [
+            { "data": "scgl_po_id", "name": "scgl_po_id", "title": "SCGL PO ID", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "service_group", "name": "service_group", "title": "Service Group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "document_status", "name": "document_status", "title": "Document Status", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_status", "name": "customer_status", "title": "Customer Status", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "importer", "name": "importer", "title": "Importer", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "bu", "name": "bu", "title": "BU", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "contact_name", "name": "contact_name", "title": "Contact Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pr_received_date", "name": "pr_received_date", "title": "PR Received Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pr_no", "name": "pr_no", "title": "PR No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "plan_condition_date", "name": "plan_condition_date", "title": "Plan Condition Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mode", "name": "mode", "title": "Mode", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_no", "name": "po_no", "title": "PO No./ Ship Noti No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_date", "name": "po_date", "title": "PO Date/Ship Noti Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "supplier_date", "name": "supplier_date", "title": "PO Sent to Supplier Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "order_cofirm_date", "name": "order_cofirm_date", "title": "Order Confirm Received/ Supplier Acknowledge Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "currency", "name": "currency", "title": "Currency", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_amount", "name": "po_amount", "title": "PO Amount", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_balance", "name": "po_balance", "title": "PO Payment Remaining Balance", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "plan_etd_date", "name": "plan_etd_date", "title": "Plan ETD", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_type", "name": "po_type", "title": "PO Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "product_type", "name": "product_type", "title": "Product Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "supplier", "name": "supplier", "title": "Supplier", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "payment_term", "name": "payment_term", "title": "Payment Term", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "incoterms", "name": "incoterms", "title": "Incoterms", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "forwarder", "name": "forwarder", "title": "Forwarder", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_remark", "name": "po_remark", "title": "PO Remark", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "payment_remark", "name": "payment_remark", "title": "Payment Remark", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "privilege_type", "name": "privilege_type", "title": "Privilege Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "license", "name": "license", "title": "License/Permission", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "tolerance", "name": "tolerance", "title": "Tolerance PO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "terminated", "name": "terminated", "title": "Terminated PO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "created_by", "name": "created_by", "title": "Created by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "created_date", "name": "created_date", "title": "Created Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "updated_by", "name": "updated_by", "title": "Updated by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "updated_date", "name": "updated_date", "title": "Updated Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "locked_by", "name": "locked_by", "title": "Locked by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "locked_date", "name": "locked_date", "title": "Locked Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "kpi_issue_po", "name": "kpi_issue_po", "title": "KPI Issue PO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "kpi_sent_po_supplier", "name": "kpi_sent_po_supplier", "title": "KPI Sent PO to Supplier", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "kpi_order_confirm_received", "name": "kpi_order_confirm_received", "title": "KPI Order Confirm Received", "autoWidth": true, "className": "text-nowrap" }
+        ];
+        var vm;
+        $(document).ready(function () {
+            initialControl();
+            GetService().then(() => {
+                //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+        });
+
+        function initialControl() {
+            //Report Type
+            init_datepicker();
+            var type = "Barite";
+            document.getElementById('reporttype').value = type;
+
+            vm = new ViewModel();
+            ko.applyBindings(vm);
+            //Search();
+        }
+
+        function ILB003DrawTable(request) {
+            drawTable(request, "#RPTILB003Overlay", column, "/Report/RPTILB003_Report");
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+            //Monthly chart
+            drawChart(getRequest());
+            //Monthly Table
+            DrawTableDetail(getRequest());
+
+            var paramDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var paramEndDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+            var sectionRPTILB003_01Text = document.getElementById('RPTILB003_01Text');
+            sectionRPTILB003_01Text.innerText = "สรุป KPI Purchase Order ประจำวันที่ " + uiHelpers.displayDate(paramDate) + ' - ' + uiHelpers.displayDate(paramEndDate);
+
+            var sectionreportHeader = document.getElementById('reportHeader');
+            if (paramEndDate === paramDate) {
+                sectionreportHeader.innerText = 'รายงาน KPI Purchase Order ประจำวันที่ ' + uiHelpers.displayDate(paramDate);
+            } else {
+                sectionreportHeader.innerText = 'รายงาน KPI Purchase Order ประจำวันที่ ' + uiHelpers.displayDate(paramDate)
+                    + ' - ' + uiHelpers.displayDate(paramEndDate)
+            }
+            setBox("/ReportChart/RPTILB003_PO_Summary_Status").always(() => {
+                $('#div_total_summary .card-body').css('height', $('#div_criteria .card-body').css('height'));
+            });
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            //if (!data.criteria.selectStartDate) {
+            //    var startDate = new Date(data.criteria.selectStartDate);
+            //    $('#daterange-tr01').data('daterangepicker').startDate = startDate;
+            //}
+            //if (!data.criteria.selectEndDate) {
+            //    var endDate = new Date(data.criteria.selectEndDate);
+            //    $('#daterange-tr01').data('daterangepicker').endDate = endDate;
+            //}
+
+            //$('#daterange-tr01').trigger('change');
+            $('#cboService').val(data.criteria.selectServiceGroup).trigger('change');
+        }
+
+        function drawChart(request) {
+            var currentdate = new Date(request.selectStartDate);
+            var startDate = new Date(currentdate.getFullYear(), currentdate.getMonth(), 1);
+            var endDate = new Date(currentdate.getFullYear(), currentdate.getMonth() + 1, 0);
+
+            var startCriteria = new Date($('#daterange-tr01').data('daterangepicker').startDate._d);
+            var endCriteria = new Date($('#daterange-tr01').data('daterangepicker').endDate._d);
+
+            $('#RPTILB003_01' + ' .section-loading').show();
+            $('#RPTILB003_02' + ' .section-loading').show();
+            $('#RPTILB003_03' + ' .section-loading').show();
+
+            $.post("/ReportChart/ILB003_Summary_PO_Mothly_Chart", request)
+                .done(function (result) {
+                    generateGraphKPI("#RPTILB003_01", { data: result.data1, success: result.success }, 'bar', 'วันที่', 'จำนวน PO'
+                        , "Issue PO"
+                        , "สรุป KPI Purchase Order ประจำวันที่ " + uiHelpers.displayDate(startCriteria) + " - " + uiHelpers.displayDate(endCriteria), 'top',
+                        function (activePoint) {
+                            var date = activePoint._chart.data.labels[activePoint._index];
+                            ChartDrawTableDetail(getRequest(), date)
+                        },
+                        request
+                    );
+                    generateGraphKPI("#RPTILB003_02", { data: result.data2, success: result.success }, 'bar', 'วันที่', 'จำนวน PO'
+                        , "Sent PO to Supplier"
+                        , "สรุป KPI Purchase Order ประจำวันที่ " + uiHelpers.displayDate(startCriteria) + " - " + uiHelpers.displayDate(endCriteria), 'top',
+                        function (activePoint) {
+                            var date = activePoint._chart.data.labels[activePoint._index];
+                            ChartDrawTableDetail(getRequest(), date)
+                        },
+                        request
+                    );
+                    generateGraphKPI("#RPTILB003_03", { data: result.data3, success: result.success }, 'bar', 'วันที่', 'จำนวน PO'
+                        , "Order Confirm Received"
+                        , "สรุป KPI Purchase Order ประจำวันที่ " + uiHelpers.displayDate(startCriteria) + " - " + uiHelpers.displayDate(endCriteria), 'top',
+                        function (activePoint) {
+                            var date = activePoint._chart.data.labels[activePoint._index];
+                            ChartDrawTableDetail(getRequest(), date)
+                        },
+                        request
+                    );
+
+
+
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $('#RPTILB003_01' + ' .section-loading').hide();
+                    $('#RPTILB003_02' + ' .section-loading').hide();
+                    $('#RPTILB003_03' + ' .section-loading').hide();
+                    console.log('Test title text');
+                    var a = $('#RPTILB003_01 .report-title').text();
+                    console.log(a);
+                });
+
+        }
+        function ChartDrawTableDetail(request, date) {
+            date = moment(date, "DD-MM-YYYY");
+            request.selectStartDate = internalDate(date);
+            request.selectEndDate = internalDate(date);
+
+            if (date != null) {
+                var sectionPODetailText = document.getElementById('PODetailText');
+                sectionPODetailText.innerText = "รายละเอียด Purchase Order ประจำวันที่ " + uiHelpers.displayDate(date);
+                ILB003DrawTable(request);
+            }
+        }
+
+        function DrawTableDetail(request) {
+
+            var currentmonth = $('#daterange-tr01').data('daterangepicker').startDate._d.getMonth();
+            var currentdate = $('#daterange-tr01').data('daterangepicker').startDate._d.getDate();
+            var currentyear = $('#daterange-tr01').data('daterangepicker').startDate._d.getFullYear();
+            var startDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var endDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+            if (currentdate != null) {
+                var sectionPODetailText = document.getElementById('PODetailText');
+                sectionPODetailText.innerText = "รายละเอียด Purchase Order ประจำวันที่ " + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate);
+                ILB003DrawTable(request);
+            }
+        }
+
+        function ViewModel() {
+            var self = this;
+            self.summary = ko.observableArray([]);
+            self.setsummary = function (data) { this.summary(data); };
+        }
+
+    </script>
+}
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>KPI Import Purchase Order</h1>
+    <h4 class="card-title"><span id="reportHeader"></span></h4>
+    <div class="row mb-4">
+        @{
+            await Html.RenderPartialAsync("_Common_ILB_Criteria_05");
+        }
+        <div class="col-md-12 col-lg-4 col-sm-12 mt-4 h-100">
+            <div class="col-12">
+                <div class="row" id="div_total_summary" data-bind="foreach: summary">
+                    <div id="total_po" class="col-12" onclick="SearchCriteria(0);">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-around align-items-center">
+                                    <div class="btn btn-primary btn-rounded px-3 py-3 mr-2">
+                                        <i class="fas fa-shipping-fast md-18"></i>
+                                    </div>
+                                    <div class="mr-2">
+                                        <h5 class="card-title">Total <br>PO</h5>
+                                        <h5 id="b2Text" data-bind="text: total_po"></h5>
+                                        <div class="progress progress-xs">
+                                            <div id="b2Bar" class="progress-bar bg-primary" role="progressbar"
+                                                 data-bind="attr: {'aria-valuenow':100,} , style: {width:100+'%'}"
+                                                 aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @{
+        await Html.RenderPartialAsync("_Common_ILB_Summarize_003");
+    }
+    <div class="row mt-4" id="RPTILB003_01">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB003_01Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title" id="RPTILB003_01Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB003_01 .report-graph', $('#RPTILB003_01 .report-title').text(), {reportTitle:$('#RPTILB003_01 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4" id="RPTILB003_02">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB003_02Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="RPTILB003_02Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB003_02 .report-graph',$('#RPTILB003_01 .report-title').text(), {reportTitle:$('#RPTILB003_01 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4" id="RPTILB003_03">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB003_03Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="RPTILB003_03Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB003_03 .report-graph',$('#RPTILB003_01 .report-title').text(), {reportTitle:$('#RPTILB003_01 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4" id="PODetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="RPTILB003Overlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title" id="PODetailText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->

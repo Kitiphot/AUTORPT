@@ -1,0 +1,427 @@
+﻿
+@{
+    ViewBag.Title = "WEB_ILB_004";
+}
+@section OverrideStyles{
+    <style>
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+        .dataTables_wrapper .dataTable .percent {
+            padding: 0px !important;
+        }
+
+        .dataTables_wrapper .dataTable thead th {
+            padding: 5px 30px;
+        }
+
+        .pointer {
+            cursor: pointer;
+        }
+    </style>
+}
+@section Scripts{
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>*@
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/ilb.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var screenID = 'WEB_ILB_004';
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        var column = [
+            { "data": "service_group", "name": "service_group", "title": "Service Group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "bu", "name": "bu", "title": "BU", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "importer", "name": "importer", "title": "Importer", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_no", "name": "po_no", "title": "PO No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "ship_no", "name": "ship_no", "title": "Ship Noti No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "document_status", "name": "document_status", "title": "Document Status", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "plan_etd_date", "name": "plan_etd_date", "title": "Plan ETD Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "request_delivery_date", "name": "request_delivery_date", "title": "Request Delivery Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "est_readiness_date", "name": "est_readiness_date", "title": "EST Cargo Readiness Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "request_etd_date", "name": "request_etd_date", "title": "Request ETD Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mode", "name": "mode", "title": "Mode", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "incoterms", "name": "incoterms", "title": "Incoterms", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "supplier", "name": "supplier", "title": "Supplier", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "received_complete_date", "name": "received_complete_date", "title": "Received Complete Shipment Document Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "invoice_no", "name": "invoice_no", "title": "Invoice No", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "invoice_amount", "name": "invoice_amount", "title": "Invoice Amount", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "invoice_currency", "name": "invoice_currency", "title": "Invoice Currency", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "awb_no", "name": "awb_no", "title": "AWB/BL No", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "carrier", "name": "carrier", "title": "Carrier", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "forwarder", "name": "forwarder", "title": "Forwarder", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pol", "name": "pol", "title": "POL", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pod", "name": "pod", "title": "POD", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "first_cargo_description", "name": "first_cargo_description", "title": "First Cargo Description", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "net_weight", "name": "net_weight", "title": "Container Type / NET Weight", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "gross_weight", "name": "gross_weight", "title": "Container QTY / Gross Wegith", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "actual_etd_date", "name": "actual_etd_date", "title": "Actual ETD Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "eta_date", "name": "eta_date", "title": "ETA Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "ata_port_date", "name": "ata_port_date", "title": "ATA Port Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "ata_complete_container_date", "name": "ata_complete_container_date", "title": "ATA Complete Container Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "vessel_name", "name": "vessel_name", "title": "Vessel Name/Flight No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "privilege_type", "name": "privilege_type", "title": "Privilege Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "license", "name": "license", "title": "License/Permission", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "or_no", "name": "or_no", "title": "OR", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_service_no", "name": "po_service_no", "title": "PO Service no.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customs_broker", "name": "customs_broker", "title": "Customs Broker", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "import_tax_withdraw_date", "name": "import_tax_withdraw_date", "title": "Import Tax Withdraw Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "import_entry_no", "name": "import_entry_no", "title": "Import Entry No", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "tax_debit_date", "name": "tax_debit_date", "title": "Tax Debit Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customs_released_date", "name": "customs_released_date", "title": "Customs Released Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customs_released_place", "name": "customs_released_place", "title": "Customs Released Place", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "empty_return_place", "name": "empty_return_place", "title": "Empty Return Place", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "delivery_place", "name": "delivery_place", "title": "Delivery Place", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "delivery_date", "name": "delivery_date", "title": "Delivery Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "require_payment", "name": "require_payment", "title": "Require Payment", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "rent_day", "name": "rent_day", "title": "Rent Day", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "rent_charge", "name": "rent_charge", "title": "Rent Charge", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "dem_day", "name": "dem_day", "title": "DEM Day", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "dem_charge", "name": "dem_charge", "title": "DEM Charge", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "det_day", "name": "det_day", "title": "DET Day", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "det_charge", "name": "det_charge", "title": "DET Charge", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "rent_date", "name": "rent_date", "title": "Rent Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "dem_date", "name": "dem_date", "title": "DEM Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "det_date", "name": "det_date", "title": "DET Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipment_remark", "name": "shipment_remark", "title": "Shipment Remark", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "active", "name": "active", "title": "Active", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "created_by", "name": "created_by", "title": "Created by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "created_date", "name": "created_date", "title": "Created date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "updated_by", "name": "updated_by", "title": "Updated by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "updated_date", "name": "updated_date", "title": "Updated date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "locked_by", "name": "locked_by", "title": "Locked by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "locked_date", "name": "locked_date", "title": "Locked date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "manual_shipment", "name": "manual_shipment", "title": "Manual Shipment", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_status", "name": "customer_status", "title": "Customer Status", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipment_id", "name": "shipment_id", "title": "Shipment ID", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "value_date", "name": "value_date", "title": "Value Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "kpi_receive_shipdoc_sea", "name": "kpi_receive_shipdoc_sea", "title": "KPI Receive Shipdoc (Sea Freight)", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "kpi_receive_shipdoc_air", "name": "kpi_receive_shipdoc_air", "title": "KPI Receive Shipdoc (Air Freight)", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "kpi_custom_clearance_sea", "name": "kpi_custom_clearance_sea", "title": "KPI Customs Clearance (Sea Freight)", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "kpi_custom_clearance_air", "name": "kpi_custom_clearance_air", "title": "KPI Customs Clearance (Air Freight)", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "remark", "name": "remake", "title": "Task Suspending Reason", "autoWidth": true, "className": "text-nowrap" }
+        ];
+        var vm;
+        $(document).ready(function () {
+            initialControl();
+            GetService().then(() => {
+            //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+        });
+
+        function initialControl(){
+            //Report Type
+            init_datepicker();
+            vm = new ViewModel();
+            ko.applyBindings(vm);
+            //Search();
+        }
+
+        function drawChart(request) {
+            var currentdate = new Date(request.selectStartDate);
+            var paramDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var paramEndDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+
+            $.post("/ReportChart/ILB004_Summary_Mothly_Chart", request)
+                .done(function (result) {
+                    console.log('ChartData');
+                    console.log(result);
+
+                    generateGraphKPI("#RPTILB004_01", { data: result.data1, success: result.success }, 'bar', 'วันที่', 'จำนวน Shipment'
+                        , "Receive Shipdoc (Sea Freight)"
+                        , "สรุป KPI Shipment ประจำวันที่ " + uiHelpers.displayDate(paramDate) + ' - ' + uiHelpers.displayDate(paramEndDate), 'top',
+                        function (activePoint) {
+                            var date = activePoint._chart.data.labels[activePoint._index];
+                            ChartDrawTableDetail(getRequest(), date,9)
+                        },
+                        request
+                    );
+
+                    generateGraphKPI("#RPTILB004_02", { data: result.data2, success: result.success }, 'bar', 'วันที่', 'จำนวน Shipment'
+                        , "Receive Shipdoc (Air Freight)"
+                        , "", 'top',
+                        function (activePoint) {
+                            var date = activePoint._chart.data.labels[activePoint._index];
+                            ChartDrawTableDetail(getRequest(), date,10)
+                        },
+                        request
+                    );
+
+                    generateGraphKPI("#RPTILB004_03", { data: result.data3, success: result.success }, 'bar', 'วันที่', 'จำนวน Shipment'
+                        , "Customs Clearance (Sea Freight)"
+                        , "", 'top',
+                        function (activePoint) {
+                            var date = activePoint._chart.data.labels[activePoint._index];
+                            ChartDrawTableDetail(getRequest(), date,9)
+                        },
+                        request
+                    );
+
+                    generateGraphKPI("#RPTILB004_04", { data: result.data4, success: result.success }, 'bar', 'วันที่', 'จำนวน Shipment'
+                        , "Customs Clearance (Air Freight)"
+                        , "", 'top',
+                        function (activePoint) {
+                            var date = activePoint._chart.data.labels[activePoint._index];
+                            ChartDrawTableDetail(getRequest(), date,10)
+                        },
+                        request
+                    );
+
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $('#RPTILB004_01' + ' .section-loading').hide();
+                    $('#RPTILB004_02' + ' .section-loading').hide();
+                    $('#RPTILB004_03' + ' .section-loading').hide();
+                    $('#RPTILB004_04' + ' .section-loading').hide();
+                });
+
+        }
+        function ChartDrawTableDetail(request, date,criteria) {
+            date = moment(date, "DD-MM-YYYY");
+            request.selectStartDate = internalDate(date);
+            request.selectEndDate = internalDate(date);
+            request.selectCriteria = criteria;
+
+            if (date != null) {
+                var sectionPODetailText = document.getElementById('PODetailText');
+                sectionPODetailText.innerText = "รายละเอียด Shipment ประจำวันที่ " + uiHelpers.displayDate(new Date(date));
+                ILB004DrawTable(request);
+            }
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+            //Monthly chart
+            drawChart(getRequest());
+            //Monthly Table
+            DrawTableDetail(getRequest());
+            var paramDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var paramEndDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+
+            var sectionreportHeader = document.getElementById('reportHeader');
+            if (paramEndDate === paramDate) {
+                sectionreportHeader.innerText = 'รายงาน KPI Shipment ประจำวันที่ ' + uiHelpers.displayDate(paramDate);
+            } else {
+                sectionreportHeader.innerText = 'รายงาน KPI Shipment ประจำวันที่ ' + uiHelpers.displayDate(paramDate) + ' - ' + uiHelpers.displayDate(paramEndDate);
+            }
+
+            setBox();
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            $('#cboService').val(data.criteria.selectServiceGroup).trigger('change');
+        }
+
+        function ILB004DrawTable(request) {
+            drawTable(request, "#PODetailOverlay", column, "/Report/RPTILB004_Report");
+        }
+
+        function DrawTableDetail(request) {
+            var currentdate = $('#daterange-tr01').data('daterangepicker').startDate._d.getDate();
+            var currentmonth = $('#daterange-tr01').data('daterangepicker').startDate._d.getMonth();
+            var currentyear = $('#daterange-tr01').data('daterangepicker').startDate._d.getFullYear();
+            var startDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var endDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+            //ESC Text
+            var sectionPODetailText = document.getElementById('PODetailText');
+            //if (currentdate != null) sectionPODetailText.innerText = "รายละเอียดการจัดเที่ยว ประจำวันที่ 1 กรกฎาคม";// + currentmonthname;
+            if (currentdate != null) sectionPODetailText.innerText = 'รายละเอียด Shipment ประจำวันที่ ' + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate);
+            ILB004DrawTable(request);
+        }
+
+        function setBox() {
+            var jqxhr = $.post("/ReportChart/RPTILB004_Summary_Status", getRequest())
+                .done(function (result) {
+                    vm.setsummary(result.data);
+                    //console.log(self.summary);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //$('#dvOverlay').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+
+        function ViewModel() {
+            var self = this;
+            self.summary = ko.observableArray([]);
+            self.setsummary = function (data) { this.summary(data); };
+        }
+
+
+    </script>
+}
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>KPI Import Shipment</h1>
+    <h4 class="card-title"><span id="reportHeader"></span></h4>
+    @{
+        await Html.RenderPartialAsync("_Common_ILB_Criteria_01");
+        await Html.RenderPartialAsync("_Common_ILB_Summarize_004");
+    }
+
+    <div class="row mt-4" id="RPTILB004_01">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB004_01Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title" id="RPTILB004_01Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB004_01 .report-graph',$('#RPTILB004_01 .report-title').text(), {reportTitle:$('#RPTILB004_01 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4" id="RPTILB004_02">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB004_02Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title" id="RPTILB004_02Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB004_02 .report-graph',$('#RPTILB004_01 .report-title').text(),{reportTitle:$('#RPTILB004_01 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4" id="RPTILB004_03">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB004_03Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title" id="RPTILB004_03Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB004_03 .report-graph',$('#RPTILB004_01 .report-title').text(),{reportTitle:$('#RPTILB004_01 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4 mb-4" id="RPTILB004_04">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB004_04Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title" id="RPTILB004_04Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB004_04 .report-graph',$('#RPTILB004_01 .report-title').text(),{reportTitle:$('#RPTILB004_01 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="PODetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="PODetailOverlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title" id="PODetailText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+
+</div>
+<!-- Content End -->

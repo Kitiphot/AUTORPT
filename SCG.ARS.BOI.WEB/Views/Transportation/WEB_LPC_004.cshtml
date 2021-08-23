@@ -1,0 +1,132 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+
+    @*<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.4/select2.min.css" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.min.css" />*@
+
+    <script>
+        $(document).ready(function () {
+
+            getComboAjax('#plannername', '/Report/GetPlannerCombo', 'Select plannername');
+            getComboAjax('#customer', '/Report/GetCustomerCombo', 'Select Customer');
+        @*$('#single').select2({
+            placeholder: "Select a Plannername",
+            allowClear: true,
+            ajax: {
+                url: '/Report/GetTestCombo',
+                type: 'post',
+                datatype: 'json',
+                data: function (params) {
+                    return {
+                        term: params.term, // search term
+                        page: params.page
+                    };
+
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+
+                    return {
+                        results: data.data,
+                        pagination: {
+                            more: (params.page * 10) < data.data_count
+                        }
+                    };
+                },
+            },
+            minimumInputLength: 3
+        });*@
+
+        @*$("#multiple").select2({
+            placeholder: "Select a programming language",
+            allowClear: true
+        });*@
+
+
+    });
+
+        function getComboAjax(controlID, URL, placeholder, criteria = []) {
+            $(controlID).select2({
+                placeholder: placeholder,
+                allowClear: true,
+                ajax: {
+                    url: URL,
+                    type: 'post',
+                    datatype: 'json',
+                    data: function (params) {
+                        return {
+                            term: params.term, // search term
+                            page: params.page
+                        };
+
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.data,
+                            pagination: {
+                                more: (params.page * 10) < data.data_count
+                            }
+                        };
+                    },
+                },
+                minimumInputLength: 3
+            });
+        }
+        @*function testData3() {
+            var jqxhr = $.post("/Report/GetTestCombo", {  })
+                .done(function (result) {
+
+                })
+                .fail(uiHelpers.postFailHandler);
+            return jqxhr;
+        }*@
+
+
+
+
+
+    </script>
+
+
+    <!-- Select2 -->
+
+
+
+</head>
+<body>
+    <!-- Content Start -->
+    <div class="content-wrapper">
+        <h3>Hello World!</h3>
+        @*<select class="js-data-example-ajax" width="100px !important"></select>*@
+        <input id="test" style="width:100%;" placeholder="type a number, scroll for more results" />
+        <div class="card">
+            <div class="card-body">
+                <div class="row container bg-primary mt-2 mb-2">
+                    <div class="col-md-6">
+                        <label>Planner name</label>
+                        <select id="plannername" class="js-states form-control">
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Planner name</label>
+                        <select id="customer" class="js-states form-control">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

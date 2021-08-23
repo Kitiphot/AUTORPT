@@ -1,0 +1,361 @@
+﻿
+@{
+    ViewBag.Title = "KPI Confirm Booking to Customer";
+}
+
+@section OverrideStyles{
+    <style>
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable .percent {
+                padding: 0px !important;
+            }
+
+            .dataTables_wrapper .dataTable thead th {
+                padding: 5px 30px;
+            }
+
+        .pointer {
+            cursor: pointer;
+        }
+    </style>
+}
+@section Scripts{
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>*@
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/ilb.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var screenID = 'WEB_ILB_009';
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        var column = [];
+        let column_part1 = [
+            { data: "no", name: "no", title: "No." },
+            { data: "aging", name: "aging", title: "Aging" },
+            { data: "assign_job", name: "assign_job", title: "Assign Job" },
+            { data: "status", name: "status", title: "Status" },
+            { data: "jobid", name: "jobid", title: "Job ID" },
+            { data: "cust_ref_1", name: "cust_ref_1", title: "Cust.Ref.1" },
+            { data: "cust_ref_2", name: "cust_ref_2", title: "Cust.Ref.2" },
+            { data: "shipper", name: "shipper", title: "Shipper" },
+            { data: "carrier_booking_number", name: "carrier_booking_number", title: "Carrier Bkg .No." },
+            { data: "carrier_name", name: "carrier_name", title: "Carrier Name" },
+            { data: "pol", name: "pol", title: "POL" },
+            { data: "pod", name: "pod", title: "POD" },
+            { data: "mode", name: "mode", title: "Mode" },
+        ];
+        let column_part3 = [
+            { data: "etl", name: "etl", title: "ETL" },
+            { data: "etd", name: "etd", title: "ETD" },
+            { data: "eta", name: "eta", title: "ETA" },
+            { data: "cargo_desc", name: "cargo_desc", title: "Cargo Description" },
+            { data: "consignee", name: "consignee", title: "Consignee" },
+            { data: "booking_confirmed_date", name: "booking_confirmed_date", title: "Booking Confirmation Date" },
+            { data: "booking_request_date", name: "booking_request_date", title: "Booking Request" },
+            { data: "carrier_response_date", name: "carrier_response_date", title: "Carrier Response Date" },
+        ];
+
+        var vm;
+        $(document).ready(function () {
+            initialControl().done(function () {
+                return GetService();
+            }).done(function () {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+        });
+
+        function init_datepicker(dateType) {
+            var start = moment().startOf('month');
+            var end = moment().endOf('month');
+
+            var control = $('#daterange-' + dateType)
+
+            function cb(start, end) {
+                if (start.isSame(end, 'day')) {
+                    control.html(uiHelpers.displayDate(start));
+                } else {
+                    control.html(uiHelpers.displayDate(start) + '-' + uiHelpers.displayDate(end));
+                }
+            }
+
+            control.daterangepicker({
+                startDate: start,
+                endDate: end,
+                locale: {
+                    format: uiHelpers.dateFormat.DayMonthYear
+                },
+                ranges: datepicker_ranges_week,
+                maxSpan: {
+                    'months': 1,
+                    'days': -1
+                }
+            }, cb);
+
+            cb(start, end);
+        }
+
+        function initialControl() {
+            var jqxhr = $.post("/ILB/getViewTableContainerTypeColumn")
+                .done(function (result) {
+                    //console.log(result);
+                    column = column_part1.concat(result, column_part3);
+                    //uiHelpers.initMonthYearpicker('#daterange-tr01');
+                    init_datepicker('CY');
+                    init_datepicker('Return');
+                    vm = new ViewModel();
+                    ko.applyBindings(vm);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                });
+            return jqxhr;
+        }
+
+        function drawChart(dateType, request) {
+            //var currentdate = new Date(request.selectStartDate);
+            let [startDate, endDate] = getSelectDate(dateType);
+            generateGraph('#RPTILB009_' + dateType + 'Date', '/ReportChart/ILB009_' + dateType + 'Date_Chart', 'bar', dateType + ' Date', 'Booking'
+                , 'KPI Confirm Booking to Customer of ' + dateType + ' date : ' + uiHelpers.displayFullDate(startDate) + ' - ' + uiHelpers.displayFullDate(endDate)
+                , "xxxx", 'top',
+                function (activePoint) {
+                    //var day = activePoint._chart.data.labels.indexOf(activePoint._model.label) + 1;
+                    //currentDay = parseInt(day, 10);
+                    //currentmonth = currentdate.getMonth();
+                    //currentyear = currentdate.getFullYear();
+                    //ChartDrawTableDetail(getRequest(), currentDay, currentmonth, currentyear)
+                    let date = activePoint._chart.data.labels[activePoint._index];
+                    ChartDrawTableDetail(dateType, getRequest(), date)
+                },
+                { request, dateType }
+            );
+        }
+        function ChartDrawTableDetail(dateType, request, date) {
+            date = moment(date, "DD-MM-YYYY");
+            request.selectStartDate = internalDate(date);
+            request.selectEndDate = internalDate(date);
+
+            var sectionDetailText = document.getElementById(dateType + 'DateTableText');
+            if (date != null) sectionDetailText.innerText = "รายละเอียด KPI Confirm Booking to Customer " + type + ': ' + uiHelpers.displayFullDate(date);
+            drawTable(dateType, request);
+
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+
+            //drawChart('CY', getRequest('CY'));
+            //drawChart('Return', getRequest('Return'));
+            DrawTableDetail('CY', getRequest('CY'));
+            //DrawTableDetail('Return', getRequest('Return'));
+            let [startDate, endDate] = getSelectDate('CY');
+            var sectionreportHeader = document.getElementById('reportHeader');
+            sectionreportHeader.innerText = 'รายงาน KPI Confirm Booking to Customer CY Date: ' + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate);
+            setBox();
+        }
+
+        function setBox() {
+            var jqxhr = $.post("/ReportChart/RPTILB009_Summary_Status", getRequest('CY'))
+                .done(function (result) {
+                    //console.log('DataDashBoard');
+                    //console.log(result);
+                    vm.setsummary(result.data);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //$('#dvOverlay').hide();
+                    //console.log( "finished" );
+                });
+            return jqxhr;
+        }
+
+        function getSelectDate(dateType) {
+            let daterange = $('#daterange-' + dateType).data('daterangepicker');
+
+            let startDate = daterange.startDate._d;
+            let endDate = daterange.endDate._d;
+
+            return [startDate, endDate];
+
+            //var selectDate = $('#daterange-tr01').datepicker('getDate');
+            //if (selectDate == null)
+            //    selectDate = new Date(moment());
+            //return selectDate;
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            dt = new Date(data.criteria.selectStartDate);
+            //$('#daterange-tr01').datepicker('setDate', dt);
+            //$('#cboServiceGroup').val(data.criteria.selectServiceGroup).trigger('change');
+        }
+
+        function getRequest(dateType) {
+            //var selectDate = getSelectDate();
+            //var d = new Date(selectDate),
+            //    month = d.getMonth(),
+            //    year = d.getFullYear();
+            //var firstDay = new Date(year, month, 1);
+            //var lastDay = new Date(year, month + 1, 0);
+            //var serviceGroup = document.getElementById('cboServiceGroup').value;
+            let [startDate, endDate] = getSelectDate(dateType);
+            var criteria = {
+                selectStartDate: internalDate(startDate),
+                selectEndDate: internalDate(endDate),
+                selectServiceGroup: $('#cboService').val()
+            };
+            return criteria;
+        }
+
+        function ILB009DrawTable(dateType, request) {
+            drawTable({ request, dateType }, '#RPTILB009_' + dateType + 'Overlay', column, '/Report/RPTILB009_Report');
+        }
+
+        function DrawTableDetail(dateType, request) {
+            let [startDate, endDate] = getSelectDate(dateType);
+            //var sectionTableText= document.getElementById(dateType + 'DateTableText');
+            //sectionTableText.innerText = 'รายงาน KPI Carrier (Confirm Booking) of ' + dateType + ' date: ' + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate);
+            //ILB009DrawTable(dateType, request);
+
+            generateTable('#' + dateType + 'DateTable', '/Report/RPTILB009_Report',
+                { request, dateType },
+                'รายงาน KPI Confirm Booking to Customer of ' + dateType + ' date: ' + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate),
+                column, null, [{ target:'_all', autoWidth: true, className: "text-nowrap" }]);
+        }
+
+        function ViewModel() {
+            var self = this;
+            self.summary = ko.observableArray([]);
+            self.setsummary = function (data) { this.summary(data); };
+        }
+
+    </script>
+}
+<!-- Content Start -->
+<div class="content-wrapper">
+    @{
+        await Html.RenderPartialAsync("_Common_ILB_Criteria_02");
+        //await Html.RenderPartialAsync("_Common_ILB_Summarize_009");
+    }
+    <!--<div class="row mt-4 mb-4" id="RPTILB009_CYDate">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB009_CYDateOverlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="RPTILB009_CYDateText"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#chart','RPTILB009_CYDateText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="RPTILB009_CYDateLayout">
+                    <div id="RPTILB009_CYDateContainer" class="chart-container report-container">-->
+                        @*<canvas id="RPTILB009"></canvas>*@
+                    <!--</div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+    <!--<div class="row mt-4 mb-4" id="RPTILB009_ReturnDate">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB009_ReturnDateOverlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="RPTILB009_ReturnDateText"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#chart','RPTILB009_ReturnDateText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="RPTILB009_ReturnDateLayout">
+                    <div id="RPTILB009_ReturnDateContainer" class="chart-container report-container">-->
+                        @*<canvas id="RPTILB009"></canvas>*@
+                    <!--</div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+    <div class="row" id="CYDateTable">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="CYDateTableOverlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title" id="CYDateTableText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped section-table-render" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+    @*<div class="row" id="ReturnDateTable">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="ReturnDateTableOverlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title" id="ReturnDateTableText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList2" class="table table-striped section-table-render" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>*@
+</div>
+<!-- Content End -->

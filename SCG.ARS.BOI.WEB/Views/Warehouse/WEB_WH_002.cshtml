@@ -1,0 +1,1273 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Index";
+}
+
+<!-- ================== END BASE JS ================== -->
+<link href="~/assets/css/warehouse.css" rel="stylesheet" />
+<script src="~/assets/js/warehouse.js"></script>
+<style>
+    #TodayReceiving_Table th, td {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+
+    #TodayReceiving_Table th {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .dataTables_wrapper .dataTable thead th {
+        padding: 5px 30px;
+    }
+
+    table[aria-describedby="TodayReceiving_Table_info"] thead th {
+        border: 1px #eee solid;
+        text-align: center;
+    }
+
+    .dataTables_wrapper .dataTable {
+        margin: 0 !important;
+    }
+
+    hr.myhrline {
+        margin: 0px;
+    }
+
+    h4, h5, h6, p {
+        margin: 2px;
+    }
+
+    div.card-body {
+        padding: 1% !important;
+    }
+
+    .chart-legend li span {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 5px;
+    }
+
+    .chart-legend {
+        height: 250px;
+        overflow: auto;
+    }
+
+        .chart-legend li {
+            cursor: pointer;
+        }
+
+    .strike {
+        text-decoration: line-through !important;
+    }
+
+    .float-left {
+        float: left;
+    }
+
+    .select2-search__field {
+        width: 100% !important
+    }
+    /*    div.used {
+        background-color: rgba(,1) !important;
+    }
+
+    div.available {
+        background-color: rgba(,1) !important;
+    }*/
+</style>
+
+<script>
+    /*-----------------------*/
+    /*Initial on Webpage Load*/
+    /*-----------------------*/
+    var isFirstLoad = 1;
+    var table = null;
+    var selected_customer = [];
+    var selected_dc = [];
+    var submitCriteria = [];
+    var screenID = 'WEB_WH_002';
+    var column = [
+        {
+            "data": "stock_date", "name": "stock_date", "title": "STOCKDATE", "autoWidth": true, "className": "text-nowrap",
+            "render": function (data, type, row, meta) {
+                return data == null ? "" : moment(new Date(data)).format("DD/MM/YYYY");
+            }
+        },
+        { "data": "lv", "name": "lv", "title": "LV", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "storage_type", "name": "storage_type", "title": "Storage Type", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "location_code", "name": "location_code", "title": "Location", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "handling_unit", "name": "handling_unit", "title": "Handling Unit", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "sku", "name": "sku", "title": "SKU", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "sku_desc", "name": "sku_desc", "title": "Description", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "status", "name": "status", "title": "Status", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "ean", "name": "ean", "title": "EAN", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "qty", "name": "qty", "title": "Quantity", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "uom", "name": "uom", "title": "UOM", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "sticker_uid", "name": "sticker_uid", "title": "StickerUID", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "entifled", "name": "entifled", "title": "EntiFled", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "unit_volumn", "name": "unit_volumn", "title": "CB", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "m3", "name": "m3", "title": "Vol(M3)", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "weight_uom", "name": "weight_uom", "title": "WGT/UOM.", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "weight_kg", "name": "weight_kg", "title": "WGT(KG)", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "cb", "name": "cb", "title": "cb", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "vlength", "name": "vlength", "title": "vLength", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "vheight", "name": "vheight", "title": "vHeight", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "gr_date", "name": "gr_date", "title": "GR Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate},
+        { "data": "aging", "name": "aging", "title": "Aging", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "material_group", "name": "material_group", "title": "Material Group", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "product_group", "name": "product_group", "title": "Product Group", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "age_range", "name": "age_range", "title": "Rank Aging", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "level", "name": "level", "title": "Level", "autoWidth": true, "className": "text-nowrap" },
+        {"data": "expire_date", "name": "expire_date", "title": "Exp Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate },
+        {"data": "mfg_date", "name": "mfg_date", "title": "Mfg Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate},
+        { "data": "check_location_type", "name": "check_location_type", "title": "Check Location Type", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "charge_per_location", "name": "charge_per_location", "title": "Charge/Location", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "check", "name": "check", "title": "Check", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "po_no", "name": "po_no", "title": "PO No.", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "invoice_no", "name": "invoice_no", "title": "Invoice No.", "autoWidth": true, "className": "text-nowrap" }
+    ];
+
+    function initialSearchCriteria() {
+        var ajax = [];
+        $('#CriteriaOveray').show();
+        ajax.push(GetCustomer('CDC'));
+        ajax.push(GetDC('CDC'));
+        ajax.push(GetDC_Raw('#cboDC_Raw', 'CDC'));
+        ajax.push(GetCustomer_Raw('#cboCustomer_Raw', 'CDC'));
+        ajax.push(GetProductGroup('#cboProductGroup', 'CDC'));
+        ajax.push(GetProductGroup('#cboProductGroup_Raw', 'CDC'));
+        var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+        return result;
+    }
+
+    $(document).ready(function () {
+        //Report Type
+        var type = "Barite";
+        init_datepicker();
+        document.getElementById('reporttype').value = type;
+
+        $('#cboDC').on("change", function (element, checked) {
+            GetCustomer('CDC', $('#cboDC').select2('data').map(x => x.id));
+        });
+
+        $('#cboDC_Raw').on("change", function (element, checked) {
+            GetCustomer_Raw('#cboCustomer_Raw','CDC', $('#cboDC_Raw').select2('data').map(x => x.id));
+        });
+
+        initialControl().then(() => {
+            //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+
+            uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            searchRawdata();
+        });
+        
+
+        $.contextMenu({
+            selector: '.context-menu',
+            trigger: 'hover',
+            delay: 100,
+            autoHide: true,
+            callback: function (key, options) {
+                var link = $(options.selector + ".context-menu-active");
+                //window.console && console.log(m);
+                if (key == "download") {
+                    link[0].click();
+                }
+                else if (key == "downloadAll") {
+                    var chartID = $('.chartCanvas').map((idx, element) => { return '#' + $(element).prop('id') }).toArray();
+
+                    uiHelpers.downloadPDF(chartID, 'Storage Report Chart');
+                }
+                //if()
+            },
+            items: {
+                "download": { name: "Download", icon: "fas fa-download" },
+                "downloadAll": { name: "Download All", icon: "fas fa-file-download" },
+            }
+        });
+        //Search();
+
+    });
+
+
+    function init_datepicker() {
+        var start = moment();
+        var end = moment();
+
+        function cb(start, end) {
+            $('#daterange-99').html(start.format('MMM D, YYYY') + ' - ' + end.format('MMM D, YYYY'));
+        }
+
+        $('#daterange-99').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: datepicker_ranges,
+            opens: (isRtl ? 'left' : 'right')
+        }, cb);
+
+        cb(start, end);
+    }
+
+</script>
+
+<script>
+    function Search() {
+
+        submitCriteria = getRequest();
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+            GetSummary(getRequest());
+            GetStockByLocationTypeChart(getRequest());
+            ProductAging(getRequest());
+            GetStorageByLocationChart(getRequest());
+    }
+
+    function setCriteria(data) {
+        if (data == null) return;
+        $('#dtPicker').datepicker('setDate', new Date(data.criteria.selectDate));
+        $('#cboDC').val(data.criteria.selectDc).trigger('change');
+        $('#cboCustomer').val(data.criteria.selectCustomer).trigger('change');
+        $('#cboProductGroup').val(data.criteria.selectCustomer).trigger('change');
+    }
+
+    function searchRawdata() {
+        DrawTableDetail(getRequest_Rawdata());
+    }
+
+    function getRequest_Rawdata(CustomerName = null, LocationType = null, Aging = null) {
+        var customer = $('#cboCustomer_Raw').select2('data').map(x => x.id);
+        var dc = $('#cboDC_Raw').select2('data').map(x => x.id);
+        var tmpselectDate = $('#dtPicker_Raw').datepicker('getDate');
+        var selectDate = tmpselectDate.getFullYear() + "/" + (tmpselectDate.getMonth() + 1) + "/" + tmpselectDate.getDate();
+        var productgroup = $('#cboProductGroup_Raw').select2('data').map(x => x.id);
+
+        console.log('GetRequest!!!' + LocationType);
+        if (!customer) {
+            customer = null;
+        }
+        if (!dc) {
+            dc = null;
+        }
+        var request = {
+            selectDate: selectDate,
+            selectDc: dc,
+            selectCustomer: customer,
+            selectCustomerName: CustomerName,
+            selectLocationType: LocationType,
+            selectAging: Aging,
+            selectProductGroup: productgroup
+            //CountBy: CountBy
+        };
+        return request;
+    }
+
+    function getRequest(CustomerName = null,LocationType = null,Aging = null) {
+        var customer = $('#cboCustomer').select2('data').map(x => x.id);
+        var dc = $('#cboDC').select2('data').map(x => x.id);
+        var tmpselectDate = $('#dtPicker').datepicker('getDate');
+        var selectDate = tmpselectDate.getFullYear() + "/" + (tmpselectDate.getMonth() + 1) + "/" + tmpselectDate.getDate();
+        var productgroup = $('#cboProductGroup').select2('data').map(x => x.id);
+
+        console.log('GetRequest!!!'+LocationType);
+        if (!customer) {
+            customer = null;
+        }
+        if (!dc) {
+            dc = null;
+        }
+        var request = {
+            selectDate: selectDate,
+            selectDc: dc,
+            selectCustomer: customer,
+            selectCustomerName: CustomerName,
+            selectLocationType: LocationType,
+            selectAging: Aging,
+            selectProductGroup: productgroup
+            //CountBy: CountBy
+        };
+        return request;
+    }
+
+    function getSubmitRequest(filter) {
+        if (!filter) {
+            filter = {
+                CustomerName: null,
+                Status: null,
+                Time: null,
+                LocationType: null,
+                Aging:null,
+                date: submitCriteria.selectDate
+            };
+        }
+        else {
+            filter = {
+                CustomerName: filter.CustomerName ?? null,
+                Status: filter.Status ?? null,
+                Time: filter.Time ?? null,
+                LocationType: filter.LocationType ?? null,
+                Aging: filter.Aging ?? null,
+                date: moment(filter.selectDate).format('YYYY/MM/DD') ?? submitCriteria.selectDate
+            };
+        }
+
+        $('#ModalTransactionDate').text(moment(filter.orderStartDate).format('DD/MM/YYYY') + '-' + moment(filter.orderEndDate).format('DD/MM/YYYY'));
+        return {
+            ...submitCriteria,
+            selectCustomerName: filter.CustomerName,
+            selectStatus: filter.Status,
+            selectTime: filter.Time,
+            selectLocationType: filter.LocationType,
+            selectDate: filter.date,
+            selectAging: filter.Aging
+        }
+    }
+
+        function GetStockByLocationTypeChart(request) {
+            $('#barChartStockByLocationType').remove();
+            $('#barChartStockByLocationTypeContainer').append('<canvas id="barChartStockByLocationType" class="chartCanvas"><canvas>');
+
+            //Placeholder for input parameters
+
+            var sectionreportHeader = document.getElementById('StockByLocationTypeDate');
+            var tmpselectDate = $('#dtPicker').datepicker('getDate');
+            var selectDate = tmpselectDate.getDate() + "/" + (tmpselectDate.getMonth() + 1) + "/" + tmpselectDate.getFullYear();
+            sectionreportHeader.innerText = selectDate;
+
+            $('#SectionStockByLocationType').show();
+
+
+            //let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds()
+            //console.log(formatted_date)
+            $.ajax({
+                url: '@Url.Action("RPTCDC002_StockByLocationType", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                //Populate chart data and show the modal
+                //PopulateDataShipmentStatus(response, reporttype);
+
+                var ctx = document.getElementById("barChartStockByLocationType").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        plugins: {
+                            datalabels: {
+                                color: 'black',
+                                display: function (context) {
+                                    return context.dataset.data[context.dataIndex] + '%';
+                                },
+                                font: {
+                                    weight: 'bold'
+                                },
+                                formatter: function (value, context) {
+                                    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                }
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            xAxes: [{
+                                barPercentage: 0.4,
+                                stacked: false,
+                                scaleLabel: {
+                                    display: false,
+                                    labelString: ""
+                                }
+                            }],
+                            yAxes: [
+                                {
+                                    gridLines: {
+                                        display: true,
+                                    },
+                                    stacked: false,
+                                    ticks: {
+                                        beginAtZero: true,
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: "Location"
+                                    },
+                                    type: 'linear',
+                                    id: 'left-axis',
+                                    position: 'left'
+                                },
+                                {
+                                    gridLines: {
+                                        display: false,
+                                    },
+                                    ticks: {
+                                        beginAtZero: true,
+                                        suggestedMax: 100
+                                    },
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: "% Difference"
+                                    },
+                                    stacked: false,
+                                    id: 'right-axis',
+                                    position: 'right'
+                                }
+                            ]
+                        },
+                        elements: {
+                            rectangle: {
+                                borderWidth: 1,
+                            },
+                            line: {
+                                fill: false,
+                                tension: 0
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Storage location by location type',
+                            fontSize:18
+                        }
+                        ,
+                        tooltips: {
+                            mode: 'nearest',
+                            intersect: true,
+                        },
+                        hover: {
+                            mode: 'nearest',
+                            intersect: true
+                        },
+                    }
+                });
+
+                var canvas = document.getElementById('barChartStockByLocationType');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        // x label
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var LocationType = chartData.labels[idx];
+                        @*genTableModal();*@
+                    }
+                    genTableModal({ LocationType: LocationType });
+                    @*DrawTableDetail(getRequest(null, LocationType, null));*@
+                };
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionStockByLocationType').hide();
+            });
+
+        }
+
+    function GetStorageByLocationChart(request) {
+
+
+        $('#SectionStockByCustomerBarChart').show();
+        $('#barChartStockByCustomer').remove();
+        $('#barChartStockByCustomerContainer').append('<canvas id="barChartStockByCustomer" class="chartCanvas"><canvas>');
+
+            $.ajax({
+                url: '@Url.Action("RPTCDC002_StorageByCustomerLocationChart", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                var ctx = document.getElementById("barChartStockByCustomer").getContext('2d');
+                window.myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: false,
+                                    labelString: ""
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "Location"
+                                }
+                            }]
+                        },
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "right"
+                        },
+                        title: {
+                            display: true,
+                            text: "Storage location by customer (Location)",
+                            fontSize: 18
+                        }
+                    }
+                });
+                var canvas = document.getElementById('barChartStockByCustomer');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var LocationType = chartData.labels[idx];
+
+                        //data
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var data = activePoint._chart.data;
+                        var datasetIndex = activePoint._datasetIndex;
+                        var CustomerLabel = data.datasets[datasetIndex].label;
+                    }
+                    genTableModal({ LocationType: LocationType, CustomerName: CustomerLabel });
+                    @*DrawTableDetail(getRequest(CustomerLabel, LocationType,null));*@
+                };
+
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionStockByCustomerBarChart').hide();
+                //console.log( "finished" );
+            });
+
+
+
+
+        $('#SectionStockByCustomerPieceBarChart').show();
+        $('#barChartStockByCustomerPiece').remove();
+        $('#barChartStockByCustomerPieceContainer').append('<canvas id="barChartStockByCustomerPiece" class="chartCanvas"><canvas>');
+
+             $.ajax({
+                url: '@Url.Action("RPTCDC002_StorageByCustomerLocationPieceChart", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                var ctx = document.getElementById("barChartStockByCustomerPiece").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: false,
+                                    labelString: ""
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน(ชิ้น)"
+                                }
+                            }]
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "right"
+                        },
+                        title: {
+                            display: true,
+                            text: "Storage location by customer (Piece)",
+                            fontSize: 18
+                        }
+                    }
+                });
+                var canvas = document.getElementById('barChartStockByCustomerPiece');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var LocationType = chartData.labels[idx];
+
+                        //data
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var data = activePoint._chart.data;
+                        var datasetIndex = activePoint._datasetIndex;
+                        var CustomerLabel = data.datasets[datasetIndex].label;
+                    }
+                    genTableModal({ LocationType: LocationType, CustomerName: CustomerLabel });
+                    @*DrawTableDetail(getRequest(CustomerLabel, LocationType, null));*@
+                };
+
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionStockByCustomerPieceBarChart').hide();
+                //console.log( "finished" );
+            });
+
+        }
+    function ProductAging(request) {
+
+        $('#barChartProductAging').remove();
+        $('#barChartProductAgingContainer').append('<canvas id="barChartProductAging" class="chartCanvas"><canvas>');
+
+        var sectionReveivedChart = document.getElementById('ReceivedByTime');
+
+        $('#SectionProductAging').show();
+
+        $.ajax({
+            url: '@Url.Action("RPTCDC002_StockByAging", "Warehouse")',
+            type: 'POST',
+            data: request,
+            dataType: 'Json'
+        }).done(function (response) {
+            //Populate chart data and show the modal
+            console.log('response : ' + response.countData);
+            //$().style.height = "50px";
+            $('#barChartProductAgingContainer').height(200+(25*response.countData)+'px');
+            //PopulateDataShipmentStatus(response, reporttype);
+
+            var ctx = document.getElementById("barChartProductAging").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'horizontalBar',
+                data: response,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                            //ticks: {
+                            //    min: 60
+                            //},
+                            scaleLabel: {
+                                display: true,
+                                labelString: "ประเภทสินค้า (SKU)"
+                            }
+                        }],
+                        yAxes: [{
+                            stacked: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: "ลูกค้า"
+                            }
+                        }]
+                    },
+                    elements: {
+                        rectangle: {
+                            borderWidth: 1,
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Product Aging in Stock by Customer',
+                        fontSize: 18
+                    }
+                }
+            });
+            var canvas = document.getElementById('barChartProductAging');
+            canvas.onclick = function (evt) {
+                var activePoints = myChart.getElementsAtEvent(evt);
+                if (activePoints[0]) {
+
+                    var chartData = activePoints[0]['_chart'].config.data;
+                    var idx = activePoints[0]['_index'];
+                    var CustomerLabel = chartData.labels[idx];
+
+                    //data
+                    var activePoint = myChart.getElementAtEvent(evt)[0];
+                    var data = activePoint._chart.data;
+                    var datasetIndex = activePoint._datasetIndex;
+                    var Aging = data.datasets[datasetIndex].label;
+                    @*console.log(Aging + ';' + CustomerLabel);*@
+                    genTableModal({ Aging: Aging, CustomerName: CustomerLabel })
+                }
+                @*DrawTableDetail(getRequest(CustomerLabel, null, Aging));*@
+            };
+        }).fail(function (error) {
+            console.log(error);
+        }).always(function () {
+            $('#SectionProductAging').hide();
+            //console.log( "finished" );
+        });
+    }
+
+    function DrawTableDetail(request) {
+        var currentdate = request.selectDate;
+
+        //ESC Text
+        var sectionStockDetailText = document.getElementById('StockDetailText');
+        var tmpselectDate = $('#dtPicker').datepicker('getDate');
+        var selectDate = tmpselectDate.getDate() + "/" + (tmpselectDate.getMonth() + 1) + "/" + tmpselectDate.getFullYear();
+        sectionStockDetailText.innerText = "รายละเอียดการใช้พื้นที่จัดเก็บประจำวันที่ " + selectDate;
+
+        $('#SectionStockDetail').show();
+
+        var jqxhr = $.post("/Warehouse/RPTCDC002_StockOnHandReport", request)
+            .done(function (result) {
+                if (table == null) {
+                    GenerateDatatable(result.data, column);
+                }
+                else {
+                    table.clear();
+                    $.each(result.data, function (idx, obj) {
+                        table.row.add(result.data[idx]);
+                    });
+                    table.draw();
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function (e) {
+                $('#SectionStockDetail').hide();
+            });
+
+
+    }
+        function isEmpty(obj) {
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key))
+                    return false;
+            }
+            return true;
+        }
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-base').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+    function isActive() {
+        setTimeout(function () {
+            if ($('#filled-dashboard').is(':visible')) {
+                $('#summarystorage').show();
+            }
+            else if ($('#filled-rawdata').is(':visible')) {
+                $('#summarystorage').hide();
+            }
+        }, 100)
+    }
+
+    function genTableModal(filter) {
+        $('#modals-transaction').modal('show');
+        generateTableLeadModal_SR('#ReportModal', '@Url.Action("RPTCDC002_StockOnHandReport", "Warehouse")',
+            filter, '', column);
+    }
+
+    function generateTableLeadModal(controlID, serviceUrl, filter, title, column, created_row_callback, column_def = []) {
+        $(controlID + ' .section-loading').show();
+        $(controlID + ' .section-title').text(title);
+        var jqxhr = $.post(serviceUrl, getCriteria(filter))
+            .done(function (result) {
+                if (uiHelpers.errorHandler(result)) {
+                    if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                        $(controlID + ' .section-table-render').DataTable({
+                            dom: 'lTf<"html5buttons"B > gtip',
+                            buttons: [
+                                'copy', 'excel'
+                            ],
+                            fixedHeader: false,
+                            scrollX: true,
+                            scrollY: '40vh',
+                            ordering: true,
+                            responsive: true,
+                            pageLength: 10,
+                            filter: true,
+                            data: result.data,
+                            columns: column,
+                            createdRow: created_row_callback,
+                            columnDefs: column_def
+                        });
+                    }
+                    else {
+                        var table = $(controlID + ' .section-table-render').DataTable();
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                }
+                else {
+                    if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                        //create empty table
+                        $(controlID + ' .section-table-render').DataTable({
+                            dom: 'lTf<"html5buttons"B > gtip',
+                            buttons: [
+                                'copy', 'excel'
+                            ],
+                            fixedHeader: true,
+                            scrollX: true,
+                            ordering: false,
+                            responsive: true,
+                            pageLength: 10,
+                            filter: true,
+                            columns: column
+                        });
+                    }
+                    else {
+                        //empty
+                        var table = $(controlID + ' .section-table-render').DataTable();
+                        table.clear();
+                        table.draw();
+                    }
+                }
+                $(controlID + ' .section-table-render').DataTable().columns.adjust().draw();
+            })
+            .fail(uiHelpers.postFailHandler)
+            .always(function () {
+                $(controlID + ' .section-loading').hide();
+            });
+        return jqxhr;
+    }
+
+        //$('#cboWarehouse').onchange = function () { GetCustomer(document.getElementById('cboWarehouse').value) }
+</script>
+
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Warehouse</h1>
+    <h4 class="card-title">รายงานการจัดเก็บ (Storage Report)</h4> @*<span id="reportHeader"></span>*@
+    @*<h4 class="card-title mb-4">Filled Tabs</h4>*@
+    <ul class="nav filled-tabs">
+        <li class="nav-item">
+            <a class="nav-link active show" data-toggle="tab" href="#filled-dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#filled-rawdata">Raw Data</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active show" id="filled-dashboard">
+            <div id="summarystorage" class="row" style="margin-top:2%;">
+                <div class="col-12 card-statistics">
+                    <h4>
+                        STORAGE LOCATION
+                    </h4>
+                    <div id="SectionStockSummary" class="overlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="div_summary" data-bind="foreach: summary">
+                        <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                            <div class="card">
+                                <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                                    <div class="row">
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-center">
+                                                <p data-bind="text: dc_name"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="myhrline" />
+                                    <div class="row ">
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-center">
+                                                <b><p data-bind="text: formatCurrency(total_location)"></p></b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-center">
+                                                <p>Total Location</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 align-items-center">
+                                            <div class="d-flex justify-content-start">
+                                                <b><p data-bind="text: formatCurrency(used_location)">1000</p></b>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 align-items-center">
+                                            <div class="d-flex justify-content-end">
+                                                <b><p data-bind="text: formatCurrency(avaliable_location)">2000</p></b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 align-items-center">
+                                            <div class="d-flex justify-content-start">
+                                                <p style="text-align:left">Used</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 align-items-center">
+                                            <div class="d-flex justify-content-end">
+                                                <p style="text-align:right">Avaliable</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col align-items-center">
+
+                                            <div class="progress progress-lg">
+                                                <div class="progress-bar bg-info" role="progressbar" data-bind="attr: {'aria-valuenow': (total_location/used_location)*100,} , style: {width:(used_location/total_location)*100+'%'}"
+                                                     aria-valuemin="0" aria-valuemax="100"> <span data-bind="text: used_percent+'%'">2000</span></div>
+                                                <div class="progress-bar bg-danger" role="progressbar" data-bind="attr: {'aria-valuenow': 100-((total_location/used_location)*100),} ,style: {width:100-((used_location/total_location)*100)+'%'}"
+                                                     aria-valuemin="0" aria-valuemax="100"> <span data-bind="text: avaliable_percent+'%'">2000</span></div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer" style="padding-bottom: 2%; padding-top: 2%; padding-left: 5%; padding-right: 5%;background-color: rgba(68,84,106,1); color: white">
+                                    <div class="row">
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-center">
+                                                <p> Quantity in Stock (Pcs.)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col align-items-center">
+                                            <div class="d-flex justify-content-center">
+                                                <b><p data-bind="text: formatCurrency(qty)"></p></b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @{
+                await Html.RenderPartialAsync("_Common_WH_Criteria_04");
+            }
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">สรุปการใช้พื้นที่จัดเก็บ วันที่ <span id="StockByLocationTypeDate"></span></h4>
+                            <div class="row" id="StockByLocationType">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div id="SectionStockByLocationType" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center justify-content-between">
+                                            <h4 class="card-title" id="StockByLocationTypeText"></h4>
+                                            <div class="d-flex align-items-center">
+                                                <div class="wrapper">
+                                                    <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartStockByLocationType','Storage location by location type'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                        <div class="card-body" id="barChartStockByLocationTypeLayout">
+                                            <div id="barChartStockByLocationTypeContainer" class="chart-container">
+                                                <canvas id="barChartStockByLocationType"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            @*<h4 class="card-title"></h4>*@
+                            <div class="row" id="StockByCustomer">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div id="SectionStockByCustomerBarChart" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center justify-content-between">
+                                            <h4 class="card-title" id="StockByCustomerText"></h4>
+                                            <div class="d-flex align-items-center">
+                                                <div class="wrapper">
+                                                    <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartStockByCustomer','Stock Location By Customer(Location)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                        <div class="card-body" id="barChartStockByCustomerLayout">
+                                            <div id="barChartStockByCustomerContainer" class="chart-container">
+                                                <canvas id="barChartStockByCustomer"></canvas>
+                                            </div>
+                                            @*<div id="js-legend" class="chart-legend"></div>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div id="SectionStockByCustomerPieceBarChart" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center justify-content-between">
+                                            <h4 class="card-title" id="StockByCustomerPieceText"></h4>
+                                            <div class="d-flex align-items-center">
+                                                <div class="wrapper">
+                                                    <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartStockByCustomerPiece','Stock Location By Customer(Piece)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                        <div class="card-body" id="barChartStockByCustomerPieceLayout">
+                                            <div id="barChartStockByCustomerPieceContainer" class="chart-container">
+                                                <canvas id="barChartStockByCustomerPiece"></canvas>
+                                            </div>
+                                            @*<div id="js-legend" class="chart-legend"></div>*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Product Aging in Stock </h4>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div id="SectionProductAging" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center justify-content-between">
+                                            <h4 class="card-title" id="barChartProductAgingText"></h4>
+                                            <div class="d-flex align-items-center">
+                                                <div class="wrapper">
+                                                    <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartProductAging','Product Aging in Stock by Customer'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                        <div class="card-body" id="barChartProductAgingLayout">
+                                            <div id="barChartProductAgingContainer" class="chart-container">
+                                                <canvas id="barChartProductAging"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="filled-rawdata">
+            @{
+                await Html.RenderPartialAsync("_Common_WH_Criteria_Rawdata_04");
+            }
+            <div class="row" id="StockDetail">
+                <div class="col-12">
+                    <article class="card mb-4">
+                        <div class="card-body">
+                            <div id="SectionStockDetail" class="overlay">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="card-title" id="StockDetailText"></h4>
+                            <div>
+                                <div class="dataTables_wrapper">
+                                    <table id="dtList" class="table table-striped" style="width:100%"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal modal-default" id="modals-transaction">
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width: 80%;margin:auto">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    รายละเอียดการใช้พื้นที่จัดเก็บ ระหว่างวันที่ <span id="ModalTransactionDate"></span>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col">
+                        <div class="row" id="ReportModal">
+                            <div class="col-12">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">Close</button>
+                @*<button type="button" class="btn btn-primary" onclick="SaveStock()">Save</button>*@
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+    var model = {
+        summary: ko.observableArray([])
+    }
+
+    ko.applyBindings(model, document.getElementById("div_summary"));
+
+    $(document).ready(function () {
+
+        $('#dtPicker').datepicker({
+            format: "dd/mm/yyyy",
+            autoclose: true
+        });
+
+        var date = new Date();
+
+        $('#dtPicker').datepicker('setDate', date);
+        var getDate = $('#dtPicker').datepicker('getDate');
+
+        $('#dtPicker_Raw').datepicker({
+            format: "dd/mm/yyyy",
+            autoclose: true
+        });
+
+        $('#dtPicker_Raw').datepicker('setDate', date);
+        var getDate = $('#dtPicker_Raw').datepicker('getDate');
+
+    });
+    function GetSummary(request) {
+        $('#SectionStockSummary').show();
+
+        var jqxhr = $.post("/Warehouse/RPTCDC002_StockSummary")
+            .done(function (result) {
+                model.summary(result.data);
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#SectionStockSummary').hide();
+                //console.log( "finished" );
+            });
+    }
+    var formatCurrency = function (amount) {
+        if (!amount) {
+            return "0";
+        }
+        amount += '';
+        x = amount.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        }
+        return "" + x1 + x2;
+    }
+
+</script>

@@ -1,0 +1,222 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListUserMasterViewModel
+@{
+    ViewData["Title"] = "";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .ui-th-column, .ui-jqgrid .ui-jqgrid-htable th.ui-th-column {
+            border-right-width: 0.5px;
+            border-right-color: lightgray;
+            border-right-style: solid;
+            overflow: hidden;
+            text-align: center;
+            white-space: nowrap;
+            background: #1E90FF;
+        }
+
+        /* Set jqgrid auto resize to current web page */
+        .ui-jqgrid {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100% !important;
+        }
+
+            .ui-jqgrid > .ui-jqgrid-view {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                overflow: auto;
+                width: auto !important;
+            }
+
+                .ui-jqgrid > .ui-jqgrid-view,
+                .ui-jqgrid > .ui-jqgrid-view > .ui-jqgrid-bdiv {
+                    flex: 1;
+                    width: auto !important;
+                }
+
+                    .ui-jqgrid > .ui-jqgrid-pager,
+                    .ui-jqgrid > .ui-jqgrid-view > .ui-jqgrid-hdiv {
+                        flex: 0 0 auto;
+                        width: auto !important;
+                    }
+         /*enable scrollbar*/ 
+        .ui-jqgrid-bdiv {
+            overflow: auto
+        }
+
+        .ui-common-table {            
+            width: 100% !important;
+        }
+
+        .ui-jqgrid .ui-jqgrid-hbox {            
+            padding-right: 0px !important;
+        }
+        
+        #pager_left {
+            width: 40% !important;
+        }
+        #pager_center {
+            width: 0px !important;
+        }
+        #add_dxGridMainData, #edit_dxGridMainData, #del_dxGridMainData, #search_dxGridMainData {
+            width: 15px;
+        }
+        /*######### end #########*/
+
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.ajax({
+                url: "/User/GetDataPermission",
+                type: 'GET',
+                success: function (data) {                    
+                    $.each(data.permission, function (key, entry) {
+                        if (entry.fullControl_Flag == true) {
+                            GetMainData(true, true);
+                        }
+                        else {
+                            GetMainData(false, false);
+                        }
+                    })
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            })
+        });
+
+        function GetMainData(bEdit, bDelete) {
+            intTemplate = {
+                width: 20, template: "integer", editable: true
+            };
+            $("#dxGridMainData").jqGrid({
+                url: "/User/GetUserInfo",
+                datatype: 'json',
+                mtype: 'GET',
+                colNames: ["User ID", "Login ID", "Full Name", "Email", "User Group ID", "User Group", "Create Date", "Last Active Date"],
+                colModel: [
+                    { name: "user_Id", hidden: true },
+                    { name: "user_Code", index: "user_Code", align: "left", template: intTemplate, key: true, editable: true, editrules: { required: true }, search: true, searchoptions: { sopt: ['eq', 'cn'] } },
+                    { name: "user_Name", index: "user_Name", align: "left", template: intTemplate, editable: true, editrules: { required: true }, search: true, searchoptions: { sopt: ['eq', 'cn'] } },
+                    { name: "user_Email", align: "center", template: intTemplate, editable: true, search: false },
+                    { name: "userGroup_Id", hidden: true },
+                    { name: "userGroup_Name", align: "center", template: intTemplate, editable: true, search: false, edittype: 'select', editoptions: { value: getAllSelectOptions() } },
+                    { name: "create_DateTime", align: "center", template: intTemplate, editable: true, search: false, formatter: 'date', formatoptions: { srcformat: "ISO8601Long", newformat: "d/M/Y H:i:s" } },
+                    { name: "lastActive_DateTime", align: "center", template: intTemplate, editable: true, search: false, formatter: 'date', formatoptions: { srcformat: "ISO8601Long", newformat: "d/M/Y H:i:s" } }
+                ],
+                rowNum: 50,
+                height: "100%",
+                viewrecords: true,
+                caption: "User Info.",
+                emptyrecords: "No records",
+                pager: jQuery("#pager"),
+                jsonReader:
+                {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: false,
+                    Id: "0"
+                },
+                autowidth: true
+            }).navGrid('#pager',
+                {
+                    edit: bEdit,
+                    add: false,
+                    del: bDelete,
+                    search: true,
+                    refresh: true,
+                    closeAfterSearch: true
+                },
+                {
+                    // edit option
+                    zIndex: 0,
+                    beforeShowForm: function (formid) {
+                        $("#user_Id", formid).attr("disabled", "true");
+                        $("#user_Id", formid).attr('style', 'background-color: lightgrey;');
+                        $("#user_Code", formid).attr("disabled", "true");
+                        $("#user_Code", formid).attr('style', 'background-color: lightgrey;');
+                        $("#user_Name", formid).attr("disabled", "true");
+                        $("#user_Name", formid).attr('style', 'background-color: lightgrey;');
+                        $("#user_Email", formid).attr("disabled", "true");
+                        $("#user_Email", formid).attr('style', 'background-color: lightgrey;');
+                        $("#create_DateTime", formid).attr("disabled", "true");
+                        $("#create_DateTime", formid).attr('style', 'background-color: lightgrey;');
+                        $("#lastActive_DateTime", formid).attr("disabled", "true");
+                        $("#lastActive_DateTime", formid).attr('style', 'background-color: lightgrey;');
+
+                    },
+                    url: '/User/EditUser',
+                    closeOnEscape: true,
+                    closeAfterEdit: true,
+                    recreateForm: true,
+                    afterComplete: function (response) {
+                        if (response.responseText) {
+                            alert(response.responseText);
+                        }
+                    }
+                },
+                {},
+                {
+                    // delete option
+                    zIndex: 0,
+                    url: '/User/DeleteUser',
+                    closeOnEscape: true,
+                    closeAfterDelete: true,
+                    recreateForm: true,
+                    msg: 'Do you want to delete this user?',
+                    afterComplete: function (response) {
+                        if (response.responseText) {
+                            alert(response.responseText);
+                        }
+                    }
+                }
+            );
+        }
+        function getAllSelectOptions() {                  //same logic for 3rd dropdown list
+            var grp = $.ajax({ url: "/User/GetDataUserGroupForMap", async: false }).responseJSON;
+            var result = {};
+            for (var i = 0; i < grp.length; i++) {
+                result[grp[i].code] = grp[i].name;
+            }
+            return result;
+        }
+    </script>
+</head>
+<body>
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+    </section>
+    <!-- Main content -->
+    <section class="content container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="box box-primary" style="margin-top:-20px">
+                    <div class="box-body">
+                        <div class="text-left">
+                            <h2 class="display-2" style="margin-top:0">Manage User</h2>
+                        </div>
+                        <div class="box box-primary">
+                            <table id="dxGridMainData" style="font-size:12px;width: 100%;"></table>
+                            <div id="pager"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+    </section>
+</body>
+</html>

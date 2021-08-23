@@ -1,0 +1,729 @@
+﻿@model SCG.ARS.BOI.WEB.Configuration.SmtpSetting
+    <!-- Content Start -->
+<div class="content-wrapper">
+    <!-- Heading Start -->
+    <section class="heading">
+        <h4 class="mb-2">Email Scheduler</h4>
+        @*<div class="breadcrumb-container">
+                <div class="titles">
+                    <p>mapping database and template to send mail or line message configuration</p>
+                </div>
+            </div>*@
+    </section><!-- Heading End -->
+    <div class="row">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="dvOverlay" class="overlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="datatTableList">
+                        <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        <div id="dvPerformance"></div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6 col-sm-6 col-md-6">
+            <div id="dvSchemaOverlay" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6 col-sm-6 col-md-6">
+            <div id="dvFunctionOverlay" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal modal-default" id="modals-scheduler">
+    <div class="modal-dialog modal-lg">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    E-mail Scheduler
+                    <span class="font-weight-light">Information</span>
+                    <br>
+                    <small class="text-muted">scheduler for send e-mail</small>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="mail-compose-container" data-bind="foreach: scheduler">
+                    <div class="form-group">
+                        <div class="form-labels to">
+                            <label>To:</label>
+                            <input type="text" class="form-control" data-bind="attr: {value: email_to}" />
+                            <a href="javascript:void(0)" data-bind="event: { click: onClickTo }"><i class="mdi mdi-chevron-down md-18"></i></a>
+                        </div>
+                        <div class="form-labels" style="display:none">
+                            <label>cc:</label>
+                            <input type="text" class="form-control" data-bind="attr: {value: email_cc}" />
+                        </div>
+                        <div class="form-labels" style="display:none">
+                            <label>bcc:</label>
+                            <input type="text" class="form-control" data-bind="attr: {value: email_bcc}" />
+                        </div>
+                    </div>
+                    <div class="form-group from">
+                        <label>From:</label>
+                        <span>@Model.From</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Schedule:</label>
+                        <div class="form-inline">
+                            @*<div class="form-group col-md-2">
+                                    <label>Seconds(0-59)</label>
+                                    <input type="number" id="txt_second" value="0" min="0" max="59" class="form-control">
+                                </div>*@
+                            <div class="form-group col-md-3">
+                                <label>Minutes</label>
+                                <input type="number" id="txt_minute" value="0" min="0" max="59" class="form-control">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>Hours</label>
+                                <input type="number" id="txt_minute" value="0" min="0" max="23" class="form-control">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>Day Of Month</label>
+                                <input type="number" id="txt_minute" value="0" min="0" max="31" class="form-control">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>Month)</label>
+                                <input type="number" id="txt_minute" value="0" min="1" max="12" class="form-control">
+                            </div>
+                            @*<div class="form-inline col-md-2">
+                                    <label class="ml-1">Year(empty, 1970-2099)</label>
+                                    <input type="number" id="txt_minute" value="" min="1970" max="2099" class="form-control">
+                                </div>*@
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-inline">
+                            <label class="mr-2">Day of week</label>
+                            <div class="form-check">
+                                <label for="chk_dayOfWeek" class="form-check-label ml-4 custom-checkbox success-checkbox">
+                                    <input type="checkbox" id="chk_dayOfWeek" class="form-control">
+                                    Every Day
+                                    <i class="input-helper"></i>
+                                </label>
+                            </div>
+                            <div id="div_weekDays" class="list-inline" data-bind="foreach: weekDays">
+                                <fieldset class="form-group d-inline mr-1">
+                                    <div class="form-check">
+                                        <label class="custom-checkbox success-checkbox" data-bind="css: {$index}">
+                                            <input class="form-check-input" type="checkbox" data-bind="attr: {id: 'chkWeekdays_' + value, value: value}" name="chkWeekDays">
+                                            <!-- ko text: text --><!-- /ko -->
+                                            <i class="input-helper"></i>
+                                        </label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="form-inline">
+                            
+                        </div>
+                    </div>
+
+                    <div class="form-inline">
+                        <label>Attachment:</label>
+                        <select id="ddlFunction" class="form-control ml-2" data-bind="options: $parent.schemas,
+                                optionsText: 'schema_display',
+                                optionsValue: 'schema_name',
+                                event:{ change: onSelectSchema}">
+                        </select>
+                        @*<div id="div_schema" class="ml-2" data-bind="foreach: {data: $parent.schemas}">
+                                <fieldset class="form-group d-inline mr-3">
+                                    <div class="form-check">
+                                        <label class="custom-radio primary-radio" data-bind="css: {$index}">
+                                            <input class="form-check-input" type="radio" data-bind="attr: {id: 'chk_' + schema_name, value: schema_name}, event: { change: onSelectSchema }" name="chkLocation">
+
+                                            <i class="input-helper"></i>
+                                        </label>
+                                    </div>
+                                </fieldset>
+                            </div>*@
+                    </div>
+                    <div class="form-group">
+                        <div id="dvFunctionOverlay" class="overlay">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <label id="lblTemplate">Template:</label>
+                        <div id="list_functions" class="list-inline" data-bind="foreach: $parent.functions">
+                            <fieldset class="form-group d-inline mr-1">
+                                <div class="form-check">
+                                    <label class="custom-checkbox warning-checkbox" data-bind="css: {$index}">
+                                        <input class="form-check-input" type="checkbox" data-bind="attr: {id: 'chkfunction_' + function_name, value: function_name}" name="chkFunction">
+                                        <!-- ko text: report_desc --><!-- /ko -->
+                                        <i class="input-helper"></i>
+                                    </label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="compose-body">
+                        <div class="form-labels subject mb-5">
+                            <input type="text" class="form-control" placeholder="Subject" data-bind="attr: {value: email_subject}" />
+                        </div>
+                        <div class="form-group no-border-b">
+                            @*<div class="summernote" data-bind="attr: {html: email_body}">
+                                    Type your mail here
+                                </div>*@
+                            @*<textarea id="bs-markdown" class="form-control" rows="10" data-bind="value: email_body"></textarea>*@
+                            <textarea id="editor" class="form-control" rows="10" data-bind="value: email_body"></textarea>
+                        </div>
+                        @*<div class="btns-holder">
+                                <button class="btn btn-success mr-2">Save</button>
+                                <button class="btn btn-secondary">Cancel</button>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="SaveEmailScheduler()">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var table = null;
+    var data = null;
+    var date = new Date();
+    var columnDefs = [];
+    var columns = [
+        { "data": "email_scheduler_name", "name": "email_scheduler_name", "title": "Name", "autoWidth": false, "width": "250px" },
+        //{
+        //    "data": "logged", "name": "logged", "title": "Logged", "autoWidth": true,
+        //    "render": function (data, type, row, meta) {
+        //        return moment(new Date(data)).format("DD/MM/YYYY hh:mm:ss");
+        //    }
+        //},
+        { "data": "email_scheduler_staus_name", "name": "email_scheduler_staus_name", "title": "Status", "autoWidth": true, "orderable": false },
+        { "data": "email_cron_expression", "name": "email_cron_expression", "title": "Schedule", "autoWidth": true, "orderable": false },
+        { "data": "email_subject", "name": "email_subject", "title": "Subject", "autoWidth": false, "width": "200px", "orderable": false },
+        { "data": "email_to", "name": "email_to", "title": "To", "autoWidth": false, "width": "60px", "orderable": false },
+        {
+            "data": null, "name": "", "autoWidth": false, "width": 20, "orderable": false,
+            "render": function (data, type, row, meta) {
+                return '<a href="javascript:void(0)" class="mr-2"><i class="icon-note md-18" data-toggle="modal" data-target="#modals-scheduler" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>\
+<a href="javascript:DeleteScheduler(event);" class="mr-2"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>\
+<a href="javascript:RunScheduler(event);"><i class="icon-control-play" data-toggle="tooltip" data-placement="top" title="Run"></i></a>';
+            }
+        }
+    ];
+
+    var cronArray = [{ seconds: "0", minutes: "", hours: "", days: "", months: "", weekDays: "" }];
+
+    var minutes = [
+        { value: 5, text: "5:00" },
+        { value: 10, text: "10:00" },
+        { value: 15, text: "15:00" },
+        { value: 20, text: "20:00" },
+        { value: 25, text: "25:00" },
+        { value: 30, text: "30:00" }
+    ];
+
+    var everyMinutes = [
+        { value: 1, text: "1 minute" },
+        { value: 2, text: "2 minutes" },
+        { value: 3, text: "3 minutes" },
+        { value: 4, text: "4 minutes" },
+        { value: 5, text: "5 minutes" },
+        { value: 6, text: "6 minutes" },
+        { value: 7, text: "7 minutes" },
+        { value: 8, text: "8 minutes" },
+        { value: 9, text: "9 minutes" },
+        { value: 10, text: "10 minutes" },
+        { value: 11, text: "11 minutes" },
+        { value: 12, text: "12 minutes" },
+        { value: 13, text: "13 minutes" },
+        { value: 14, text: "14 minutes" },
+        { value: 15, text: "15 minutes" },
+        { value: 16, text: "16 minutes" },
+        { value: 17, text: "17 minutes" },
+        { value: 18, text: "18 minutes" },
+        { value: 19, text: "19 minutes" },
+        { value: 20, text: "20 minutes" },
+        { value: 21, text: "21 minutes" },
+        { value: 22, text: "22 minutes" },
+        { value: 23, text: "23 minutes" },
+        { value: 24, text: "24 minutes" },
+        { value: 25, text: "25 minutes" },
+        { value: 26, text: "26 minutes" },
+        { value: 27, text: "27 minutes" },
+        { value: 28, text: "28 minutes" },
+        { value: 29, text: "29 minutes" },
+        { value: 30, text: "30 minutes" }
+    ];
+
+    var hours = [
+        { value: 1, text: "1:00:00" },
+        { value: 2, text: "2:00:00" },
+        { value: 3, text: "3:00:00" },
+        { value: 4, text: "4:00:00" },
+        { value: 5, text: "5:00:00" },
+        { value: 6, text: "6:00:00" },
+        { value: 7, text: "7:00:00" },
+        { value: 8, text: "8:00:00" },
+        { value: 9, text: "9:00:00" },
+        { value: 10, text: "10:00:00" },
+        { value: 11, text: "11:00:00" },
+        { value: 12, text: "12:00:00" },
+        { value: 13, text: "13:00:00" },
+        { value: 14, text: "14:00:00" },
+        { value: 15, text: "15:00:00" },
+        { value: 16, text: "16:00:00" },
+        { value: 17, text: "17:00:00" },
+        { value: 18, text: "18:00:00" },
+        { value: 19, text: "19:00:00" },
+        { value: 20, text: "20:00:00" },
+        { value: 21, text: "21:00:00" },
+        { value: 22, text: "22:00:00" },
+        { value: 23, text: "23:00:00" }
+    ];
+
+    var everyHours = [
+        { value: 1, text: "1 hour" },
+        { value: 2, text: "2 hours" },
+        { value: 3, text: "3 hours" },
+        { value: 4, text: "4 hours" },
+        { value: 5, text: "5 hours" },
+        { value: 6, text: "6 hours" },
+        { value: 7, text: "7 hours" },
+        { value: 8, text: "8 hours" },
+        { value: 9, text: "9 hours" },
+        { value: 10, text: "10 hours" },
+        { value: 11, text: "11 hours" },
+        { value: 12, text: "12 hours" },
+        { value: 13, text: "13 hours" },
+        { value: 14, text: "14 hours" },
+        { value: 15, text: "15 hours" },
+        { value: 16, text: "16 hours" },
+        { value: 17, text: "17 hours" },
+        { value: 18, text: "18 hours" },
+        { value: 19, text: "19 hours" },
+        { value: 20, text: "20 hours" },
+        { value: 21, text: "21 hours" },
+        { value: 22, text: "22 hours" },
+        { value: 23, text: "23 hours" },
+        { value: 24, text: "24 hours" }
+    ];
+
+    var days = [
+        { value: "*", text: "Every Days" },
+        { value: "1", text: "Day 1" },
+        { value: "2", text: "Day 2" },
+        { value: "3", text: "Day 3" },
+        { value: "4", text: "Day 4" },
+        { value: "5", text: "Day 5" },
+        { value: "6", text: "Day 6" },
+        { value: "7", text: "Day 7" },
+        { value: "8", text: "Day 8" },
+        { value: "9", text: "Day 9" },
+        { value: "10", text: "Day 10" },
+        { value: "11", text: "Day 11" },
+        { value: "12", text: "Day 12" },
+        { value: "13", text: "Day 13" },
+        { value: "14", text: "Day 14" },
+        { value: "15", text: "Day 15" },
+        { value: "16", text: "Day 16" },
+        { value: "17", text: "Day 17" },
+        { value: "18", text: "Day 18" },
+        { value: "19", text: "Day 19" },
+        { value: "20", text: "Day 20" },
+        { value: "21", text: "Day 21" },
+        { value: "22", text: "Day 22" },
+        { value: "23", text: "Day 23" },
+        { value: "24", text: "Day 24" },
+        { value: "25", text: "Day 25" },
+        { value: "26", text: "Day 26" },
+        { value: "27", text: "Day 27" },
+        { value: "28", text: "Day 28" },
+        { value: "29", text: "Day 29" },
+        { value: "30", text: "Day 30" },
+        { value: "31", text: "Day 31" }
+    ]
+
+    var months = [
+        { value: 1, text: "January" },
+        { value: 2, text: "February" },
+        { value: 3, text: "March" },
+        { value: 4, text: "April" },
+        { value: 5, text: "May" },
+        { value: 6, text: "June" },
+        { value: 7, text: "July" },
+        { value: 8, text: "August" },
+        { value: 9, text: "September" },
+        { value: 10, text: "October" },
+        { value: 11, text: "November" },
+        { value: 12, text: "December" }
+    ];
+
+    var weekDays = [
+        { value: 0, text: "Sunday" },
+        { value: 1, text: "Monday" },
+        { value: 2, text: "Tuesday" },
+        { value: 3, text: "Wednesday" },
+        { value: 4, text: "Thursday" },
+        { value: 5, text: "Friday" },
+        { value: 6, text: "Saturday" }
+    ];
+
+    var model = {
+        schedulers: ko.observableArray([]),
+        scheduler: ko.observableArray([]),
+        minutes: ko.observableArray(months),
+        hours: ko.observableArray(hours),
+        days: ko.observableArray(days),
+        months: ko.observableArray(months),
+        weekDays: ko.observableArray(weekDays),
+        cron: ko.observable(),
+        cronArray: ko.observableArray(cronArray),
+        targets: ko.observableArray([]),
+        schemas: ko.observableArray([]),
+        functions: ko.observableArray([]),
+        selectSchema: ko.observable(),
+        selectFunction: ko.observable()
+    }
+
+    ko.applyBindings(model);
+
+    function DeleteScheduler(event) {
+
+    }
+
+    function RunScheduler(event) {
+
+    }
+
+    var onSelectScheduler = function (item, event) {
+        //console.log("Selected Scheduler.");
+
+        $('#dvSchemaOverlay').show();
+        var jqxhr = $.post("/EmailScheduler/LoadSchemas")
+            .done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    model.schemas(result.data);
+                    //new Quill('#editor', {
+                    //    modules: { toolbar: toolbarOptions },
+                    //    placeholder: 'Type something',
+                    //    theme: 'snow'
+                    //});
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvSchemaOverlay').hide();
+                //console.log( "finished" );
+            });
+    }
+
+    function SaveEmailScheduler() {
+        $('#dvSchedulerOverlay').show();
+        var data = model.scheduler();
+        console.log(data);
+        var jqxhr = $.post("/EmailScheduler/SaveEmailScheduler", data)
+            .done(function (result) {
+                if (result.status) {
+                    if (data.email_scheduler_id == null) {
+                        table.row.add(result.data);
+                    }
+                    else {
+                        var index = table.row('.selected').index();
+                        console.log(index);
+                        $('#dtList').dataTable().fnUpdate(result.data, index, undefined, false);
+                    }
+
+                    toastr["success"]("Save data successful.");
+                    $('#modals-scheduler').modal('hide');
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvSchedulerOverlay').hide();
+                //console.log( "finished" );
+            });
+    }
+
+    var onSelectSchema = function (item, event) {
+        $('#dvFunctionOverlay').show();
+        //console.log(item);
+        console.log(event.currentTarget.value);
+
+        request = {
+            //schema: item.schema_name
+            schema: event.currentTarget.value
+        };
+
+        var jqxhr = $.post("/EmailScheduler/LoadTemplateReportMapping", request)
+            .done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    if (result.data != null && result.data.length > 0)
+                        $("#lblTemplate").show();
+                    else
+                        $("#lblTemplate").hide();
+                    model.functions(result.data);
+                } else {
+                    $("#lblTemplate").hide();
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvFunctionOverlay').hide();
+                //console.log( "finished" );
+            });
+
+        //console.log(self.functions);
+    }
+
+    var onClickRun = function (item, event) {
+        $('#dvSchemaOverlay').show();
+        console.log(item);
+        console.log(event);
+
+        request = item;
+
+        var jqxhr = $.post("/EmailScheduler/Run", request)
+            .done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    toastr["success"]("Run success");
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvSchemaOverlay').hide();
+                //console.log( "finished" );
+            });
+    }
+
+    var onClickPause = function (item, event) {
+        $('#dvSchemaOverlay').show();
+        console.log(item);
+        console.log(event);
+
+        request = item;
+
+        var jqxhr = $.post("/EmailScheduler/Pause", request)
+            .done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    toastr["success"]("Pause success");
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvSchemaOverlay').hide();
+                //console.log( "finished" );
+            });
+    }
+
+    var onClickTo = function (data, event) {
+        //console.log(data);
+        //console.log(event);
+        $(event.currentTarget).children().toggleClass('mdi-chevron-down').toggleClass("mdi-chevron-up");
+        $(event.currentTarget).parent().siblings().slideToggle();
+    }
+
+    $(document).ready(function () {
+        $('#dvSchedulerOverlay').show();
+        var jqxhr = $.post("/EmailScheduler/LoadEmailScheduler")
+            .done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    model.schedulers(result.data);
+                    console.log(model.schedulers);
+                    if (table == null) {
+                        //console.log(result);
+                        table = $('#dtList').DataTable({
+                            dom: 'Bfrtip',
+                            buttons: [
+                                {
+                                    id: 'btnAddScheduler',
+                                    text: 'Add',
+                                    className: 'btn btn-primary',
+                                    action: function (e, dt, node, config) {
+                                        model.scheduler({
+                                            email_scheduler_id: null,
+                                            email_scheduler_name: "",
+                                            email_scheduler_status_id: null,
+                                            email_scheduler_staus_name: "",
+                                            email_cron_expression: "",
+                                            email_time_zone_id: "",
+                                            email_from: "",
+                                            email_to: "",
+                                            email_cc: "",
+                                            email_bcc: "",
+                                            email_subject: "",
+                                            email_body: ""
+                                        });
+                                        //$("#ddlSource").val("");
+
+                                        $("#modals-scheduler").modal({
+                                            backdrop: 'static',
+                                            keyboard: false
+                                        });
+                                        //).on('click', '#btnSaveReportMapping', function (e) {
+                                        //    var data = reportModel.reports();
+                                        //    console.log(data);
+                                        //    SaveReportMapping(data);
+                                        //});
+
+
+                                    }
+                                }],
+                            "columnDefs": columnDefs,
+                            "columns": columns,
+                            "data": result.data,
+                            //scrollX: true,
+                            //scrollY: true,
+                            //ordering: false,
+                            responsive: true,
+                            fixHeader: true,
+                            "scrollX": true,
+                            "filter": true, // this is for disable filter (search box)
+                            "orderMulti": false, // for disable multiple column at once
+                            "pageLength": 25,
+                            "bLengthChange": false,
+                            "bResetDisplay": false,
+                            "bSort": true,
+                        });
+                    }
+                    else {
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            //console.log(result.data);
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+
+                    $('#dtList tbody').on('click', 'tr', function (e) {
+                        //var data = table.row(this).data();
+                        //model.scheduler(data);
+                        //onSelectScheduler(data, e);
+                        table.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                    });
+
+                    $('#dtList tbody tr a').on('click', 'i.icon-note', function (e) {
+                        var data = table.row($(this).parents('tr')).data();
+                        model.scheduler(data);
+                        onSelectScheduler(data, e);
+                    });
+
+                    $('#dtList tbody tr').on('click', 'i.icon-control-play', function (e) {
+                        var data = table.row($(this).parents('tr')).data();
+                        console.log("i.icon-control-play");
+                        console.log(data);
+                        onClickRun(data, e);
+                        $(this).toggleClass('selected');
+                    });
+
+                    //$('#dtList tbody tr').on('click', 'i.icon-control-pause', function (e) {
+                    //    var data = table.row($(this).parents('tr')).data();
+                    //    console.log("i.icon-control-pause");
+                    //    console.log(data);
+                    //    onClickPause(data, e);
+                    //    $(this).toggleClass('selected');
+                    //});
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvSchedulerOverlay').hide();
+                //console.log( "finished" );
+            });
+
+        $("#lblTemplate").hide();
+
+        //$('.summernote').summernote({
+        //    disableResizeEditor: true
+        //});
+    });
+
+    //function clickItem(item) {
+    //    $(item).addClass('active').siblings().removeClass('active');
+    //}
+
+    var toolbarOptions = [
+        [{ 'font': [] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'script': 'sub' }, { 'script': 'super' }],      // toggled buttons
+
+        [{ 'header': 1 }, { 'header': 2 }],
+        ['blockquote', 'code-block'],              // custom button values
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        // superscript/subscript
+        [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+        [{ 'direction': 'rtl' }],
+        [{ 'align': [] }],           // text direction
+        ['link', 'image', 'video'],
+        ['clean']                                         // remove formatting button
+    ];
+
+
+
+</script>

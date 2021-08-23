@@ -1,0 +1,206 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div id="CriteriaOveray" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+                <div class="form-row">
+                    <div class="form-group col-lg-3">
+                        <label for="cboBusiness">Business</label>
+                        @Html.DropDownListFor(m => m.Business, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboBusiness", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label for="cboMatfrg">Matfrg</label>
+                        @Html.DropDownListFor(m => m.Matfrg, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboMatfrg", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label for="cboFleet">Fleet</label>
+                        @Html.DropDownListFor(m => m.Fleet, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboFleet", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                        <label for="cboShippingPoint">Shipping Point</label>
+                        @Html.DropDownListFor(m => m.Shipping_Point, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboShippingPoint", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                </div>
+                <div class="form-row" style="display:none;">
+                    <div class="form-group col-lg-3" id="sectionwarehouse">
+                        @*<label for="cboWarehouse">Warehouse</label>*@
+                        <div class="col-sm-12">
+                            @Html.DropDownList("warehouse", new List<SelectListItem>
+                            {
+                                new SelectListItem{ Text="CDC", Value = "CDC" },
+                                new SelectListItem{ Text="ESC", Value = "ESC" }
+                            }
+                            , new { @class = "form-control", @id = "cboWarehouse", @style = "display: none" })
+                        </div>
+                    </div>
+                    @*<div class="form-group col-lg-3" id="sectioncustomer">
+                        <label for="cboCustomer">Customers</label>
+                        <div class="col-sm-12">
+                            @Html.DropDownListFor(m => m.Customer, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboCustomer", multiple = "multiple", @style = "width: 100%" })
+                        </div>
+                    </div>*@
+                </div>
+                <div class="form-row">
+
+                    <div class="form-group col-lg-3">
+                        <label for="cboShiptoRegion">Shipto Region</label>
+                        @Html.DropDownListFor(m => m.Shipto_Region, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboShiptoRegion", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label for="cboCustomer">Customer</label>
+                        @Html.DropDownListFor(m => m.CustomerTransport, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboCustomer", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label for="cboTruckType">Truck Type</label>
+                        @Html.DropDownListFor(m => m.Truck_Type, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboTruckType", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label for="cboOrderType">Order Type</label>
+                        @Html.DropDownListFor(m => m.Order_Type, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboOrderType", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-lg-3">
+                        <label for="cboPlannerName">Planner Name</label>
+                        @Html.DropDownListFor(m => m.Planner_Name, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboPlannerName", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <div class="row pt-2">
+                            <div class="col-5">
+                                <div id="search-button">
+                                </div>
+                            </div>
+
+                            <div class="col-5 pt-4">
+                                <button type="button" class="btn btn-warning btn-block" onclick="clearCriteria()">Clear</button>
+                            </div>
+                            <div class="col-5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row d-flex align-items-center">
+                    @* <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="daterange-4">Date</label>
+                                <div class="col-sm-12">
+                                    <button id="daterange-99" style="width:100%" class="btn btn-default dropdown-toggle md-btn-flat"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboBusiness">Business</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Business, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboBusiness" , @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboFleet">Fleet</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Fleet, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboFleet", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboShippingPoint">Shipping Point</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Shipping_Point, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboShippingPoint", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center" id="sectionwarehouse">
+                            <div class="form-group row"> *@
+                    @*<label for="cboWarehouse">Warehouse</label>*@
+                    @* <div class="col-sm-12">
+                                    @Html.DropDownList("warehouse", new List<SelectListItem>
+                                    {
+                                        new SelectListItem{ Text="CDC", Value = "CDC" },
+                                        new SelectListItem{ Text="ESC", Value = "ESC" }
+                                    }
+                                    , new { @class = "form-control", @id = "cboWarehouse", @style = "display: none" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center" id="sectioncustomer">
+                            <div class="form-group row">
+                                <label for="cboCustomer">Customers</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Customer, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboCustomer", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div> *@
+                </div>
+
+
+                @* <div class="row d-flex align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboShiptoRegion">Shipto Region</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Shipto_Region, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboShiptoRegion", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboMatfrg">Matfrg</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Matfrg, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboMatfrg", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboOrderType">Order Type</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Order_Type, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboOrderType", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboTruckType">Truck Type</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Truck_Type, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboTruckType", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="cboPlannerName">Planner Name</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Planner_Name, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboPlannerName", @style = "width: 100%" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="wrapper">
+                                <button class="btn btn-primary submit-btn with-arrow rounded-border mr-2 mb-4" onclick="Search();">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div> *@
+
+
+            </div>
+        </div>
+    </div>
+</div>

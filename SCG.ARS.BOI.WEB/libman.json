@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "knockout@3.5.1",
+      "destination": "wwwroot/lib/knockout",
+      "files": ["knockout.min.js"]
+    },
+    {
+      "library": "multiselect@2.2.9",
+      "destination": "wwwroot/lib/multiselect",
+      "files": [
+        "js/multiselect.min.js"
+      ]
+    },
+    {
+      "library": "toastr.js@2.1.4",
+      "destination": "wwwroot/lib/toastr.js",
+      "files" : [
+        "toastr.css",
+        "toastr.min.js"
+      ]
+    }
+  ]
+}

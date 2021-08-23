@@ -1,0 +1,3525 @@
+﻿@{
+    ViewBag.Title = "Networking";
+    Layout = "_NetworkingLayout";
+}
+@section Styles {
+    <style>
+        .back-to-summary {
+            cursor: pointer;
+            color: white;
+        }
+
+        .dropdown-width {
+            width: 100%;
+        }
+
+        .header-total {
+            font-weight: bold;
+            text-align: right;
+            color: white;
+            font-size: 130% !important;
+        }
+
+        .summary-text {
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12pt;
+            display: inline-block;
+        }
+
+        .summary-cnt {
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 20pt;
+            display: inline-block;
+        }
+
+        .summary-unit {
+            display: none !important;
+            font-weight: bold;
+            display: inline-block;
+            padding-left: 5px;
+        }
+
+        .sticky {
+            position: fixed;
+            top: 0;
+        }
+
+        .custom-table-header {
+            position: absolute;
+            color: white;
+        }
+
+        .swap-map {
+            margin-top: 40px;
+            display: none;
+        }
+        /*.sum-group-panel {
+            height: 200px;
+            overflow: hidden;
+        }*/
+    </style>
+}
+
+@section OverrideStyles {
+    <style>
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable tbody td {
+                padding: 5px 5px !important;
+            }
+
+        .card-padding-remove {
+            padding-bottom: 0px !important;
+        }
+
+        .dt-body-right {
+            text-align: right;
+        }
+
+        .card {
+            width: 99%;
+        }
+
+        .card .card-body {
+            padding: 0.6rem 0.6rem;
+        }
+
+        .dataTables_wrapper .dataTable thead th, .dataTables_wrapper .dataTable thead td {
+            padding: 5px 5px;
+        }
+
+        .dataTables_wrapper .dataTable thead .sorting_desc, .dataTables_wrapper .dataTable thead .sorting {
+            padding-right: 30px;
+        }
+
+        .command-icon {
+            color: rgb(30, 34, 42);
+        }
+
+        .command-icon:hover {
+            color: #4F5779;
+        }
+
+        .command-icon:focus {
+            box-shadow: 0 0 0 0.2rem rgba(79, 87, 121, 0.4);
+        }
+
+
+        .default-table-text-color {
+            color: rgb(208, 206, 206);
+            font-size: 110%;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border: solid white 1px;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border: solid white 1px;
+        }
+
+        .select2 .select2-selection__rendered {
+            color: rgb(208, 206, 206) !important;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 36px;
+        }
+
+        .select2-container .select2-search--inline .select2-search__field {
+            color: white;
+        }
+
+        .table th, .table td {
+            border-color: rgba(51, 63, 80, 0.7);
+        }
+        .table thead th {
+            border-color: rgba(51, 63, 80, 0.7);
+        }
+        .select2-container {
+            width: 100% !important;
+        }
+        .search-button {
+            padding: 0.7rem 10px;
+        }
+        .dropdown-toggle {
+            padding: 0.7rem 5px;
+        }
+        .clear-button {
+            padding: 0.7rem 10px;
+        }
+
+        .info-window-map {
+            color: black;
+        }
+
+        .btn-group .btn-primary {
+            background: #4F5779;
+            border-color: #4F5779;
+        }
+        .btn-primary {
+            background: #4F5779;
+            border-color: #4F5779;
+        }
+        .btn-primary:hover {
+            background: #4F5779;
+            border-color: #4F5779;
+        }
+        .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active, .show > .btn-primary.dropdown-toggle {
+            color: #fff;
+            background-color: #4F5779;
+            border-color: #4F5779;
+        }
+
+        .btn-primary:hover, .btn-primary:focus, .btn-primary a:visited, .btn-primary.active, .btn-primary:active {
+            background: #4F5779;
+            border-color: #4F5779;
+            color: #ffffff;
+        }
+
+        .btn-primary:focus, .btn-primary.focus {
+            box-shadow: 0 0 0 0.2rem rgba(79, 87, 121, 0.4);
+        }
+
+        .btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus, .show > .btn-primary.dropdown-toggle:focus {
+            box-shadow: 0 0 0 0.2rem rgba(79, 87, 121, 0.4);
+        }
+    </style>
+    <style media="screen and (min-width:1024px)">
+        .modal-dialog {
+            max-width: 800px;
+            margin: 1.75rem auto;
+        }
+    </style>
+    <style media="screen and (min-width:1200px)">
+        .modal-dialog {
+            max-width: 1000px;
+            margin: 1.75rem auto;
+        }
+    </style>
+}
+@section Scripts{
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCybIuBGhS6SP1fLAF6nfKkeEiOUOC43-s&callback=initMap&libraries=geometry&v=weekly" defer></script>
+    @*<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApV-xCfdUibNBUzac3JDxMYBWqj6ddo74&callback=initMap&libraries=geometry&v=weekly" defer></script>*@
+    <script src="~/assets/js/networking-data.js"></script>
+    <script type="text/javascript">
+        var colorList = ['#f8c82d', '#ff6f6f', '#0dccc0', '#3498db', '#27ae60', '#b23f73', '#0000ee', '#ff00aa', '#f0afff']
+        var mapListener = null;
+        var screenID = 'Networking';
+        var map;
+        var infowindow = null, currentMarker = null;
+        var loadTimer = null;
+        var allCarMarker = new Map();
+        var allShippingPointMarker = new Map();
+        var groupColor = new Map();
+        var allCircle = [];
+        var firstLoad = true;
+        var all_data;
+        var leftMenuOffset;
+        var currentAjax = null;
+        var maxDistanceByShippingPoint = new Map();
+        var ignoreBoundChange = false;
+        var timerForDblClickCheck = null;
+
+        ///
+        var swapMap;
+        var provinceInfoWindow = null;
+        var allMarker = new Map();
+        var level = 1; //1: show region, 2: show zone, 3: show province
+        var pvLvl = 1;
+        var selectedRegionCode = null;
+        var selectedZoneCode = null;
+        var hoverRegionCode = null;
+        var hoverZoneCode = null;
+        var hoverProvince = null;
+        var currentAjax = null;
+        var textColor = 'black';
+        var labelFontSize = '12px';
+        var summaryMarker = [];
+
+        var doChange = false;
+        var fixProvince = null;
+        var filterFunctionAfterLoadComplete = null;
+
+        var bolSetCenter = false;
+        var searchCriteria;
+
+        var detail_columns = [
+            { "data": "carrierName", "name": "action", "title": "", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: false },
+            { "data": "carrierName", "name": "carrierName", "title": "ผรม.", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "fleetName", "name": "fleet", "title": "ชื่อ Fleet", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "status", "name": "status", "title": "สถานะรถ", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true, "render": renderStatus },
+            { "data": "truckTypeName", "name": "truckType", "title": "ประเภทรถ", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "fuelTypeName", "name": "fuelType", "title": "เชื้อเพลิง", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "regionName", "name": "region", "title": "ภาค", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "zoneName", "name": "zone", "title": "โซนจังหวัด", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "province", "name": "province", "title": "จังหวัด", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "licensePlate", "name": "licensePlate", "title": "ทะเบียนรถ", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "driverName", "name": "driverName", "title": "ชื่อผขร.", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "mobileNo", "name": "mobileNo", "title": "เบอร์ติดต่อ", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "locate", "name": "locate", "title": "ตำแหน่งล่าสุด", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "loadID", "name": "loadID", "title": "Load ID", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: true },
+            { "data": "carrierName", "name": "locate", "title": "  ", "autoWidth": true, "className": "text-nowrap default-table-text-color", orderable: false },
+        ];
+        var sum_columns = [
+            { "data": "truckTypeName", "name": "truckType", "title": "ประเภทรถ", "autoWidth": true, "className": "text-nowrap default-table-text-color" },
+            { "data": "lightCount", "name": "lightCount", "title": "เบา", "autoWidth": true, "className": "text-nowrap dt-body-right default-table-text-color" },//, "render": renderLightAndInactive },
+            { "data": "inactiveCount", "name": "inactiveCount", "title": "ปิด", "autoWidth": true, "className": "text-nowrap dt-body-right default-table-text-color", visible: false },//, "render": renderLightAndInactive },
+            { "data": "heavyCount", "name": "heavyCount", "title": "หนัก", "autoWidth": true, "className": "text-nowrap dt-body-right default-table-text-color" },
+        ];
+        var nearby_columns = [
+            { "data": "locationName", "name": "locationName", "title": "Shipping Point", "autoWidth": true, "className": "text-nowrap default-table-text-color" },
+            { "data": "shippingPointGroup", "name": "shippingPointGroup", "title": "Group", "autoWidth": true, "className": "text-nowrap dt-body-right default-table-text-color" },
+            { "data": "distanceInKiloMeter", "name": "distanceInKiloMeter", "title": "Distance (km)", "autoWidth": true, "className": "text-nowrap dt-body-right default-table-text-color", "render": uiHelpers.renderN2 },
+        ];
+
+        function swapMap_leftclick(event) {
+            if (timerForDblClickCheck != null)
+                clearTimeout(timerForDblClickCheck);
+
+            timerForDblClickCheck = setTimeout(function () {
+                timerForDblClickCheck = null;
+                if (provinceInfoWindow != null) {
+                    provinceInfoWindow.close();
+                }
+                pvLvl = level;
+                if (level < 3) {
+                    //summaryMarker.forEach((rec, idx, array) => {
+                    //    rec.setMap(null);
+                    //});
+                    //summaryMarker = [];
+                    //if (currentAjax != null) {
+                    //    currentAjax.abort();
+                    //    currentAjax = null;
+                    //}
+
+                    var regionCode = event.feature.getProperty("regionCode");
+                    var zoneCode = event.feature.getProperty("zoneCode");
+                    if (level == 3) {
+                        if (regionCode != selectedRegionCode || zoneCode != selectedZoneCode) {
+                            return;
+                        }
+                    }
+                    else if (level == 2) {
+                        if (regionCode != selectedRegionCode) {
+                            return;
+                        }
+                    }
+                    else if (zoneCode == null || zoneCode == '') {
+                        //skip zone
+                        level++;
+                    }
+                    level++;
+
+                    summaryMarker.forEach((rec, idx, array) => {
+                        rec.setMap(null);
+                    });
+                    summaryMarker = [];
+
+                    setRegionAndZone(event);
+
+                    LoadMapBound();
+
+                    if (searchCriteria != null) {
+                        searchCriteria.zoneCode = zoneCode;
+                        searchCriteria.regionCode = [regionCode];
+                    }
+                    search(false);
+                    //setZoomAndCenter(event);
+                }
+            }, 500);
+        }
+
+        function swapMap_rightclick(event) {
+            if (provinceInfoWindow != null) {
+                provinceInfoWindow.close();
+            }
+            pvLvl = level;
+            if (level > 1) {
+                summaryMarker.forEach((rec, idx, array) => {
+                    rec.setMap(null);
+                });
+                summaryMarker = [];
+                if (currentAjax != null) {
+                    currentAjax.abort();
+                    currentAjax = null;
+                }
+
+                if (level == 3 && (selectedZoneCode == null || selectedZoneCode == '')) {
+                    //skip zone
+                    level--;
+                }
+                level--;
+
+                summaryMarker.forEach((rec, idx, array) => {
+                    rec.setMap(null);
+                });
+                summaryMarker = [];
+
+                resetRegionAndZone(event);
+                LoadMapBound();
+
+                if (searchCriteria != null) {
+                    searchCriteria.zoneCode = zoneCode;
+                    searchCriteria.regionCode = [regionCode];
+                }
+                search(false);
+                //setZoomAndCenter(event);
+            }
+        }
+
+        function setZoomAndCenter(event) {
+            var regionCode;
+            if (event == null || event.feature == null)
+                regionCode = event;
+            else
+                regionCode = event.feature.getProperty('regionCode');
+            if (level > 1) {
+                //map.setCenter(event.latLng);
+                if (regionCode == 'M1') {
+                    swapMap.setCenter({ lat: 13.831798506555229, lng: 100.56616486428574 });
+                    swapMap.setZoom(10);
+                }
+                else {
+                    swapMap.setZoom(7);
+                    if (regionCode == 'M2') {
+                        swapMap.setCenter({ lat: 13.968422038267331, lng: 101.53460978908733 });
+                    }
+                    else if (regionCode == 'M3')
+                        swapMap.setCenter({ lat: 17.75037922097063, lng: 99.60101603908733 });
+                    else if (regionCode == 'M4')
+                        swapMap.setCenter({ lat: 16.246091737950817, lng: 103.14300782425597 });
+                    else if (regionCode == 'M5')
+                        swapMap.setCenter({ lat: 8.3226267007634, lng: 99.42523478908733 });
+                    else if (regionCode == 'M6')
+                        swapMap.setCenter({ lat: 13.691058550091423, lng: 99.66693400783733 });
+                }
+                //if (level == 2)
+                //    loadByZone(regionCode);
+            }
+            else {
+                swapMap.setCenter({ lat: 13.802977, lng: 100.537052 });
+                swapMap.setZoom(6);
+                //loadByRegion();
+            }
+        }
+
+        function setRegionAndZone(event) {
+            if (level == 2) {
+                selectedRegionCode = event.feature.getProperty('regionCode');
+                selectedZoneCode = null
+
+                doChange = true;
+                $('#cboRegionAndZone').val([selectedRegionCode]).trigger('change');//.trigger('change.select2');
+            }
+            else if (level == 3) {
+                selectedRegionCode = event.feature.getProperty('regionCode');
+                selectedZoneCode = event.feature.getProperty('zoneCode');
+
+                doChange = true;
+                $('#cboRegionAndZone').val([JSON.stringify({ regionCode: selectedRegionCode, zoneCode: selectedZoneCode })]).trigger('change');//.trigger('change.select2');
+            }
+            else {
+                selectedRegionCode = null;
+
+                doChange = true;
+                $('#cboRegionAndZone').val([]).trigger('change');//.trigger('change.select2');
+            }
+            //search();
+        }
+
+        function resetRegionAndZone(event) {
+            if (level == 2) {
+                selectedZoneCode = null
+                doChange = true;
+                $('#cboRegionAndZone').val([selectedRegionCode]).trigger('change');//.trigger('change.select2');
+            }
+            else {
+                selectedRegionCode = null;
+                selectedZoneCode = null
+                doChange = true;
+                $('#cboRegionAndZone').val([]).trigger('change');//.trigger('change.select2');
+            }
+            //search();
+        }
+
+        function getInfoWindowOffset() {
+            if (swapMap.getZoom() < 6)
+                return 0.6;
+            else if (swapMap.getZoom() == 6)
+                return 0.5;
+            else if (swapMap.getZoom() == 7)
+                return 0.4;
+            else if (swapMap.getZoom() == 8)
+                return 0.3;
+            else if (swapMap.getZoom() == 9)
+                return 0.2;
+
+            return 0;
+        }
+
+        function bindRegionToMap(data) {
+            data.forEach((rec, idx, array) => {
+                var pos = getZoomPosition(rec.regionCode);
+
+                if (pos == null) return;
+
+                var marker = new google.maps.Marker({
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    position: pos,
+                    map: swapMap,
+                    animation: google.maps.Animation.DROP,
+                    label: { text: rec.regionName.replace('ภาค', ''), color: textColor, fontSize: labelFontSize },
+                    icon: {
+                        path: 'M 0.5 0.015625 C 0.230469 0.015625 0.015625 0.230469 0.015625 0.5 C 0.015625 0.765625 0.230469 0.980469 0.5 0.980469 C 0.765625 0.980469 0.980469 0.765625 0.980469 0.5 C 0.980469 0.230469 0.765625 0.015625 0.5 0.015625 Z M 0.5 0.015625 ',
+                        fillColor: 'red',
+                        fillOpacity: 0.0,
+                        scale: 1,
+                        strokeColor: 'red',
+                        strokeWeight: 0.0,
+                        labelOrigin: new google.maps.Point(0, 0)
+                    }
+                });
+                marker.setMap(swapMap);
+                summaryMarker.push(marker);
+                marker = new google.maps.Marker({
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    position: pos,
+                    map: swapMap,
+                    animation: google.maps.Animation.DROP,
+                    label: { text: uiHelpers.displayInteger(rec.lightCount) + '/' + uiHelpers.displayInteger(rec.heavyCount), color: textColor, fontSize: labelFontSize },
+                    icon: {
+                        path: 'M 0.5 0.015625 C 0.230469 0.015625 0.015625 0.230469 0.015625 0.5 C 0.015625 0.765625 0.230469 0.980469 0.5 0.980469 C 0.765625 0.980469 0.980469 0.765625 0.980469 0.5 C 0.980469 0.230469 0.765625 0.015625 0.5 0.015625 Z M 0.5 0.015625 ',
+                        fillColor: 'red',
+                        fillOpacity: 0.0,
+                        scale: 1,
+                        strokeColor: 'red',
+                        strokeWeight: 0.0,
+                        labelOrigin: new google.maps.Point(0, 20)
+                    }
+                });
+                marker.setMap(swapMap);
+                summaryMarker.push(marker);
+            });
+        }
+        function bindZoneToMap(data) {
+            data.forEach((rec, idx, array) => {
+                var pos = getZoomPosition(rec.regionCode, rec.zoneCode);
+
+                if (pos == null) return;
+
+                var marker = new google.maps.Marker({
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    position: pos,
+                    map: swapMap,
+                    animation: google.maps.Animation.DROP,
+                    label: { text: rec.zoneName, color: 'black' },
+                    icon: {
+                        path: 'M 0.5 0.015625 C 0.230469 0.015625 0.015625 0.230469 0.015625 0.5 C 0.015625 0.765625 0.230469 0.980469 0.5 0.980469 C 0.765625 0.980469 0.980469 0.765625 0.980469 0.5 C 0.980469 0.230469 0.765625 0.015625 0.5 0.015625 Z M 0.5 0.015625 ',
+                        fillColor: 'red',
+                        fillOpacity: 0.0,
+                        scale: 1,
+                        strokeColor: 'red',
+                        strokeWeight: 0.0,
+                        labelOrigin: new google.maps.Point(0, 0)
+                    }
+                });
+                marker.setMap(swapMap);
+                summaryMarker.push(marker);
+                marker = new google.maps.Marker({
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    position: pos,
+                    map: swapMap,
+                    animation: google.maps.Animation.DROP,
+                    label: { text: uiHelpers.displayInteger(rec.lightCount) + '/' + uiHelpers.displayInteger(rec.heavyCount), color: 'black' },
+                    icon: {
+                        path: 'M 0.5 0.015625 C 0.230469 0.015625 0.015625 0.230469 0.015625 0.5 C 0.015625 0.765625 0.230469 0.980469 0.5 0.980469 C 0.765625 0.980469 0.980469 0.765625 0.980469 0.5 C 0.980469 0.230469 0.765625 0.015625 0.5 0.015625 Z M 0.5 0.015625 ',
+                        fillColor: 'red',
+                        fillOpacity: 0.0,
+                        scale: 1,
+                        strokeColor: 'red',
+                        strokeWeight: 0.0,
+                        labelOrigin: new google.maps.Point(0, 20)
+                    }
+                });
+                marker.setMap(swapMap);
+                summaryMarker.push(marker);
+            });
+        }
+        function bindProvinceToMap(data) {
+            data.forEach((rec, idx, array) => {
+                var pos = getZoomPosition(null, null, rec.province);
+
+                if (pos == null) return;
+
+                var marker = new google.maps.Marker({
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    position: pos,
+                    map: swapMap,
+                    animation: google.maps.Animation.DROP,
+                    label: { text: rec.province, color: 'black' },
+                    icon: {
+                        path: 'M 0.5 0.015625 C 0.230469 0.015625 0.015625 0.230469 0.015625 0.5 C 0.015625 0.765625 0.230469 0.980469 0.5 0.980469 C 0.765625 0.980469 0.980469 0.765625 0.980469 0.5 C 0.980469 0.230469 0.765625 0.015625 0.5 0.015625 Z M 0.5 0.015625 ',
+                        fillColor: 'red',
+                        fillOpacity: 0.0,
+                        scale: 1,
+                        strokeColor: 'red',
+                        strokeWeight: 0.0,
+                        labelOrigin: new google.maps.Point(0, 0)
+                    }
+                });
+                marker.setMap(swapMap);
+                summaryMarker.push(marker);
+                marker = new google.maps.Marker({
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    position: pos,
+                    map: swapMap,
+                    animation: google.maps.Animation.DROP,
+                    label: { text: uiHelpers.displayInteger(rec.lightCount) + '/' + uiHelpers.displayInteger(rec.heavyCount), color: 'black' },
+                    icon: {
+                        path: 'M 0.5 0.015625 C 0.230469 0.015625 0.015625 0.230469 0.015625 0.5 C 0.015625 0.765625 0.230469 0.980469 0.5 0.980469 C 0.765625 0.980469 0.980469 0.765625 0.980469 0.5 C 0.980469 0.230469 0.765625 0.015625 0.5 0.015625 Z M 0.5 0.015625 ',
+                        fillColor: 'red',
+                        fillOpacity: 0.0,
+                        scale: 1,
+                        strokeColor: 'red',
+                        strokeWeight: 0.0,
+                        labelOrigin: new google.maps.Point(0, 20)
+                    }
+                });
+                marker.setMap(swapMap);
+                summaryMarker.push(marker);
+            });
+        }
+
+        function loadByRegion() {
+            if (currentAjax != null) {
+                currentAjax.abort();
+                currentAjax = null;
+            }
+            summaryMarker.forEach((rec, idx, array) => {
+                rec.setMap(null);
+            });
+            summaryMarker = [];
+            currentAjax = $.post('@Url.Action("SummaryCarByRegion", "Networking")', getCriteria())
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        bindRegionToMap(result.data);
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    currentAjax = null;
+                })
+                ;
+            return currentAjax;
+        }
+
+        function loadByZone(regionCode) {
+            if (currentAjax != null) {
+                currentAjax.abort();
+                currentAjax = null;
+            }
+            summaryMarker.forEach((rec, idx, array) => {
+                rec.setMap(null);
+            });
+            summaryMarker = [];
+            currentAjax = $.post('@Url.Action("SummaryCarByZone", "Networking")', getCriteria({ regionCode: regionCode }))
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        bindZoneToMap(result.data);
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    currentAjax = null;
+                })
+                ;
+            return currentAjax;
+        }
+
+        function loadByProvince(regionCode) {
+            if (currentAjax != null) {
+                currentAjax.abort();
+                currentAjax = null;
+            }
+            summaryMarker.forEach((rec, idx, array) => {
+                rec.setMap(null);
+            });
+            summaryMarker = [];
+            currentAjax = $.post('@Url.Action("SummaryCarByProvince", "Networking")', getCriteria({ regionCode: regionCode }))
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        bindProvinceToMap(result.data);
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    currentAjax = null;
+                })
+                ;
+            return currentAjax;
+        }
+
+        function renderLightAndInactive(data, type, row, meta) {
+            return uiHelpers.displayInteger(row.lightCount) + " (" + uiHelpers.displayInteger(row.inactiveCount) + ")";
+        }
+
+        function renderStatus(data, type, row, meta) {
+            if (data == 3)
+                return 'ไม่สตาร์ทรถ';
+            else if (data == 2)
+                return 'เบา';
+            else
+                return 'หนัก';
+        }
+
+        function isDisplayNetworkingDetail() {
+            return $('#NetworkDetail').is(':visible') || isShowDetailTable();
+        }
+
+        function isDisplayMap() {
+            return $('.swap-map').is(':visible');
+        }
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 13.802977, lng: 100.537052 },
+                zoom: 12
+            });
+
+            swapMap = new google.maps.Map(document.getElementById('swapMap'), {
+                center: { lat: 13.802977, lng: 100.537052 },
+                zoom: 6,
+                disableDoubleClickZoom: true,
+                styles:
+                    [
+                    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+                    {
+                        featureType: "administrative.locality",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "poi",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "poi.park",
+                        elementType: "geometry",
+                        stylers: [{ color: "#263c3f" }],
+                    },
+                    {
+                        featureType: "poi.park",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#6b9a76" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#38414e" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#212a37" }],
+                    },
+                    {
+                        featureType: "road",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#9ca5b3" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry",
+                        stylers: [{ color: "#746855" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "geometry.stroke",
+                        stylers: [{ color: "#1f2835" }],
+                    },
+                    {
+                        featureType: "road.highway",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#f3d19c" }],
+                    },
+                    {
+                        featureType: "transit",
+                        elementType: "geometry",
+                        stylers: [{ color: "#2f3948" }],
+                    },
+                    {
+                        featureType: "transit.station",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#d59563" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#17263c" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#515c6d" }],
+                    },
+                    {
+                        featureType: "water",
+                        elementType: "labels.text.stroke",
+                        stylers: [{ color: "#17263c" }],
+                    },
+                    {
+                        "elementType": "labels",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "administrative.land_parcel",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                    {
+                        "featureType": "administrative.neighborhood",
+                        "stylers": [
+                            {
+                                "visibility": "off"
+                            }
+                        ]
+                    },
+                ],
+                //[
+                //    {
+                //        "elementType": "labels",
+                //        "stylers": [
+                //            {
+                //                "visibility": "off"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "administrative.land_parcel",
+                //        "stylers": [
+                //            {
+                //                "visibility": "off"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "administrative.neighborhood",
+                //        "stylers": [
+                //            {
+                //                "visibility": "off"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "administrative.province",
+                //        "stylers": [
+                //            {
+                //                "lightness": 40
+                //            },
+                //            {
+                //                "visibility": "simplified"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "administrative.province",
+                //        "elementType": "geometry",
+                //        "stylers": [
+                //            {
+                //                "visibility": "on"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "poi",
+                //        "elementType": "labels.text",
+                //        "stylers": [
+                //            {
+                //                "visibility": "off"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "poi.business",
+                //        "stylers": [
+                //            {
+                //                "visibility": "off"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "road",
+                //        "elementType": "labels.icon",
+                //        "stylers": [
+                //            {
+                //                "visibility": "off"
+                //            }
+                //        ]
+                //    },
+                //    {
+                //        "featureType": "transit",
+                //        "stylers": [
+                //            {
+                //                "visibility": "off"
+                //            }
+                //        ]
+                //    }
+                //]
+            });
+
+            LoadMapBound();
+
+            swapMap.data.setStyle(function (feature) {
+                var color = feature.getProperty('regionColor');
+                var strokeColor = color;
+                if (level == 2) {
+                    color = feature.getProperty('zoneColor');
+                }
+                var provinceName = feature.getProperty('provinceName');
+                var regionCode = feature.getProperty('regionCode');
+                var zoneCode = feature.getProperty('zoneCode');
+                var fillOpacity = 0.2;
+                var strokeWeight = 0.4;
+                if (selectedRegionCode != null && selectedZoneCode != null) {
+                    if (isProvinceSelected()) {
+                        if (provinceName == $('#cboProvince').val()) {
+                            fillOpacity = 0.6;
+                            strokeWeight = 0.8;
+                        }
+                        else {
+                            fillOpacity = 0.0;
+                            strokeWeight = 0.0;
+                        }
+                    }
+                    else if (selectedRegionCode == regionCode && selectedZoneCode == zoneCode) {
+                        fillOpacity = 0.6;
+                        strokeWeight = 0.8;
+                    }
+                    else if (selectedRegionCode == regionCode) {
+                        fillOpacity = 0.05;
+                        strokeWeight = 0;
+                    }
+                    else {
+                        fillOpacity = 0.0;
+                        strokeWeight = 0.0;
+                    }
+                }
+                else if (selectedRegionCode != null) {
+                    if (selectedRegionCode == regionCode) {
+                        fillOpacity = 0.6;
+                        strokeWeight = 0;
+                    }
+                    else {
+                        fillOpacity = 0.0;
+                        strokeWeight = 0.0;
+                    }
+                }
+                else {
+                    fillOpacity = 0.6;
+                    strokeWeight = 0;
+                }
+
+                if (feature.getProperty('isColorful')) {
+                    fillOpacity = 0.8;
+                    strokeWeight = 0;
+                    if (isProvinceSelected()) {
+                        if (provinceName != $('#cboProvince').val()) {
+                            fillOpacity = 0.0;
+                            strokeWeight = 0.0;
+                        }
+                    }
+                    else if (level == 3) {
+                        strokeWeight = 0.9;
+                    }
+                    else {
+                        strokeWeight = 0.0;
+                    }
+                }
+
+                return ({
+                    fillColor: color,
+                    strokeColor: strokeColor,
+                    strokeWeight: 2,
+                    fillOpacity: fillOpacity,
+                    strokeWeight: strokeWeight
+                });
+            });
+
+            swapMap.data.addListener("mousemove", (event) => {
+                var infoPos = { lat: event.latLng.lat() + getInfoWindowOffset(), lng: event.latLng.lng() };
+                if (level == 3) {
+                    var regionCode = event.feature.getProperty("regionCode");
+                    var zoneCode = event.feature.getProperty("zoneCode");
+                    var provinceName = event.feature.getProperty("provinceName");
+
+                    if (regionCode == hoverRegionCode && zoneCode == hoverZoneCode && provinceName == hoverProvince) {
+                        if (event.feature.getProperty('isColorful')) {
+                            if (provinceInfoWindow != null) {
+                                provinceInfoWindow.close();
+                            }
+                            provinceInfoWindow = new google.maps.InfoWindow({
+                                content: '<div id="content" class="info-window-map">'
+                                    + '<div id="siteNotice">'
+                                    + '</div>'
+                                    + '<div id="bodyContent">'
+                                    + event.feature.getProperty('regionCode') + ': '
+                                    + event.feature.getProperty('regionName') + '<br/>'
+                                    + event.feature.getProperty('zoneCode') + '<br/>'
+                                    + event.feature.getProperty('provinceName')
+                                    + '</div>'
+                                    + '</div>'
+                            });
+                            provinceInfoWindow.setPosition(infoPos);
+                            provinceInfoWindow.open(swapMap);
+                        }
+                        return;
+                    }
+                    hoverRegionCode = regionCode;
+                    hoverZoneCode = zoneCode;
+                    hoverProvince = provinceName;
+
+                    swapMap.data.forEach(function (feature) {
+                        if (regionCode == feature.getProperty("regionCode")
+                            && zoneCode == feature.getProperty("zoneCode")
+                            && provinceName == feature.getProperty("provinceName")
+                            && regionCode == selectedRegionCode
+                            && zoneCode == selectedZoneCode) {
+                            feature.setProperty('isColorful', true);
+                        }
+                        else {
+                            feature.setProperty('isColorful', false);
+                        }
+                    });
+                    if (event.feature.getProperty('isColorful')) {
+                        if (provinceInfoWindow != null) {
+                            provinceInfoWindow.close();
+                        }
+                        provinceInfoWindow = new google.maps.InfoWindow({
+                            content: '<div id="content" class="info-window-map">'
+                                + '<div id="siteNotice">'
+                                + '</div>'
+                                + '<div id="bodyContent">'
+                                + event.feature.getProperty('regionCode') + ': '
+                                + event.feature.getProperty('regionName') + '<br/>'
+                                + event.feature.getProperty('zoneCode') + '<br/>'
+                                + event.feature.getProperty('provinceName')
+                                + '</div>'
+                                + '</div>'
+                        });
+                        provinceInfoWindow.setPosition(infoPos);
+                        provinceInfoWindow.open(swapMap);
+                    }
+                }
+                else if (level == 2) {
+                    var regionCode = event.feature.getProperty("regionCode");
+                    var zoneCode = event.feature.getProperty("zoneCode");
+
+                    if (regionCode == hoverRegionCode && zoneCode == hoverZoneCode) {
+                        if (event.feature.getProperty('isColorful')) {
+                            if (provinceInfoWindow != null) {
+                                provinceInfoWindow.close();
+                            }
+                            provinceInfoWindow = new google.maps.InfoWindow({
+                                content: '<div id="content" class="info-window-map">'
+                                    + '<div id="siteNotice">'
+                                    + '</div>'
+                                    + '<div id="bodyContent">'
+                                    + event.feature.getProperty('regionCode') + ': '
+                                    + event.feature.getProperty('regionName') + '<br/>'
+                                    + event.feature.getProperty('zoneCode')
+                                    + '</div>'
+                                    + '</div>'
+                            });
+                            provinceInfoWindow.setPosition(infoPos);
+                            provinceInfoWindow.open(swapMap);
+                        }
+                        return;
+                    }
+                    hoverRegionCode = regionCode;
+                    hoverZoneCode = zoneCode;
+                    hoverProvince = null;
+
+                    swapMap.data.forEach(function (feature) {
+                        if (regionCode == feature.getProperty("regionCode")
+                            && zoneCode == feature.getProperty("zoneCode")
+                            && regionCode == selectedRegionCode) {
+                            feature.setProperty('isColorful', true);
+                        }
+                        else {
+                            feature.setProperty('isColorful', false);
+                        }
+                    });
+
+                    if (event.feature.getProperty('isColorful')) {
+                        if (provinceInfoWindow != null) {
+                            provinceInfoWindow.close();
+                        }
+                        provinceInfoWindow = new google.maps.InfoWindow({
+                            content: '<div id="content" class="info-window-map">'
+                                + '<div id="siteNotice">'
+                                + '</div>'
+                                + '<div id="bodyContent">'
+                                + event.feature.getProperty('regionCode') + ': '
+                                + event.feature.getProperty('regionName') + '<br/>'
+                                + event.feature.getProperty('zoneCode')
+                                + '</div>'
+                                + '</div>'
+                        });
+                        provinceInfoWindow.setPosition(infoPos);
+                        provinceInfoWindow.open(swapMap);
+                    }
+                }
+                else {
+                    var regionCode = event.feature.getProperty("regionCode");
+
+                    if (regionCode == hoverRegionCode) {
+                        if (provinceInfoWindow != null) {
+                            provinceInfoWindow.close();
+                        }
+                        provinceInfoWindow = new google.maps.InfoWindow({
+                            content: '<div id="content" class="info-window-map">'
+                                + '<div id="siteNotice">'
+                                + '</div>'
+                                + '<div id="bodyContent">'
+                                + event.feature.getProperty('regionCode') + ': '
+                                + event.feature.getProperty('regionName')
+                                + '</div>'
+                                + '</div>'
+                        });
+                        provinceInfoWindow.setPosition(infoPos);
+                        provinceInfoWindow.open(swapMap);
+                        return;
+                    }
+                    hoverRegionCode = regionCode;
+                    hoverZoneCode = null;
+                    hoverProvince = null;
+
+                    swapMap.data.forEach(function (feature) {
+                        if (regionCode == feature.getProperty("regionCode")) {
+                            feature.setProperty('isColorful', true);
+                        }
+                        else {
+                            feature.setProperty('isColorful', false);
+                        }
+                    });
+                    if (provinceInfoWindow != null) {
+                        provinceInfoWindow.close();
+                    }
+                    provinceInfoWindow = new google.maps.InfoWindow({
+                        content: '<div id="content" class="info-window-map">'
+                            + '<div id="siteNotice">'
+                            + '</div>'
+                            + '<div id="bodyContent">'
+                            + event.feature.getProperty('regionCode') + ': '
+                            + event.feature.getProperty('regionName')
+                            + '</div>'
+                            + '</div>'
+                    });
+                    provinceInfoWindow.setPosition(infoPos);
+                    provinceInfoWindow.open(swapMap);
+                }
+            });
+
+            swapMap.data.addListener("mouseout", (event) => {
+                if (provinceInfoWindow != null) {
+                    provinceInfoWindow.close();
+                }
+            });
+
+            swapMap.data.addListener("click", swapMap_leftclick);
+
+            swapMap.addListener("rightclick", swapMap_rightclick);
+
+            swapMap.data.addListener("rightclick", swapMap_rightclick);
+
+            swapMap.data.addListener("dblclick", (event) => {
+                emptyData();
+                if (timerForDblClickCheck != null) {
+                    clearTimeout(timerForDblClickCheck);
+                    timerForDblClickCheck = null;
+                }
+                if (provinceInfoWindow != null) {
+                    provinceInfoWindow.close();
+                }
+
+                var regionCode = event.feature.getProperty("regionCode");
+                var zoneCode = event.feature.getProperty("zoneCode");
+                var provinceName = event.feature.getProperty("provinceName");
+                if (level == 3) {
+                    doChange = true;
+                    fixProvince = provinceName;
+                    $('#cboRegionAndZone').val([JSON.stringify({ regionCode: regionCode, zoneCode: zoneCode })]).trigger('change');
+                }
+                else if (level == 2) {
+                    doChange = true;
+                    $('#cboRegionAndZone').val([JSON.stringify({ regionCode: regionCode, zoneCode: zoneCode })]).trigger('change');
+                    search(false);
+                }
+                else {
+                    doChange = true;
+                    $('#cboRegionAndZone').val([regionCode]).trigger('change');
+                    search(false);
+                }
+                showSummaryPanel(elem = $('.fa-table')[0], false);
+            });
+        }
+
+        function LoadMapBound() {
+            console.log('load map bound');
+            var jqxhr = $.post('@Url.Action("GetBound", "Networking")', { file: getUrlVars()["file"] })
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        swapMap.data.forEach(function (feature) {
+                            swapMap.data.remove(feature);
+                        });
+                        result.data.features.forEach(function (feature) {
+                            var provinceName = feature.properties['provinceName'];
+                            var regionCode = feature.properties['regionCode'];
+                            var zoneCode = feature.properties['zoneCode'];
+
+                            if (selectedRegionCode != null && selectedZoneCode != null) {
+                                if (isProvinceSelected()) {
+                                    if (provinceName == $('#cboProvince').val()) {
+                                        swapMap.data.addGeoJson(feature);
+                                    }
+                                }
+                                else if (selectedRegionCode == regionCode && selectedZoneCode == zoneCode) {
+                                    swapMap.data.addGeoJson(feature);
+                                }
+                                else if (selectedRegionCode == regionCode) {
+                                    swapMap.data.addGeoJson(feature);
+                                }
+                            }
+                            else
+                                swapMap.data.addGeoJson(feature);
+                        });
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                })
+                ;
+        }
+
+        function getStatusColor(status) {
+            if (status == 3)
+                return 'gray';
+            else if (status == 2)
+                return 'green';
+            else
+                return 'red';
+        }
+
+        function getMaxDistance(shippingPointGroup) {
+            if (maxDistanceByShippingPoint.has(shippingPointGroup))
+                return maxDistanceByShippingPoint.get(shippingPointGroup);
+            else
+                return 10;
+            //return $('.cboMaxDistance[data-shipping-point="' + shippingPointGroup + '"]').val();
+        }
+
+        function prepareLoad() {
+            if (firstLoad) {
+                firstLoad = false;
+                bolSetCenter = true;
+                loadMapData({
+                    mapBound: {
+                        northEast: {
+                            lat: map.getBounds().getNorthEast().lat(),
+                            lng: map.getBounds().getNorthEast().lng()
+                        },
+                        southWest: {
+                            lat: map.getBounds().getSouthWest().lat(),
+                            lng: map.getBounds().getSouthWest().lng()
+                        }
+                    }
+                });
+                return;
+            }
+            if (loadTimer != null) {
+                clearTimeout(loadTimer);
+                loadTimer = null;
+            }
+            loadTimer = setTimeout(function () {
+                bolSetCenter = true;
+                loadMapData({
+                    mapBound: {
+                        northEast: {
+                            lat: map.getBounds().getNorthEast().lat(),
+                            lng: map.getBounds().getNorthEast().lng()
+                        },
+                        southWest: {
+                            lat: map.getBounds().getSouthWest().lat(),
+                            lng: map.getBounds().getSouthWest().lng()
+                        }
+                    }
+                });
+                clearTimeout(loadTimer);
+            }, 1000);
+        }
+
+        function drawShippingPointRadius(pos, shippingPointGroup, color) {
+            if (!isProvinceSelected() && !isSelectShippingPoint()) return;
+
+            var cityCircle = new google.maps.Circle({
+                strokeColor: color, //"#43a1e8",
+                strokeOpacity: 0.35,
+                strokeWeight: 1,
+                fillColor: color, //"#43a1e8",
+                fillOpacity: 0.04,
+                map,
+                center: pos,
+                radius: getMaxDistance(shippingPointGroup) * 1000,
+            });
+            allCircle.push(cityCircle);
+            if (bolSetCenter) {
+                bolSetCenter = false;
+                ignoreBoundChange = true;
+                map.setCenter({ lat: pos.lat(), lng: pos.lng() });
+                //map.setCenter(pos);
+
+                loadCarList({
+                    mapBound: {
+                        northEast: {
+                            lat: map.getBounds().getNorthEast().lat(),
+                            lng: map.getBounds().getNorthEast().lng()
+                        },
+                        southWest: {
+                            lat: map.getBounds().getSouthWest().lat(),
+                            lng: map.getBounds().getSouthWest().lng()
+                        }
+                    }
+                }).done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        result.data.forEach((item, index, array) => {
+                            //คันเดิมที่เคยโหลด ข้อมูลมาแล้ว
+                            if (allCarMarker.has(item.licensePlate)) {
+                                if (allCarMarker.get(item.licensePlate)[1] != item.hashCode) {
+                                    //ข้อมูลเปลี่ยนแปลง ลบ marker เดิม
+                                    allCarMarker.get(item.licensePlate)[0].setMap(null);
+                                }
+                                else {
+                                    //ไม่มีอะไรเปลี่ยนแปลง
+                                    allCarMarker.get(item.licensePlate)[0].setMap(map);
+                                    return;
+                                }
+                            }
+                            drawCarMarker(item);
+                        });
+                    }
+
+                })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function (e) {
+                        $('#has-been-loaded').show();
+                        $('#is-loading').hide();
+                    })
+                    ;
+            }
+        }
+
+        function openCarLocationMap(data) {
+            $('#mapDialog').modal('show');
+            $('#has-been-loaded').hide();
+            $('#is-loading').show();
+
+            allCarMarker.forEach(function (value, key) {
+                value[0].setMap(null);
+            });
+            allShippingPointMarker.forEach(function (value, key) {
+                value.setMap(null);
+            });
+            allCircle.forEach(function (value, idx, array) {
+                value.setMap(null);
+            });
+
+            allCarMarker.clear();
+            allShippingPointMarker.clear();
+            allCircle = [];
+            ignoreBoundChange = true;
+            map.setCenter({ lat: data.lat, lng: data.long });
+            if (isProvinceSelected())
+                map.setZoom(9);
+            else
+                map.setZoom(12);
+
+            if (mapListener != null) {
+                google.maps.event.removeListener(mapListener);
+                mapListener = null;
+            }
+            //google.maps.event.clearInstanceListeners(map);
+            //map.addListener('bounds_changed', function () {
+            //    prepareLoad();
+            //});
+            drawCarMarker(data);
+            //loadMapData(false, { licensePlates: [data.licensePlate] }, false);
+
+            $('#has-been-loaded').show();
+            $('#is-loading').hide();
+
+        }
+
+        function openNearbyShippingPoint(data) {
+            data.nearBy.sort(function (a, b) {
+                return a.distanceInKiloMeter - b.distanceInKiloMeter;
+            });
+
+            var dataInRange = data.nearBy.filter((rec) => {
+                return rec.distanceInKiloMeter < getMaxDistance(rec.shippingPointGroupDisplay);
+            });
+
+            genNearbyTable('#nearbyDialog', dataInRange);
+            $('#nearbyDialog').modal('show');
+        }
+
+        function getBearings(point1, point2) {
+            var spherical = google.maps.geometry.spherical;
+            //var point3 = new google.maps.LatLng(point1.lat + 0.5, point1.lg);
+            point1 = new google.maps.LatLng(point1.lat, point1.lng);
+            point2 = new google.maps.LatLng(point2.lat, point2.lng);
+            //var bearing2 = google.maps.geometry.spherical.computeHeading(point1, point3);
+            var bearing1 = google.maps.geometry.spherical.computeHeading(point1, point2);
+            //var angle = getDifference(bearing1, bearing2);
+            return bearing1;
+        }
+
+        function getDifference(a1, a2) {
+            al = (a1 > 0) ? a1 : 360 + a1;
+            a2 = (a2 > 0) ? a2 : 360 + a2;
+            var angle = Math.abs(a1 - a2) + 180;
+            if (angle > 180) {
+                angle = 360 - angle;
+            }
+            return Math.abs(angle);
+        }
+
+        function loadCarList(additionalCriteria = null) {
+            //searchCriteria = getCriteria(additionalCriteria);
+            return $.post('@Url.Action("ListCarLocation", "Networking")', getCriteria(additionalCriteria));
+        }
+
+        function loadMapData(additionalCriteria = null, showShippingPoint = true) {
+
+            $('#has-been-loaded').hide();
+            $('#is-loading').show();
+
+            allCarMarker.forEach(function (value, key) {
+                if (map.getBounds().contains(value[0].position)) {
+                    value[0].setMap(map);
+                }
+                else {
+                    value[0].setMap(null);
+                }
+            });
+            allShippingPointMarker.forEach(function (value, key) {
+                if (map.getBounds().contains(value.position)) {
+                    value.setMap(map);
+                }
+                else {
+                    value.setMap(null);
+                }
+            });
+
+            if (!bolSetCenter) {
+                loadCarList(additionalCriteria).done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        result.data.forEach((item, index, array) => {
+                            //คันเดิมที่เคยโหลด ข้อมูลมาแล้ว
+                            if (allCarMarker.has(item.licensePlate)) {
+                                if (allCarMarker.get(item.licensePlate)[1] != item.hashCode) {
+                                    //ข้อมูลเปลี่ยนแปลง ลบ marker เดิม
+                                    allCarMarker.get(item.licensePlate)[0].setMap(null);
+                                }
+                                else {
+                                    //ไม่มีอะไรเปลี่ยนแปลง
+                                    allCarMarker.get(item.licensePlate)[0].setMap(map);
+                                    return;
+                                }
+                            }
+                            drawCarMarker(item);
+                        });
+                    }
+
+                })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function (e) {
+                        $('#has-been-loaded').show();
+                        $('#is-loading').hide();
+                    })
+                    ;
+            }
+
+            if (showShippingPoint) {
+                var jqxhr = $.post('@Url.Action("GetShippingPoint", "Networking")', getCriteria())
+                    .done(function (result) {
+                        if (uiHelpers.errorHandler(result)) {
+                            allCircle.forEach(function (value, idx, array) {
+                                value.setMap(null);
+                            });
+                            allCircle = [];
+
+
+                            if (searchCriteria != null && searchCriteria.shippingPointGroup.length > 0)
+                                result.data = result.data.filter((rec) => {
+                                    return searchCriteria.shippingPointGroup.includes(rec.shippingPointGroupDisplay);
+                                });
+
+                            result.data.forEach((item, index, array) => {
+                                var markerColor;
+                                if (groupColor.has(item.shippingPointGroupDisplay)) {
+                                    markerColor = groupColor.get(item.shippingPointGroupDisplay);
+                                }
+                                else {
+                                    markerColor = colorList[groupColor.size];
+                                    groupColor.set(item.shippingPointGroupDisplay, markerColor);
+                                }
+
+                                if (allShippingPointMarker.has(item.locationCode)) {
+                                    allShippingPointMarker.get(item.locationCode).setMap(map);
+                                    var pos = new google.maps.LatLng(item.latitude, item.longitude);
+                                    drawShippingPointRadius(pos, item.shippingPointGroupDisplay, markerColor);
+                                    return;
+                                }
+
+                                var marker = new google.maps.Marker({
+                                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                                    position: { lat: item.latitude, lng: item.longitude },
+                                    map: map,
+                                    //animation: google.maps.Animation.DROP,
+                                    title: item.locationName,
+                                    icon: {
+                                        path: 'M 20.414062 7.039062 L 14.4375 10.839844 L 14.4375 7.90625 C 14.4375 7.09375 13.539062 6.601562 12.851562 7.039062 L 6.875 10.839844 L 6.875 2.40625 C 6.875 1.835938 6.414062 1.375 5.84375 1.375 L 1.03125 1.375 C 0.460938 1.375 0 1.835938 0 2.40625 L 0 19.59375 C 0 20.164062 0.460938 20.625 1.03125 20.625 L 20.96875 20.625 C 21.539062 20.625 22 20.164062 22 19.59375 L 22 7.90625 C 22 7.09375 21.101562 6.601562 20.414062 7.039062 Z M 20.414062 7.039062 ',
+                                        fillColor: markerColor,
+                                        fillOpacity: 0.8,
+                                        scale: 1,
+                                        strokeColor: 'white',
+                                        strokeWeight: 1,
+                                    },
+                                    optimized: false,
+                                    zIndex: 999
+                                });
+                                allShippingPointMarker.set(item.locationCode, marker);
+
+                                var pos = new google.maps.LatLng(item.latitude, item.longitude);
+                                drawShippingPointRadius(pos, item.shippingPointGroupDisplay, markerColor);
+
+                                marker.addListener('click', function () {
+                                    if (marker.getAnimation() !== null) {
+                                        marker.setAnimation(null);
+                                        currentMarker = null;
+                                    } else {
+                                        marker.setAnimation(google.maps.Animation.BOUNCE);
+                                        if (infowindow != null) {
+                                            infowindow.close();
+                                        }
+                                        if (currentMarker != null) {
+                                            currentMarker.setAnimation(null);
+                                        }
+                                        currentMarker = marker;
+                                        infowindow = new google.maps.InfoWindow({
+                                            content: '<div id="content" class="info-window-map">'
+                                                + '<div id="siteNotice">'
+                                                + '</div>'
+                                                + '<h1 id="firstHeading" class="firstHeading">รายละเอียด Shipping Point</h1>'
+                                                + '<div id="bodyContent">'
+                                                + '<div class="row"><div class="col-12">&nbsp;</div></div>'
+                                                + '<table>'
+                                                + '<tr><td>Shipping Point:</td><td>' + item.locationName + '</td></tr>'
+                                                + '<tr><td>อำเภอ:</td><td>' + item.amphur + '</td></tr>'
+                                                + '<tr><td>จังหวัด:</td><td>' + item.province + '</td></tr>'
+                                                + '<tr><td>กลุ่ม:</td><td>' + item.shippingPointGroup + '</td></tr>'
+                                                + '</table>'
+                                                + '</div>'
+                                                + '</div>'
+                                        });
+                                        infowindow.open(map, marker);
+                                        infowindow.addListener('closeclick', function () {
+                                            marker.setAnimation(null);
+                                            infowindow = null;
+                                        });
+                                    }
+                                });
+                            });
+                        }
+
+                    })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function (e) {
+                    })
+                    ;
+            }
+        }
+
+        function drawCarMarker(item) {
+
+            var marker = new google.maps.Marker({
+                path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                position: { lat: item.lat, lng: item.long },
+                map: map,
+                animation: google.maps.Animation.DROP,
+                title: item.title,
+                icon: {
+                    path: 'M 19.5 11 L 19 11 L 19 7.621094 C 19 7.226562 18.839844 6.84375 18.558594 6.5625 L 15.4375 3.441406 C 15.15625 3.160156 14.773438 3 14.378906 3 L 13 3 L 13 1.5 C 13 0.671875 12.328125 0 11.5 0 L 1.5 0 C 0.671875 0 0 0.671875 0 1.5 L 0 11.5 C 0 12.328125 0.671875 13 1.5 13 L 2 13 C 2 14.65625 3.34375 16 5 16 C 6.65625 16 8 14.65625 8 13 L 12 13 C 12 14.65625 13.34375 16 15 16 C 16.65625 16 18 14.65625 18 13 L 19.5 13 C 19.773438 13 20 12.773438 20 12.5 L 20 11.5 C 20 11.226562 19.773438 11 19.5 11 Z M 5 14.5 C 4.171875 14.5 3.5 13.828125 3.5 13 C 3.5 12.171875 4.171875 11.5 5 11.5 C 5.828125 11.5 6.5 12.171875 6.5 13 C 6.5 13.828125 5.828125 14.5 5 14.5 Z M 15 14.5 C 14.171875 14.5 13.5 13.828125 13.5 13 C 13.5 12.171875 14.171875 11.5 15 11.5 C 15.828125 11.5 16.5 12.171875 16.5 13 C 16.5 13.828125 15.828125 14.5 15 14.5 Z M 17.5 8 L 13 8 L 13 4.5 L 14.378906 4.5 L 17.5 7.621094 Z M 17.5 8 ',
+                    fillColor: getStatusColor(item.status),
+                    fillOpacity: 0.8,
+                    scale: 1,
+                    strokeColor: 'white',
+                    strokeWeight: 1,
+                    rotation: (getBearings({ lat: item.startLat, lng: item.startLong }, { lat: item.lat, lng: item.long }) - 90)
+                }
+            });
+
+            //var guidePoly = [
+            //    { lat: item.startLat + 0.5, lng: item.startLong },
+            //    { lat: item.startLat, lng: item.startLong }
+            //];
+            //var guidePath = new google.maps.Polyline({
+            //    path: guidePoly,
+            //    geodesic: true,
+            //    strokeColor: '#00FF00',
+            //    strokeOpacity: 0.5,
+            //    strokeWeight: 2
+            //});
+            //guidePath.setMap(map);
+
+            //var drivePoly = [
+            //    { lat: item.startLat, lng: item.startLong },
+            //    { lat: item.lat, lng: item.long }
+            //];
+            //var drivePath = new google.maps.Polyline({
+            //    path: drivePoly,
+            //    geodesic: true,
+            //    strokeColor: '#FF0000',
+            //    strokeOpacity: 0.5,
+            //    strokeWeight: 2,
+            //    icons: [{
+            //        icon: {
+            //            path: 'M 19.5 11 L 19 11 L 19 7.621094 C 19 7.226562 18.839844 6.84375 18.558594 6.5625 L 15.4375 3.441406 C 15.15625 3.160156 14.773438 3 14.378906 3 L 13 3 L 13 1.5 C 13 0.671875 12.328125 0 11.5 0 L 1.5 0 C 0.671875 0 0 0.671875 0 1.5 L 0 11.5 C 0 12.328125 0.671875 13 1.5 13 L 2 13 C 2 14.65625 3.34375 16 5 16 C 6.65625 16 8 14.65625 8 13 L 12 13 C 12 14.65625 13.34375 16 15 16 C 16.65625 16 18 14.65625 18 13 L 19.5 13 C 19.773438 13 20 12.773438 20 12.5 L 20 11.5 C 20 11.226562 19.773438 11 19.5 11 Z M 5 14.5 C 4.171875 14.5 3.5 13.828125 3.5 13 C 3.5 12.171875 4.171875 11.5 5 11.5 C 5.828125 11.5 6.5 12.171875 6.5 13 C 6.5 13.828125 5.828125 14.5 5 14.5 Z M 15 14.5 C 14.171875 14.5 13.5 13.828125 13.5 13 C 13.5 12.171875 14.171875 11.5 15 11.5 C 15.828125 11.5 16.5 12.171875 16.5 13 C 16.5 13.828125 15.828125 14.5 15 14.5 Z M 17.5 8 L 13 8 L 13 4.5 L 14.378906 4.5 L 17.5 7.621094 Z M 17.5 8 ',
+            //            fillColor: getStatusColor(item.status),
+            //            fillOpacity: 0.8,
+            //            scale: 1,
+            //            strokeColor: 'white',
+            //            strokeWeight: 1,
+            //            rotation: 270
+            //        },
+            //        offset: '100%'
+            //    }]
+            //});
+            //drivePath.setMap(map);
+
+            allCarMarker.set(item.licensePlate, [marker, item.hashCode]);
+            marker.addListener('click', function () {
+                if (marker.getAnimation() !== null) {
+                    marker.setAnimation(null);
+                    currentMarker = null;
+                } else {
+                    marker.setAnimation(google.maps.Animation.BOUNCE);
+                    if (infowindow != null) {
+                        infowindow.close();
+                    }
+                    if (currentMarker != null) {
+                        currentMarker.setAnimation(null);
+                    }
+                    currentMarker = marker;
+                    infowindow = new google.maps.InfoWindow({
+                        content: '<div id="content">'
+                            + '<div id="siteNotice">'
+                            + '</div>'
+                            + '<h1 id="firstHeading" class="firstHeading">รายละเอียดรถ</h1>'
+                            + '<div id="bodyContent">'
+                            + '<div class="row"><div class="col-12">&nbsp;</div></div>'
+                            + '<table>'
+                            + '<tr><td>ทะเบียนรถ:</td><td>' + item.licensePlate + '</td></tr>'
+                            + '<tr><td>ชื่อ Fleet:</td><td>' + item.fleetName + '</td></tr>'
+                            + '<tr><td>ประเภทรถ:</td><td>' + item.truckTypeName + '</td></tr>'
+                            + '<tr><td>ผรม.:</td><td>' + item.carrierName + '</td></tr>'
+                            + '<tr><td>ชื่อผขร.:</td><td>' + item.driverName + '</td></tr>'
+                            + '<tr><td>เบอร์ติดต่อ:</td><td>' + item.mobileNo + '</td></tr>'
+                            //+ '<tr><td>Bearing:</td><td>' + getBearings({ lat: item.startLat, lng: item.startLong }, { lat: item.lat, lng: item.long }) + '</td></tr>'
+                            + '</table>'
+                            + '</div>'
+                            + '</div>'
+                    });
+                    infowindow.open(map, marker);
+                    infowindow.addListener('closeclick', function () {
+                        marker.setAnimation(null);
+                        infowindow = null;
+                    });
+                }
+            });
+        }
+        function showDetailPanel(elem = $('.fa-info-circle')[0], bind = true) {
+            $('#any-data').show();
+            setTimeout(function () {
+                $(elem).siblings().show();
+                $(elem).hide();
+                $('.detail-section').show();
+                $('#sum-data').hide();
+                $('#near-by').hide();
+                $('#NetworkDetail').show();
+                $('.swap-map').hide();
+                if (bind)
+                    bindData(true);
+
+                if (currentAjax == null)
+                    $('#any-data').hide();
+            }, 50);
+        }
+        function showMapPanel(elem = $('.fa-map-marked-alt')[0], bind = true) {
+            $('#any-data').show();
+            setTimeout(function () {
+                $(elem).siblings().show();
+                $(elem).hide();
+                $('.detail-section').hide();
+                $('.swap-map').show();
+                LoadMapBound();
+                if (bind)
+                    bindData(isDisplayNetworkingDetail());
+                if (currentAjax == null)
+                    $('#any-data').hide();
+            }, 50);
+        }
+
+        function emptyData() {
+            $('#sum-data .sum-group-block').empty();
+            $('#near-by .sum-group-block').empty();
+            $('#sum-data .card-title').text('');
+            $('.html5buttons').find('.custom-table-header').remove();
+
+            $('#sum-data .total-car-text').text('');
+            $('#sum-data .total-car-cnt').text('');
+            $('#sum-data .light-car-text').text('');
+            $('#sum-data .light-car-cnt').text('');
+            $('#sum-data .heavy-car-text').text('');
+            $('#sum-data .heavy-car-cnt').text('');
+            $('#sum-data .inactive-car-text').text('');
+            $('#sum-data .inactive-car-cnt').text('');
+            $('#sum-data .summary-unit').text('');
+
+            $('.fa-location-arrow').hide();
+
+            if (isProvinceSelected() || isSelectShippingPoint()) {
+                $('.fa-location-arrow').show();
+            }
+        }
+        function showSummaryPanel(elem = $('.fa-table')[0], bind = true) {
+            $('#any-data').show();
+            setTimeout(function () {
+                $(elem).siblings().show();
+                $(elem).hide();
+                $('.detail-section').show();
+                $('#sum-data').hide();
+                $('#sum-data .summary-panel').hide();
+                $('#near-by').hide();
+                $('#NetworkDetail').hide();
+                emptyData();
+                $('.swap-map').hide();
+                if (isShowByAll()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').show();
+                    $('#sum-data .sum-group-block').show();
+                }
+                else if (isShowByRegion()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').show();
+                    $('#sum-data .sum-group-block').show();
+                }
+                else if (isShowByZone()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').show();
+                    $('#sum-data .sum-group-block').show();
+                }
+                else if (isSelectShippingPoint()) {
+                    $('#sum-data').show();
+                    $('#sum-data .sum-group-block').hide();
+                    $('#sum-data .summary-panel').hide();
+                    $('#near-by').show();
+                }
+                else {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').hide();
+                    $('#sum-data .sum-group-block').show();
+                    $('#near-by').show();
+                }
+
+
+                if (bind)
+                    bindData(false);
+                if (currentAjax == null)
+                    $('#any-data').hide();
+            }, 50);
+        }
+        function toggleMapAndDetail() {
+            if ($('.swap-map').is(':visible')) {
+                $('.detail-section').show();
+                $('.swap-map').hide();
+            }
+            else {
+                $('.detail-section').hide();
+                $('.swap-map').show();
+            @*var jqxhr = $.post('@Url.Action("GetProvince", "Networking")', null)
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        result.data.forEach((rec, idx, array) => {
+                            var pos = getZoomPosition(null, null, rec.dataValue_Key);
+                            console.log(rec.dataValue_Key);
+                            console.log(pos);
+                            if (pos == null) return;
+                            var marker = new google.maps.Marker({
+                                path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                                position: pos,
+                                map: map,
+                                animation: google.maps.Animation.DROP,
+                                label: { text: rec.dataValue_Key, color: 'black' },
+                                icon: {
+                                    path: 'M 37.5 1.171875 C 17.429688 1.171875 1.171875 17.429688 1.171875 37.5 C 1.171875 57.570312 17.429688 73.828125 37.5 73.828125 C 57.570312 73.828125 73.828125 57.570312 73.828125 37.5 C 73.828125 17.429688 57.570312 1.171875 37.5 1.171875 Z M 37.5 1.171875 ',
+                                    fillColor: 'red',
+                                    fillOpacity: 0.0,
+                                    scale: 1,
+                                    strokeColor: 'red',
+                                    strokeWeight: 0.0,
+                                    labelOrigin: new google.maps.Point(0, 0)
+                                }
+                            });
+                            marker.setMap(swapMap);
+                            var marker2 = new google.maps.Marker({
+                                path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                                position: pos,
+                                map: map,
+                                animation: google.maps.Animation.DROP,
+                                label: { text: '20', color: 'black' },
+                                icon: {
+                                    path: 'M 0.5 0.015625 C 0.230469 0.015625 0.015625 0.230469 0.015625 0.5 C 0.015625 0.765625 0.230469 0.980469 0.5 0.980469 C 0.765625 0.980469 0.980469 0.765625 0.980469 0.5 C 0.980469 0.230469 0.765625 0.015625 0.5 0.015625 Z M 0.5 0.015625 ',
+                                    fillColor: 'red',
+                                    fillOpacity: 0.0,
+                                    scale: 1,
+                                    strokeColor: 'red',
+                                    strokeWeight: 0.0,
+                                    labelOrigin: new google.maps.Point(0, 20)
+                                }
+                            });
+                            marker2.setMap(swapMap);
+                        });
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                })
+                ;*@
+            }
+            bindData(isDisplayNetworkingDetail());
+        }
+        function openMap() {
+            //google.maps.event.clearInstanceListeners(map);
+            if (mapListener != null) {
+                google.maps.event.removeListener(mapListener);
+                mapListener = null;
+            }
+            $('#mapDialog').modal('show');
+            $('#has-been-loaded').hide();
+            $('#is-loading').show();
+
+            allCarMarker.forEach(function (value, key) {
+                value[0].setMap(null);
+            });
+            allShippingPointMarker.forEach(function (value, key) {
+                value.setMap(null);
+            });
+            allCircle.forEach(function (value, idx, array) {
+                value.setMap(null);
+            });
+
+            allCarMarker.clear();
+            allShippingPointMarker.clear();
+            allCircle = [];
+            ignoreBoundChange = true;
+            map.setCenter({ lat: 13.802977, lng: 100.537052 });
+            if (isProvinceSelected())
+                map.setZoom(9);
+            else
+                map.setZoom(12);
+
+            mapListener = map.addListener('bounds_changed', function () {
+                if (ignoreBoundChange) {
+                    ignoreBoundChange = false;
+                    return;
+                }
+                prepareLoad();
+            });
+
+            bolSetCenter = true;
+            loadMapData({
+                mapBound: {
+                    northEast: {
+                        lat: map.getBounds().getNorthEast().lat(),
+                        lng: map.getBounds().getNorthEast().lng()
+                    },
+                    southWest: {
+                        lat: map.getBounds().getSouthWest().lat(),
+                        lng: map.getBounds().getSouthWest().lng()
+                    }
+                }
+            });
+        }
+
+        function getCriteria(overrideData) {
+            var shps = $('#cboShippingPoint').val();
+            var shpCriteria = [];
+            shps.forEach((shpGrp, idx, array) => {
+                shpCriteria.push({ shippingPoint: shpGrp, distanct: getMaxDistance(shpGrp) });
+            });
+            return {
+                wheel: $('#cboWheel').val(),
+                truckTypeCode: $('#cboTruckType').val(),
+                equipment: $('#cboEquipment').val(),
+                fleetCode: $('#cboFleet').val(),
+                regionCode: getRegionCode(),
+                zoneCode: getZoneCode(),
+                province: $('#cboProvince').val(),
+                shippingPoint: shpCriteria,
+                carrierCode: $('#cboCarrier').val(),
+                status: $('#cboStatus').val(),
+                fuel: $('#cboFuel').val(),
+                licensePlates: $('#cboLicensePlate').val(),
+                shippingPointGroup: $('#cboShippingPoint').val(),
+                regionAndZone: $('#cboRegionAndZone').val(),
+                ...overrideData
+            };
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            console.log(data);
+            $('#cboWheel').val(data.criteria.wheel).trigger('change');
+            $('#cboTruckType').val(data.criteria.truckTypeCode).trigger('change');
+            $('#cboEquipment').val(data.criteria.equipment).trigger('change');
+            $('#cboFleet').val(data.criteria.fleetCode).trigger('change');
+            doChange = true;
+            fixProvince = data.criteria.province;
+            $('#cboRegionAndZone').val(data.criteria.regionAndZone).trigger('change');
+            $('#cboCarrier').val(data.criteria.carrierCode).trigger('change');
+            $('#cboStatus').val(data.criteria.status).trigger('change');
+            $('#cboFuel').val(data.criteria.fuel).trigger('change');
+            $('#cboLicensePlate').val(data.criteria.licensePlates).trigger('change');
+            $('#cboShippingPoint').val(data.criteria.shippingPointGroup).trigger('change');
+        }
+
+        function isSelectRegionAndZone() {
+            if (searchCriteria == null)
+                return $('#cboRegionAndZone').val() != null && $('#cboRegionAndZone').val().length != 0;
+            else
+                return searchCriteria.regionAndZone != null && searchCriteria.regionAndZone.length != 0;
+        }
+
+        function getRegionCode() {
+            var regionCode = [];
+            if (isSelectRegionAndZone()) {
+                if ($('#cboRegionAndZone').select2('data').length >0 && $($('#cboRegionAndZone').select2('data')[0].element).attr('data-parent-key') != null)
+                    regionCode = [$($('#cboRegionAndZone').select2('data')[0].element).attr('data-parent-key')];
+                else
+                    regionCode = $('#cboRegionAndZone').val();
+            }
+            else if (isProvinceSelected()) {
+                var raw = JSON.parse($($('#cboProvince').select2('data')[0].element).attr('data-raw').replace(/'/g, '"'));
+                regionCode = [raw.RegionCode];
+            }
+            return regionCode;
+        }
+
+        function getRegionName() {
+            var regionName = '';
+            if (isSelectRegionAndZone() && $('#cboRegionAndZone').val().length == 1) {
+                if ($($('#cboRegionAndZone').select2('data')[0].element).attr('data-parent-text') != null)
+                    regionName = $($('#cboRegionAndZone').select2('data')[0].element).attr('data-parent-text');
+                else
+                    regionName = $('#cboRegionAndZone').select2('data')[0].text;
+            }
+            else if (isProvinceSelected()) {
+                var raw = JSON.parse($($('#cboProvince').select2('data')[0].element).attr('data-raw').replace(/'/g, '"'));
+                regionName = raw.RegionName;
+            }
+            return regionName;
+        }
+
+        function getZoneCode() {
+            var zoneCode = '';
+            if (isSelectRegionAndZone()) {
+
+                if ((searchCriteria == null && $('#cboRegionAndZone').val().length == 1) || (searchCriteria != null && searchCriteria.regionAndZone.length == 1)) {
+                    if ($($('#cboRegionAndZone').select2('data')[0].element).attr('data-parent-key') != null)
+                        zoneCode = JSON.parse($('#cboRegionAndZone').val()).zoneCode;
+                }
+            }
+            else if (isProvinceSelected()) {
+                var raw = JSON.parse($($('#cboProvince').select2('data')[0].element).attr('data-raw').replace(/'/g, '"'));
+                zoneCode = raw.ZoneCode;
+            }
+            return zoneCode;
+        }
+
+        function isShowByAll() {
+            if (searchCriteria == null)
+                return (!isSelectRegionAndZone() || $('#cboRegionAndZone').val().length > 1) && !isProvinceSelected() && !isSelectShippingPoint();// && $('#cboShippingPoint').val().length == 0;
+            else 
+                return (!isSelectRegionAndZone() || (searchCriteria != null && searchCriteria.regionAndZone.length > 1)) && !isProvinceSelected() && !isSelectShippingPoint();
+        }
+
+        function isShowByRegion() {
+            var zoneCode = getZoneCode();
+            return zoneCode == '' && !isProvinceSelected() && !isSelectShippingPoint();
+        }
+
+        function isShowByZone() {
+            return !isProvinceSelected() && !isSelectShippingPoint();
+        }
+
+        function isSelectShippingPoint() {
+            if (searchCriteria == null)
+                return $('#cboShippingPoint').val().length > 0;
+            else
+                return searchCriteria.shippingPointGroup.length > 0;
+        }
+
+        function isShowDetailTable() {
+            if (searchCriteria == null)
+                return $('#cboLicensePlate').val().length > 0
+            else
+                return searchCriteria.licensePlates.val().length > 0;
+        }
+
+        function isProvinceSelected() {
+            //return $('#cboProvince').val() != '' && $('#cboProvince').val() != null;
+            if (searchCriteria == null)
+                return $('#cboProvince').val() != '' && $('#cboProvince').val() != null;
+            else
+                return searchCriteria.province != '' && searchCriteria.province != null;
+        }
+
+        function search(showDetail = false) {
+            if (currentAjax != null) {
+                currentAjax.abort();
+                currentAjax = null;
+            }
+
+            emptyData();
+
+            if (showDetail) {
+                $('#near-by').hide();
+            }
+            else {
+                $('#NetworkDetail').hide();
+            }
+
+
+            $('#any-data').show();
+            $('.cboLicensePlate').show();
+            currentAjax = loadCarList()
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        var lpList = $('#cboLicensePlate').val();
+                        var foundInCombo = false;
+                        all_data = []
+                        if (lpList.length != 0) {
+                            result.data.forEach((rec, idx, array) => {
+                                if (lpList.includes(rec.licensePlate)) {
+                                    foundInCombo = true;
+                                    all_data.push(rec);
+                                }
+                            });
+                        }
+                        if (all_data.length == 0) {
+                            all_data = result.data;
+                        }
+                        bindData(showDetail);
+                        var comboData = [];
+                        result.data.forEach((rec, idx, array) => {
+                            comboData.push({ id: rec.licensePlate, text: rec.licensePlate });
+                        });
+
+                        var pageSize = 20;
+                        var selectedVal = [];
+                        //uiHelpers.initCombo('#cboLicensePlate', comboData, null, 'ทุกทะเบียน');
+                        $('#cboLicensePlate').select2({
+                            allowClear: true,
+                            placeholder: 'ทุกทะเบียน',
+                            ajax: {
+                                url: '@Url.Action("GetCar", "Networking")',
+                                data: function (params) {
+                                    var query = {
+                                        search: params.term,
+                                        page: params.page || 1,
+                                        type: 'public'
+                                    }
+                                    return query;
+                                },
+                                processResults: function (data, params) {
+                                    var page = params.page || 1;
+                                    var totalRecords = comboData.length;
+
+                                    var licenses = [];
+                                    if (params.term != null) {
+                                        if (params.term.includes('\r\n'))
+                                            licenses = params.term.split('\r\n');
+                                        else
+                                            licenses = params.term.split(' ');
+                                    }
+                                    var dataItem = comboData
+                                        .filter(license => params.term == null || params.term == '' || licenses.filter(lc => license.text.includes(lc)).length > 0);
+
+                                    totalRecords = dataItem.length;
+
+                                    dataItem = dataItem
+                                        .slice((page - 1) * pageSize, page * pageSize);
+
+                                    var selectedItem = dataItem.filter(license => licenses.includes(license.text));
+                                    if (selectedItem.length > 0) {
+                                        var vals = [];
+                                        $('#cboLicensePlate').val(vals).trigger('select2:select');
+                                        selectedItem.forEach((elem, idx, array) => {
+                                            var option = new Option(elem.text, elem.id, false, true);
+                                            $('#cboLicensePlate').append(option);
+                                            //vals.push(option);
+                                        });
+                                        $('#cboLicensePlate').trigger('change').select2('close');
+                                    }
+                                    return {
+                                        results: dataItem,
+                                        pagination: {
+                                            more: (page * pageSize) < totalRecords
+                                        }
+                                    };
+                                }
+                            }
+                        });
+
+                        if (foundInCombo)
+                            $('#cboLicensePlate').val(lpList).trigger('change.select2');
+                        $('.cboLicensePlate').hide();
+                    }
+
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    currentAjax = null;
+                    if (filterFunctionAfterLoadComplete != null) {
+                        filterFunctionAfterLoadComplete();
+                        filterFunctionAfterLoadComplete = null;
+                    }
+                    $('#any-data').hide();
+                })
+                ;
+            return currentAjax;
+        }
+
+        function bindData(showDetail) {
+            emptyData();
+            if (isDisplayMap()) {
+                LoadMapBound();
+                summaryMarker.forEach((rec, idx, array) => {
+                    rec.setMap(null);
+                });
+                summaryMarker = [];
+                if (isShowByAll()) {
+                    level = 1;
+                    selectedRegionCode = null;
+                    selectedZoneCode = null;
+                    setZoomAndCenter();
+                    var sumByRegion = new Map();
+                    all_data.forEach((rec, idx, array) => {
+                        if (sumByRegion.has(rec.regionCode)) {
+                            var rgData = sumByRegion.get(rec.regionCode);
+                            if (rec.status == 1) {
+                                rgData.heavyCount += 1;
+                            }
+                            else if (rec.status == 3) {
+                                rgData.inactiveCount += 1;
+                            } else {
+                                rgData.lightCount += 1;
+                            }
+                        }
+                        else {
+                            var lightCount = 0, heavyCount = 0, inactiveCount = 0;
+                            if (rec.status == 1) {
+                                heavyCount = 1;
+                            }
+                            else if (rec.status == 3) {
+                                inactiveCount = 1;
+                            }
+                            else {
+                                lightCount = 1;
+                            }
+
+                            sumByRegion.set(rec.regionCode, {
+                                regionCode: rec.regionCode,
+                                regionName: rec.regionName,
+                                lightCount: lightCount,
+                                heavyCount: heavyCount,
+                                inactiveCount: inactiveCount
+                            });
+                        }
+                    });
+                    bindRegionToMap(Array.from(sumByRegion.values()));
+                }
+                else if (isShowByRegion()) {
+                    level = 2;
+                    selectedRegionCode = getRegionCode()[0];
+                    selectedZoneCode = null;
+                    setZoomAndCenter(getRegionCode()[0]);
+
+                    var sumByZone = new Map();
+                    all_data.forEach((rec, idx, array) => {
+                        if (sumByZone.has(rec.regionCode + rec.zoneCode)) {
+                            var rgData = sumByZone.get(rec.regionCode + rec.zoneCode);
+                            if (rec.status == 1) {
+                                rgData.heavyCount += 1;
+                            }
+                            else if (rec.status == 3) {
+                                rgData.inactiveCount += 1;
+                            } else {
+                                rgData.lightCount += 1;
+                            }
+                        }
+                        else {
+                            var lightCount = 0, heavyCount = 0, inactiveCount = 0;
+                            if (rec.status == 1) {
+                                heavyCount = 1;
+                            }
+                            else if (rec.status == 3) {
+                                inactiveCount = 1;
+                            }
+                            else {
+                                lightCount = 1;
+                            }
+
+                            sumByZone.set(rec.regionCode + rec.zoneCode, {
+                                zoneCode: rec.zoneCode,
+                                zoneName: rec.zoneName,
+                                regionCode: rec.regionCode,
+                                regionName: rec.regionName,
+                                lightCount: lightCount,
+                                heavyCount: heavyCount,
+                                inactiveCount: inactiveCount
+                            });
+                        }
+                    });
+                    bindZoneToMap(Array.from(sumByZone.values()));
+                }
+                else if (isShowByZone() || isProvinceSelected()) {
+                    level = 3
+                    selectedRegionCode = getRegionCode()[0];
+                    selectedZoneCode = getZoneCode();
+                    setZoomAndCenter(getRegionCode()[0]);
+
+                    var sumByProvince = new Map();
+                    all_data.forEach((rec, idx, array) => {
+                        if (sumByProvince.has(rec.province)) {
+                            var rgData = sumByProvince.get(rec.province);
+                            if (rec.status == 1) {
+                                rgData.heavyCount += 1;
+                            }
+                            else if (rec.status == 3) {
+                                rgData.inactiveCount += 1;
+                            } else {
+                                rgData.lightCount += 1;
+                            }
+                        }
+                        else {
+                            var lightCount = 0, heavyCount = 0, inactiveCount = 0;
+                            if (rec.status == 1) {
+                                heavyCount = 1;
+                            }
+                            else if (rec.status == 3) {
+                                inactiveCount = 1;
+                            }
+                            else {
+                                lightCount = 1;
+                            }
+
+                            sumByProvince.set(rec.province, {
+                                province: rec.province,
+                                zoneCode: rec.zoneCode,
+                                zoneName: rec.zoneName,
+                                regionCode: rec.regionCode,
+                                regionName: rec.regionName,
+                                lightCount: lightCount,
+                                heavyCount: heavyCount,
+                                inactiveCount: inactiveCount
+                            });
+                        }
+                    });
+                    bindProvinceToMap(Array.from(sumByProvince.values()));
+                }
+            }
+            else {
+                $('#sum-data').hide();
+                $('#near-by').hide();
+                if (showDetail) {
+                    $('#NetworkDetail').show();
+                    generateTable('#NetworkDetail', all_data, null, detail_columns);
+                    //if (!isShowByAll() && !isShowByRegion() && !isShowByZone()) {
+                    //    $('#near-by').show();
+                    //    genNearBy();
+                    //}
+                }
+                else if (isShowByAll()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').show();
+                    $('#sum-data .sum-group-block').show();
+                    if (getRegionCode().length > 1) {
+                        var regions = [];
+                        $('#cboRegionAndZone').select2('data').forEach((rec, idx, array) => {
+                            regions.push({
+                                dataValue_Key: rec.id, dataDisplay: rec.text
+                            });
+                        });
+                        genSum('#sum-data', all_data, regions, 'regionCode');
+                    }
+                    else
+                        genSum('#sum-data', all_data, '@Url.Action("GetRegion", "Networking")', 'regionCode');
+                }
+                else if (isShowByRegion()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').show();
+                    $('#sum-data .sum-group-block').show();
+                    genSum('#sum-data', all_data, '@Url.Action("GetZone", "Networking")', 'zoneCode', true);
+                }
+                else if (isShowByZone()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').show();
+                    $('#sum-data .sum-group-block').show();
+                    genSum('#sum-data', all_data, '@Url.Action("GetProvince", "Networking")', 'province', true);
+                }
+                else if (isSelectShippingPoint()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').hide();
+                    $('#sum-data .sum-group-block').hide();
+                    $('#near-by').show();
+                    genNearBy();
+                }
+                else {// if (isProvinceSelected()) {
+                    $('#sum-data').show();
+                    $('#sum-data .summary-panel').hide();
+                    $('#sum-data .sum-group-block').show();
+                    genSum('#sum-data', all_data, [{ dataValue_Key: $('#cboProvince').select2('data')[0].id, dataDisplay: $('#cboProvince').select2('data')[0].text }], 'province', true);
+                    $('#near-by').show();
+                    genNearBy();
+                }
+            }
+        }
+
+        function getUrlVars() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+
+        function genNearbyTable(controlID, data) {
+            if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                $(controlID + ' .section-table-render').DataTable({
+                    dom: 'lTf<"html5buttons"B > gtip',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            title: null, // not add title on first row
+                            exportOptions: {
+                                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                            }
+                        }
+                    ],
+                    fixedHeader: true,
+                    scrollX: true,
+                    ordering: false,
+                    responsive: true,
+                    pageLength: 999,
+                    filter: true,
+                    data: data,
+                    columns: nearby_columns,
+                    asStripeClasses: []
+                });
+            }
+            else {
+                var table = $(controlID + ' .section-table-render').DataTable();
+                table.clear();
+                $.each(data, function (idx, obj) {
+                    table.row.add(data[idx]);
+                });
+                table.draw();
+            }
+        }
+
+        function generateTable(controlID, data, title, column) {
+            //$(controlID + ' .section-title').text(title);
+
+            if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                $(controlID + ' .section-table-render').DataTable({
+                    dom: 'lTf<"html5buttons"B > gtip',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            title: null, // not add title on first row
+                            exportOptions: {
+                                columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                            }
+                        }
+                    ],
+                    fixedHeader: true,
+                    scrollX: true,
+                    ordering: true,
+                    responsive: true,
+                    pageLength: 10,
+                    filter: true,
+                    data: data,
+                    columns: column,
+                    createdRow: function (row, data, dataIndex) {
+                        var viewNearByShippingPoint = '<a href="#" class="link-padding edit-icon" onclick=\'openNearbyShippingPoint(' + JSON.stringify(data) + '); return false;\' title="View shipping point within ' + getMaxDistance() + ' km"><i class="fas fa-map-marker-alt"></i></a>';
+                        var element = '';
+                        if (isProvinceSelected() || isShowDetailTable()) {
+                            var dataInRange = data.nearBy.filter((rec) => {
+                                return rec.distanceInKiloMeter < getMaxDistance(rec.shippingPointGroupDisplay);
+                            });
+                            if (dataInRange.length > 0)
+                                element += viewNearByShippingPoint;
+                        }
+
+                        $($(row).find('td')[0]).html(element);
+
+                        var openByLatLong = '<a href="#" class="link-padding edit-icon" onclick=\'openCarLocationMap(' + JSON.stringify(data) + '); return false;\' title="View car location."><img src="/assets/images/MapIcon.png"></img><i style="color: white;" class="fas fa-map-marker-alt"></i></a>';
+
+                        $($(row).find('td')[14]).html(openByLatLong);
+
+
+                        var shippingPointGroups = [];
+                        data.nearBy.forEach((rec, idx, array) => {
+                            if (!shippingPointGroups.includes(rec.shippingPointGroupDisplay) && rec.distanceInKiloMeter <= getMaxDistance(rec.shippingPointGroupDisplay))
+                                shippingPointGroups.push(rec.shippingPointGroupDisplay);
+                        });
+                        if (shippingPointGroups.length > 1) {
+                            $(row).css('color', 'red');
+                        }
+
+                        if (isShowDetailTable() && data.nearBy != null && data.nearBy.length > 0) {
+                            var dtRow = $('#NetworkDetail .section-table-render').DataTable().row(row)
+                            if (dtRow.child.isShown()) {
+                                // This row is already open - close it
+                                dtRow.child.hide();
+                                $(row).removeClass('shown');
+                            }
+                            else {
+                                // Open this row
+                                var childRow = '';
+                                var spGroup = [];
+                                data.nearBy.forEach((rec, idx, array) => {
+                                    if (spGroup.length < 3 && !spGroup.includes(rec.shippingPointGroupDisplay)) {
+                                        childRow = childRow + '<div class="card col-3" style="margin: 5px;"><div class="card-body row">'
+                                        childRow = childRow + '<div class="col-8">' + rec.shippingPointGroup + '</div>';
+                                        childRow = childRow + '<div class="col-4">' + uiHelpers.displayN2(rec.distanceInKiloMeter) + ' km</div>';
+                                        childRow = childRow + '</div></div>'
+                                        spGroup.push(rec.shippingPointGroupDisplay);
+                                    }
+                                });
+                                dtRow.child('<div class="row" style="margin-left: 20px; max-width: 1200px;">' + childRow + '</div>').show();
+                                $(row).addClass('shown');
+                            }
+                        }
+                    },
+                    asStripeClasses: []
+                });
+            }
+            else {
+                var table = $(controlID + ' .section-table-render').DataTable();
+                table.clear();
+                $.each(data, function (idx, obj) {
+                    table.row.add(data[idx]);
+                });
+                table.draw();
+            }
+            $('.html5buttons').find('.custom-table-header').remove();
+            if (title == null)
+                title = '';
+            if (isShowByAll()) {
+                $('.html5buttons').prepend('<div class="custom-table-header"><h4>' + title + '</h4></div>');
+            }
+            else if (isShowByRegion()) {
+                $('.html5buttons').prepend('<div class="custom-table-header"><h4>' + $('#cboRegionAndZone').select2('data')[0].text + ' ' + title + '</h4></div>');
+            }
+            else if (isShowByZone()) {
+                $('.html5buttons').prepend('<div class="custom-table-header"><h4>' + getRegionName() + ' ' + $('#cboRegionAndZone').select2('data')[0].text + ' ' + title + '</h4></div>');
+            }
+            else if (isProvinceSelected() || isSelectShippingPoint()) {
+                $('.html5buttons').prepend('<div class="custom-table-header"><h4>' + $('#cboProvince').select2('data')[0].text + ' ' + title + '</h4></div>');
+            }
+        }
+
+        function genNearBy() {
+            var controlId = '#near-by';
+            $(controlId + ' .sum-group-block').empty();
+
+            var jqxhr = $.post('@Url.Action("GetShippingPointGroup", "Networking")', getCriteria())
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        var shippingPoint = result.data;
+                        if ($('#cboShippingPoint').val().length > 0)
+                            shippingPoint = result.data.filter((rec) => {
+                                return $('#cboShippingPoint').val().includes(rec.dataValue_Key);
+                            });
+                        drawNearByTable(shippingPoint);
+                    }
+
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $(controlId + ' .section-loading').hide();
+                })
+                ;
+        }
+
+        function drawNearByTable(groupData) {
+            var controlId = '#near-by';
+
+            groupData.forEach((groupRec, idx, array) => {
+                var groupCnt = { lightCount: 0, heavyCount: 0, inactiveCount: 0 };
+                var dataByRegion = all_data.filter((rec) => {
+                    return rec.nearBy.some((nearRec, idx, array) => {
+                        return nearRec.shippingPointGroupDisplay == groupRec.dataValue_Key && nearRec.distanceInKiloMeter < getMaxDistance(nearRec.shippingPointGroupDisplay);
+                    })
+                });
+
+                $(controlId + ' .sum-group-block').append('<div class="col-md-6 col-lg-6 col-xl-4" group-key="' + groupRec.dataValue_Key + '">'
+                    + '<article class="card mb-4 sum-group-panel">'
+                    + '	<div class="card-body">'
+                    + '		<h4 class="card-title section-title">' + groupRec.dataValue_Key + '</h4>'
+                    + '<div class="row card-body">'
+                    + '    <div class="col-12">'
+                    + '        <label for="cboMaxDistance" style="font-weight: bold;">แสดงรถในรัศมี</label>'
+                    + '        <select class="form-control auto-search cboMaxDistance" data-shipping-point="' + groupRec.dataValue_Key + '">'
+                    + '            <option value="10">10 km</option>'
+                    + '            <option value="15">15 km</option>'
+                    + '            <option value="20">20 km</option>'
+                    + '            <option value="25">25 km</option>'
+                    + '            <option value="30">30 km</option>'
+                    + '            <option value="40">40 km</option>'
+                    + '            <option value="50">50 km</option>'
+                    + '            <option value="60">60 km</option>'
+                    + '        </select>'
+                    + '    </div>'
+                    + '</div>'
+                    + '		<div class="table-responsive">'
+                    + '			<div class="dataTables_wrapper">'
+                    + '				<table class="table table-striped section-table-render" style="width:100%">'
+                    + '             </table>'
+                    + '			</div>'
+                    + '		</div>'
+                    + '	</div>'
+                    + '</article>'
+                    + '</div>');
+
+                $('.cboMaxDistance[data-shipping-point="' + groupRec.dataValue_Key + '"]').val(getMaxDistance(groupRec.dataValue_Key));
+                $('.cboMaxDistance[data-shipping-point="' + groupRec.dataValue_Key + '"]').on('change', function () {
+                    maxDistanceByShippingPoint.set(groupRec.dataValue_Key, $('.cboMaxDistance[data-shipping-point="' + groupRec.dataValue_Key + '"]').val());
+                    search(isDisplayNetworkingDetail());
+                });
+
+                var groupMap = new Map();
+                dataByRegion.forEach((rec, idx, array) => {
+                    if (groupMap.has(rec.truckTypeCode)) {
+                        var group = groupMap.get(rec.truckTypeCode);
+                        if (rec.status == 1) {
+                            group.heavyCount += 1;
+                            groupCnt.heavyCount += 1;
+                        }
+                        else if (rec.status == 3) {
+                            group.inactiveCount += 1;
+                            groupCnt.inactiveCount += 1;
+                        }else {
+                            group.lightCount += 1;
+                            groupCnt.lightCount += 1;
+                        }
+                        group.rawData.push(rec);
+                    }
+                    else {
+                        var lightCount = 0, heavyCount = 0, inactiveCount = 0;
+                        if (rec.status == 1) {
+                            heavyCount = 1;
+                            groupCnt.heavyCount += 1;
+                        }
+                        else if (rec.status == 3) {
+                            inactiveCount = 1;
+                            groupCnt.inactiveCount += 1;
+                        }
+                        else {
+                            lightCount = 1;
+                            groupCnt.lightCount += 1;
+                        }
+
+                        groupMap.set(rec.truckTypeCode, {
+                            truckTypeCode: rec.truckTypeCode,
+                            truckTypeName: rec.truckTypeName,
+                            lightCount: lightCount,
+                            heavyCount: heavyCount,
+                            inactiveCount: inactiveCount,
+                            rawData: [rec]
+                        });
+                    }
+                });
+                var regionData = Array.from(groupMap.values());
+                regionData.sort(function (a, b) {
+                    return a.truckTypeCode.localeCompare(b.truckTypeCode);
+                });
+
+                generateTableNoButton('[group-key="' + groupRec.dataValue_Key + '"]', regionData, groupRec.dataDisplay, sum_columns)
+
+                if (regionData.length > 0) {
+                    $($('[group-key="' + groupRec.dataValue_Key + '"]').find('thead')[0]).prepend('<tr><th></th><th class="header-total">'
+                        + uiHelpers.displayInteger(groupCnt.lightCount) + '</th><th class="header-total">'
+                        //+ uiHelpers.displayInteger(groupCnt.inactiveCount) + '</th><th class="header-total">'
+                        + uiHelpers.displayInteger(groupCnt.heavyCount) + '</th></tr>')
+                }
+                groupRec.shippingPoint = true;
+                bindClickEachGroup(groupRec);
+            });
+        }
+
+        function genSum(controlId, data, serviceURLOrDataOfGroup, filter_column, hideCode = false) {
+            $(controlId + ' .sum-group-block').empty();
+            if (isShowByAll()) {
+                $(controlId + ' .card-title').text('ภาพรวมรถ');
+            }
+            else if (isShowByRegion()) {
+                $(controlId + ' .card-title').text('ภาพรวมรถ' + $('#cboRegionAndZone').select2('data')[0].text);
+            }
+            else if (isShowByZone()) {
+                $(controlId + ' .card-title').text('ภาพรวมรถ' + getRegionName() + ' ' + $('#cboRegionAndZone').select2('data')[0].text);
+            }
+            else {
+                $(controlId + ' .card-title').text('');
+            }
+            var jqxhr = null;
+            if (!Array.isArray(serviceURLOrDataOfGroup)) {
+                jqxhr = $.post(serviceURLOrDataOfGroup, getCriteria())
+                    .done(function (result) {
+                        if (uiHelpers.errorHandler(result)) {
+                            loopTable(controlId, data, result.data, filter_column, hideCode);
+                        }
+
+                    })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function (e) {
+                        $(controlId +' .section-loading').hide();
+                    })
+                    ;
+            }
+            else {
+                loopTable(controlId, data, serviceURLOrDataOfGroup, filter_column, hideCode);
+                $(controlId +' .section-loading').hide();
+            }
+        }
+
+        function loopTable(controlId, data, groupData, filter_column, hideCode) {
+            if (groupData.length == 0) {
+                //$(controlId + ' .sum-group-block').append('ไม่พบข้อมูล');
+                groupData.push({ dataValue_Key: '', dataDisplay: '' });
+            }
+
+            var totalCnt = { lightCount: 0, heavyCount: 0, inactiveCount: 0 };
+            groupData.forEach((groupRec, idx, array) => {
+                var groupCnt = { lightCount: 0, heavyCount: 0, inactiveCount: 0 };
+                var dataByRegion = data.filter((rec) => {
+                    return rec[filter_column] == groupRec.dataValue_Key || groupRec.dataValue_Key == '';
+                });
+
+                $(controlId + ' .sum-group-block').append('<div class="col-md-6 col-lg-6 col-xl-4" group-key="' + groupRec.dataValue_Key + '">'
+                    + '<article class="card mb-4 sum-group-panel">'
+                    + '	<div class="card-body">'
+                    + '		<h4 class="card-title section-title">' + groupRec.dataValue_Key + '</h4>'
+                    + '		<div class="table-responsive">'
+                    + '			<div class="dataTables_wrapper">'
+                    + '				<table class="table table-striped section-table-render" style="width:100%">'
+                    + '             </table>'
+                    + '			</div>'
+                    + '		</div>'
+                    + '	</div>'
+                    + '</article>'
+                    + '</div>');
+
+                var groupMap = new Map();
+                dataByRegion.forEach((rec, idx, array) => {
+                    if (groupMap.has(rec.truckTypeCode)) {
+                        var group = groupMap.get(rec.truckTypeCode);
+                        if (rec.status == 1) {
+                            group.heavyCount += 1;
+                            groupCnt.heavyCount += 1;
+                        }
+                        else if (rec.status == 3) {
+                            group.inactiveCount += 1;
+                            groupCnt.inactiveCount += 1;
+                        }
+                        else {
+                            group.lightCount += 1;
+                            groupCnt.lightCount += 1;
+                        }
+                        group.rawData.push(rec);
+                    }
+                    else {
+                        var lightCount = 0, heavyCount = 0, inactiveCount = 0;
+                        if (rec.status == 1) {
+                            heavyCount = 1;
+                            groupCnt.heavyCount += 1;
+                        }
+
+                        else if (rec.status == 3) {
+                            inactiveCount += 1;
+                            groupCnt.inactiveCount += 1;
+                        }
+                        else {
+                            lightCount = 1;
+                            groupCnt.lightCount += 1;
+                        }
+
+                        groupMap.set(rec.truckTypeCode, {
+                            truckTypeCode: rec.truckTypeCode,
+                            truckTypeName: rec.truckTypeName,
+                            lightCount: lightCount,
+                            heavyCount: heavyCount,
+                            inactiveCount: inactiveCount,
+                            rawData: [rec]
+                        });
+                    }
+                });
+                var regionData = Array.from(groupMap.values());
+                regionData.sort(function (a, b) {
+                    return a.truckTypeCode.localeCompare(b.truckTypeCode);
+                });
+                if (hideCode)
+                    generateTableNoButton('[group-key="' + groupRec.dataValue_Key + '"]', regionData, groupRec.dataDisplay, sum_columns)
+                else
+                    generateTableNoButton('[group-key="' + groupRec.dataValue_Key + '"]', regionData, groupRec.dataValue_Key + ' - ' + groupRec.dataDisplay, sum_columns);
+
+                bindClickEachGroup(groupRec);
+
+                if (regionData.length > 0) {
+                    $($('[group-key="' + groupRec.dataValue_Key + '"]').find('thead')[0]).prepend('<tr><th></th><th class="header-total">'
+                        + uiHelpers.displayInteger(groupCnt.lightCount) + '</th><th class="header-total">'
+                        //+ uiHelpers.displayInteger(groupCnt.inactiveCount) + '</th><th class="header-total">'
+                        + uiHelpers.displayInteger(groupCnt.heavyCount) + '</th></tr>')
+                }
+                totalCnt.lightCount += groupCnt.lightCount;
+                totalCnt.heavyCount += groupCnt.heavyCount;
+                totalCnt.inactiveCount += groupCnt.inactiveCount;
+            });
+            if (isShowByAll()) {
+                $(controlId + ' .total-car-text').text('กำลังรถรวม');
+            }
+            else if (isShowByRegion()) {
+                $(controlId + ' .total-car-text').text(getRegionCode()[0]);
+            }
+            else if (isShowByZone()) {
+                $(controlId + ' .total-car-text').text(getRegionCode()[0] + ' ' + $('#cboRegionAndZone').select2('data')[0].text);
+            }
+            $(controlId + ' .total-car-cnt').text(totalCnt.lightCount + totalCnt.heavyCount + totalCnt.inactiveCount);
+            $(controlId + ' .light-car-text').text('รถเบา');
+            $(controlId + ' .light-car-cnt').text(totalCnt.lightCount);
+            $(controlId + ' .heavy-car-text').text('รถหนัก');
+            $(controlId + ' .heavy-car-cnt').text(totalCnt.heavyCount);
+            $(controlId + ' .inactive-car-text').text('ไม่ Active');
+            $(controlId + ' .inactive-car-cnt').text(totalCnt.inactiveCount);
+            $(controlId + ' .summary-unit').text('คัน');
+        }
+
+        function generateTableNoButton(controlID, data, title, column) {
+            $(controlID + ' .section-title').text(title);
+
+            if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                $(controlID + ' .section-table-render').DataTable({
+                    dom: 'T gt',
+                    fixedHeader: true,
+                    scrollX: false,
+                    ordering: false,
+                    responsive: true,
+                    pageLength: 999,
+                    filter: true,
+                    data: data,
+                    columns: column,
+                    columnDefs: [
+                        {
+                            targets: [1, 2],
+                            className: 'dt-body-right'
+                        }
+                    ],
+                    footerCallback: function(row, data, start, end, display) {
+                        var api = this.api(), data;
+
+                        // Remove the formatting to get integer data for summation
+                        var intVal = function (i) {
+                            return typeof i === 'string' ?
+                                i.replace(/[\$,]/g, '') * 1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+                        };
+
+                        // Total over all pages
+                        totalLight = api
+                            .column(1)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+                        totalHeavy = api
+                            .column(2)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        // Update footer
+                        $(api.column(1).footer()).html(
+                            totalLight
+                        );
+                        $(api.column(2).footer()).html(
+                            totalHeavy
+                        );
+                    },
+                    asStripeClasses: []
+                });
+            }
+            else {
+                var table = $(controlID + ' .section-table-render').DataTable();
+                table.clear();
+                $.each(data, function (idx, obj) {
+                    table.row.add(data[idx]);
+                });
+                table.draw();
+            }
+        }
+
+        function searchDefault() {
+            searchCriteria = null;
+            search(isDisplayNetworkingDetail());
+        }
+
+        function initialControl() {
+            $('.CriteriaOverlay').show();
+            var ajax = [];
+            ajax.push(uiHelpers.initCombo('#cboWheel', '@Url.Action("GetWheel", "Networking")', null, 'จำนวนล้อ'));
+            ajax.push(uiHelpers.initCombo('#cboTruckType', '@Url.Action("GetTruckType", "Networking")', null, 'ประเภทรถ'));
+            ajax.push(uiHelpers.initCombo('#cboEquipment', '@Url.Action("GetEquipment", "Networking")', null, 'อุปกรณ์รถ'));
+            ajax.push(uiHelpers.initCombo('#cboFleet', '@Url.Action("GetFleet", "Networking")', null, 'Fleet'));
+            ajax.push(uiHelpers.initCombo('#cboRegionAndZone', '@Url.Action("GetRegionAndZone", "Networking")', null, 'ภาคและพื้นที่'));
+            ajax.push(uiHelpers.initCombo('#cboProvince', '@Url.Action("GetProvince", "Networking")', null, 'จังหวัด'));
+            ajax.push(uiHelpers.initCombo('#cboShippingPoint', '@Url.Action("GetShippingPointGroup", "Networking")', null, 'จุดจ่าย'));
+            ajax.push(uiHelpers.initCombo('#cboCarrier', '@Url.Action("GetCarrier", "Networking")', null, 'ผู้รับเหมา'));
+            //ajax.push(uiHelpers.initCombo('#cboLicensePlate', '@Url.Action("GetCar", "Networking")', null, 'ทุกทะเบียน'));
+            uiHelpers.initCombo('#cboLicensePlate', [], null, 'ทุกทะเบียน');
+            @*ajax.push(uiHelpers.initCombo('#cboStatus', '@Url.Action("GetStatus", "Networking")', null, 'ทั้งหมด'));*@
+            ajax.push(uiHelpers.initCombo('#cboFuel', '@Url.Action("GetFuel", "Networking")', null, 'เชื้อเพลิง'));
+            var result = Promise.all(ajax).finally(() => { $('.CriteriaOverlay').hide(); });
+            
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, searchDefault).done(function (result) {
+                $('#search-button .search-button').text('OK');
+            });
+
+
+            $('.clear-button').on('click', function (e) {
+                $('#cboWheel').val(null).trigger('change');
+                $('#cboTruckType').val(null).trigger('change');
+                $('#cboEquipment').val(null).trigger('change');
+                $('#cboFleet').val(null).trigger('change');
+                doChange = true;
+                $('#cboRegionAndZone').val(null).trigger('change');
+                $('#cboProvince').val(null).trigger('change');
+                $('#cboShippingPoint').val(null).trigger('change');
+                $('#cboCarrier').val(null).trigger('change');
+                $('#cboLicensePlate').val(null).trigger('change');
+                $('#cboStatus').val(null).trigger('change');
+                $('#cboFuel').val(null).trigger('change');
+            });
+
+            return result;
+        }
+
+        $(document).ready(function () {
+            var input = getUrlVars();
+            $('#NetworkDetail').hide();
+            initialControl().finally(() => {
+
+                $('#cboWheel').on('change', () => {
+                    //$('.CriteriaOverlay').show();
+                    uiHelpers.initCombo('#cboTruckType', '@Url.Action("GetTruckType", "Networking")', getCriteria(), 'ประเภทรถ');
+                    //search(isDisplayNetworkingDetail()).always(() => {
+                    //    //$('.CriteriaOverlay').hide();
+                    //});
+                });
+                $('#cboRegionAndZone').on('change', (e) => {
+                    //$('.CriteriaOverlay').show();
+                    if (!doChange) return;
+                    doChange = false;
+                    var ldCmb = [];
+                    ldCmb.push(uiHelpers.initCombo('#cboProvince', '@Url.Action("GetProvince", "Networking")', getCriteria(), 'จังหวัด').always(() => {
+                        if (fixProvince != null) {
+                            $('#cboProvince').val(fixProvince).trigger('change.select2');
+                            fixProvince = null;
+                            search(false);
+                        }
+                    }));
+                    ldCmb.push(uiHelpers.initCombo('#cboShippingPoint', '@Url.Action("GetShippingPointGroup", "Networking")', getCriteria(), 'จุดจ่าย'));
+                    var lpList = $('#cboLicensePlate').val();
+
+                    var result = Promise.all(ldCmb).finally(() => {
+                        if (lpList.length == 0) {
+                            //search(isDisplayNetworkingDetail());
+                        }
+                    });
+                    @*uiHelpers.initCombo('#cboLicensePlate', '@Url.Action("GetCar", "Networking")', getCriteria(), 'ทุกทะเบียน').always(() => {
+                        if (JSON.stringify(lpList) != JSON.stringify($('#cboLicensePlate').val()))
+                            $('#cboLicensePlate').val(lpList).trigger('change.select2');
+                        if (lpList.length != 0) {
+                            search(isDisplayNetworkingDetail());
+                        }
+                        $('.CriteriaOverlay').hide();
+                    });*@
+                });
+                $('#cboRegionAndZone').on('select2:selecting', (e) => {
+                    if ($(e.params.args.data.element).attr('data-parent-key') == null) {
+                        var allRegion = true;
+                        $('#cboRegionAndZone').select2('data').forEach((rec, idx, array) => {
+                            allRegion = allRegion && $(rec.element).attr('data-parent-key') == null;
+                        });
+                        if (!allRegion) {
+                            doChange = true;
+                            $('#cboRegionAndZone').val([e.params.args.data.id]).trigger('change');
+                        }
+                        else {
+                            var selected = $('#cboRegionAndZone').val();
+                            selected.push(e.params.args.data.id);
+                            doChange = true;
+                            $('#cboRegionAndZone').val(selected).trigger('change');
+                        }
+                    }
+                    else {
+                        //only 1 zone is allow
+                        doChange = true;
+                        $('#cboRegionAndZone').val([e.params.args.data.id]).trigger('change');
+                    }
+                });
+                $('#cboRegionAndZone').on('select2:unselecting', (e) => {
+                    doChange = true;
+                    var selected = $('#cboRegionAndZone').val();
+                    selected.splice(selected.indexOf(e.params.args.data.id), 1)
+                    $('#cboRegionAndZone').val(selected).trigger('change');
+                });
+                $('#cboProvince').on('change', () => {
+                    var selectedData = $('#cboShippingPoint').val();
+                    uiHelpers.initCombo('#cboShippingPoint', '@Url.Action("GetShippingPointGroup", "Networking")', getCriteria(), 'จุดจ่าย').always(() => {
+                        $('#cboShippingPoint').val(selectedData).trigger('change.select2');
+                        var lpList = $('#cboLicensePlate').val();
+                        if (lpList.length == 0) {
+                            //search(isDisplayNetworkingDetail());
+                        }
+                    });
+                });
+                $('#cboFleet').on('change', () => {
+                    uiHelpers.initCombo('#cboCarrier', '@Url.Action("GetCarrier", "Networking")', getCriteria(), 'ผู้รับเหมา');
+                    var lpList = $('#cboLicensePlate').val();
+                    if (lpList.length == 0) {
+                        //search(isDisplayNetworkingDetail());
+                    }
+                });
+                $('#cboShippingPoint').on('change', () => {
+                    if (!isProvinceSelected() && $('#cboShippingPoint').val().length > 0) {
+                        var ajax = $.post('@Url.Action("GetProvinceByShippingPoint", "Networking")', { shippingPointGroup: $('#cboShippingPoint').val()[0] })
+                            .done(function (result) {
+                                if (uiHelpers.errorHandler(result)) {
+                                    //$('#cboProvince').val(result.data).trigger('change.select2');
+                                    var selectedData = $('#cboShippingPoint').val();
+                                    uiHelpers.initCombo('#cboShippingPoint', '@Url.Action("GetShippingPointGroup", "Networking")', getCriteria(), 'จุดจ่าย').always(function () {
+                                        $('#cboShippingPoint').val(selectedData).trigger('change.select2');
+                                        //search(isDisplayNetworkingDetail());
+                                    });
+                                }
+                            })
+                            .fail(uiHelpers.postFailHandler)
+                            .always(function (e) {
+                                $('#any-data').hide();
+                            })
+                            ;
+                    }
+                    else {
+                        //search(isDisplayNetworkingDetail());
+                    }
+                });
+
+                $('#cboLicensePlate').on('change', () => {
+                    //search(isShowDetailTable());
+                });
+
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(function (e) {
+                    //if (input["zoneCode"] == null || input["zoneCode"] == '')
+                    //    $('#cboRegionAndZone').val([input["regionCode"]]).trigger('change');//.trigger('change.select2');
+                    //else
+                    //    $('#cboRegionAndZone').val([JSON.stringify({ regionCode: decodeURIComponent(input["regionCode"]), zoneCode: decodeURIComponent(input["zoneCode"]) })]).trigger('change');//.trigger('change.select2');
+
+
+                    //if (input["province"] != null && input["province"] != '')
+                    //    $('#cboProvince').val(decodeURIComponent(input["province"])).trigger('change');//.trigger('change.select2');
+                    search(isDisplayNetworkingDetail());
+                });
+
+                configSearchWhenChange();
+
+                // Get the offset position of the navbar
+                leftMenuOffset = $('.first-row')[0].offsetTop;
+
+                // When the user scrolls the page, execute myFunction
+                setStickyCriteria();
+                window.addEventListener("scroll", setStickyCriteria);
+
+                $('.back-to-summary').on('click', () => {
+                    showSummaryPanel($('.fa-table')[0]);
+                    //bindData(false);
+                    //$('#sum-data').show();
+                    //$('#near-by').show();
+                    //$('#NetworkDetail').hide();
+                });
+
+                bindClickSummary();
+            });
+        });
+        function configSearchWhenChange() {
+            //$('.auto-search').on('change', () => {
+            //    if (loadTimer != null) {
+            //        clearTimeout(loadTimer);
+            //        loadTimer = null;
+            //    }
+            //    loadTimer = setTimeout(function () { search(isDisplayNetworkingDetail()); }, 500);
+            //});
+        }
+
+        function setStickyCriteria() {
+            if (window.pageYOffset > leftMenuOffset) {
+                $('.left-menu').css('top', window.pageYOffset - leftMenuOffset);
+                $('.left-menu').css('height', '100vh');
+            } else {
+                $('.left-menu').css('top', '');
+                $('.left-menu').css('height', 'calc(100vh - ' + (leftMenuOffset - window.pageYOffset) + 'px)');
+            }
+        }
+
+        function showTable(data, title = null) {
+            emptyData();
+            $('#sum-data').hide();
+            $('#near-by').hide();
+            $('#NetworkDetail').show();
+            generateTable('#NetworkDetail', data, title, detail_columns);
+            //if (!isShowByAll() && !isShowByRegion() && !isShowByZone()) {
+            //    $('#near-by').show();
+            //    genNearBy();
+            //}
+        }
+
+        function bindClickSummary() {
+            var controlId = '#sum-data';
+            $(controlId + ' .total-car').on('click', function () {
+                var data = all_data;
+                var title = '';
+                if (isShowByAll())
+                    title = $(controlId + ' .total-car-text').text();
+                showTable(data, title);
+            });
+            $(controlId + ' .inactive-car').on('click', function () {
+                var data = all_data;
+                data = data.filter((rec) => {
+                    return rec.status == '3';
+                });
+                showTable(data, $(controlId + ' .inactive-car-text').text());
+            });
+            $(controlId + ' .light-car').on('click', function () {
+                var data = all_data;
+                data = data.filter((rec) => {
+                    return rec.status == '2';
+                });
+                showTable(data, $(controlId + ' .light-car-text').text());
+            });
+            $(controlId + ' .heavy-car').on('click', function () {
+                var data = all_data;
+                data = data.filter((rec) => {
+                    return rec.status == '1';
+                });
+                showTable(data, $(controlId + ' .heavy-car-text').text());
+            });
+        }
+        function setCombobox(data, groupRec, status) {
+            var requireSearch = false;
+            if (isShowByAll()) {
+                doChange = true;
+                $('#cboRegionAndZone').val([groupRec.dataValue_Key]).trigger('change');//.trigger('change.select2');
+                requireSearch = true;
+            }
+            else if (isShowByRegion()) {
+                if (groupRec.dataValue_Key == null || groupRec.dataValue_Key == '') {
+                    doChange = true;
+                    $('#cboRegionAndZone').val([$('#cboRegionAndZone').val()]).trigger('change');//.trigger('change.select2');
+                    requireSearch = true;
+                }
+                else {
+                    doChange = true;
+                    $('#cboRegionAndZone').val([JSON.stringify({ regionCode: $('#cboRegionAndZone').val()[0], zoneCode: groupRec.dataValue_Key })]).trigger('change');//.trigger('change.select2');
+                    requireSearch = true;
+                }
+            }
+            else if (isShowByZone()) {
+                $('#cboProvince').val(groupRec.dataValue_Key).trigger('change');//.trigger('change.select2');
+                requireSearch = true;
+            }
+
+            if (groupRec.shippingPoint) {
+                $('#cboShippingPoint').val([groupRec.dataValue_Key]).trigger('change');//.trigger('change.select2');
+                requireSearch = true;
+            }
+
+            if (!requireSearch) {
+                if (filterFunctionAfterLoadComplete != null) {
+                    filterFunctionAfterLoadComplete();
+                    filterFunctionAfterLoadComplete = null;
+                }
+            }
+            else {
+                searchDefault();
+            }
+        }
+
+        function showFilteredData(data, groupRec, status, title = null) {
+            filterFunctionAfterLoadComplete = function () {
+                var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+                data = data.filter((rec) => {
+                    return rec.status == status || status == null;
+                });
+                showTable(data, title);
+            }
+
+            showDetailPanel($('.fa-info-circle')[0], false);
+            setCombobox(data, groupRec, status);
+        }
+
+        function bindClickEachGroup(groupRec) {
+            var controlId = '#sum-data';
+            //click title
+            $('[group-key="' + groupRec.dataValue_Key + '"] .section-title').on('click', function () {
+                showSummaryPanel($('.fa-table')[0], false)
+                setCombobox(null, groupRec, null);
+                searchDefault();
+            });
+            //click truck type
+            $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render tbody').on('click', 'td:nth-child(1)', function () {
+                var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+                var title = table.row(this).data().truckTypeName;
+                showFilteredData(table.row(this).data().rawData, groupRec, null, title);
+            });
+            //click data หนัก
+            $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render tbody').on('click', 'td:nth-child(3)', function () {
+                var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+                var title = table.row(this).data().truckTypeName + ' ' + $(controlId + ' .heavy-car-text').text();
+                showFilteredData(table.row(this).data().rawData, groupRec, '1', title);
+            });
+            //click data เบา
+            $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render tbody').on('click', 'td:nth-child(2)', function () {
+                var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+                var title = table.row(this).data().truckTypeName + ' ' + $(controlId + ' .light-car-text').text();
+                showFilteredData(table.row(this).data().rawData, groupRec, '2', title);
+            });
+            //click data ปิด
+            //$('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render tbody').on('click', 'td:nth-child(3)', function () {
+            //    var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+            //    showFilteredData(table.row(this).data().rawData, groupRec, '3');
+            //});
+            //click total หนัก
+            $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render thead').on('click', 'th:nth-child(3).header-total', function () {
+                var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+                var data = [];
+                table.rows().data().each((rec, idx, array) => {
+                    data = data.concat(rec.rawData);
+                });
+                var title = $(controlId + ' .heavy-car-text').text();
+                showFilteredData(data, groupRec, '1', title);
+            });
+            //click total เบา
+            $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render thead').on('click', 'th:nth-child(2).header-total', function () {
+                var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+                var data = [];
+                table.rows().data().each((rec, idx, array) => {
+                    data = data.concat(rec.rawData);
+                });
+                var title = $(controlId + ' .light-car-text').text();
+                showFilteredData(data, groupRec, '2', title);
+            });
+            //click total ปิด
+            //$('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render thead').on('click', 'th:nth-child(3).header-total', function () {
+            //    var table = $('[group-key="' + groupRec.dataValue_Key + '"] .section-table-render').DataTable();
+            //    var data = [];
+            //    table.rows().data().each((rec, idx, array) => {
+            //        data = data.concat(rec.rawData);
+            //    });
+            //    showFilteredData(data, groupRec, '3');
+            //});
+        }
+    </script>
+}
+
+<!-- Modal -->
+<div id="mapDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Map" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="overlay section-loading">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header">
+                <h5 class="modal-title" style=" padding-right: 20px;">Map</h5>
+                <i style="display: none; color: red;" id="is-loading" class="fas fa-spinner fa-pulse fa-lg" title="Map is updaing."></i>
+                <i style="display: none; color: green;" id="has-been-loaded" class="fas fa-check fa-lg" title="Map is up-to-date."></i>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="map" style="width: 100%; height: 80vh;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="nearbyDialog" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Map" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="overlay section-loading">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header">
+                <h5 class="modal-title" style=" padding-right: 20px;">Nearby Shipping Point</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <div class="dataTables_wrapper">
+                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end modal-->
+
+<div class="row first-row">
+    <div class="col-md-2 pr-0 mr-0">
+        <div class="card left-menu">
+            <div class="overlay CriteriaOverlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group col">
+                        @*<label for="cboFleet">Fleet</label>*@
+                        <select class="dropdown-width auto-search" id="cboFleet" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col">
+                        @*<label for="cboRegionAndZone">ภาค และพื้นที่&nbsp;&nbsp;&nbsp;</label>*@
+                        <select class="dropdown-width" id="cboRegionAndZone" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col">
+                        @*<label for="cboProvince">จังหวัด&nbsp;&nbsp;&nbsp;</label>*@
+                        <select class="dropdown-width" id="cboProvince"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col">
+                        @*<label for="cboShippingPoint">Shipping Point Group</label>*@
+                        <select class="dropdown-width" id="cboShippingPoint" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col">
+                        @*<label for="cboCarrier">ผู้รับเหมา</label>*@
+                        <select class="dropdown-width auto-search" id="cboCarrier" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col">
+                        <div class="overlay cboLicensePlate">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        @*<label for="cboLicensePlate">ทะเบียนรถ</label>*@
+                        <select class="dropdown-width" id="cboLicensePlate" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row" style="display: none;">
+                    <div class="form-group col">
+                        @*<label for="cboStatus">สถานะรถ</label>*@
+                        <select class="dropdown-width auto-search" id="cboStatus"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col">
+                        <select class="dropdown-width" id="cboWheel" name="Wheel[]" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <select class="dropdown-width auto-search" id="cboTruckType" name="TruckType[]" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        @*<label for="cboFuel">เชื้อเพลิง</label>*@
+                        <select class="dropdown-width auto-search" id="cboFuel"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <select class="dropdown-width auto-search" id="cboEquipment" name="Equipment[]" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <div class="pull-right">
+                            <div id="search-button" style="display: inline-block; padding-top: 6px;">
+                            </div>
+                            <div id="search-button" style="display: inline-block;padding-top: 6px;">
+                                <button type="button" class="btn btn-primary clear-button mt-4" title="Clear search criteria">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10 pr-0 pl-0 mr-0 ml-0">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="overlay CriteriaOverlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="card-body" style="display: none;">
+                        <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+                        <div class="form-row">
+                            <div class="form-group col-lg-3">
+                                <label for="cboWheel">จำนวนล้อ</label>
+                                <select class="dropdown-width" id="cboWheel" name="Wheel[]" multiple="multiple"></select>
+                            </div>
+                            <div class="form-group col-lg-3">
+                                <label for="cboTruckType">ประเภทรถ</label>
+                                <select class="dropdown-width auto-search" id="cboTruckType" name="TruckType[]" multiple="multiple"></select>
+                            </div>
+                            <div class="form-group col-lg-3">
+                                <label for="cboEquipment">อุปกรณ์</label>
+                                <select class="dropdown-width auto-search" id="cboEquipment" name="Equipment[]" multiple="multiple"></select>
+                            </div>
+                            <div class="form-group col-lg-3">
+                                <div id="search-button" style="padding-top: 6px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div id="any-data" class="overlay section-loading" oncontextmenu="return false;">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div style="position: absolute; right: 20px; top: 12px;z-index: 999;">
+                <i class="fas fa-map-marked-alt command-icon fa-2x" onclick="showMapPanel(this);" style="cursor: pointer; padding-right: 5px;" title="View map"></i>
+                <i class="fas fa-location-arrow command-icon fa-2x" onclick="openMap();" style="cursor: pointer; padding-right: 5px;" title="View shipping point"></i>
+                <i class="fas fa-table command-icon fa-2x" onclick="showSummaryPanel(this);" style="cursor: pointer; padding-right: 5px;display: none;" title="View summary table"></i>
+                <i class="fas fa-info-circle command-icon fa-2x" onclick="showDetailPanel(this);" style="cursor: pointer; padding-right: 5px;" title="View detail table"></i>
+                <i class="fas fa-sync-alt command-icon fa-2x" onclick="search(isDisplayNetworkingDetail());" style="cursor: pointer; padding-right: 5px;" title="Refresh data"></i>
+            </div>
+            <div class="swap-map">
+                <div id="swapMap" style="width: 100%; height: 80vh;"></div>
+            </div>
+            <div class="detail-section">
+                <div id="sum-data">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body card-padding-remove summary-panel">
+                        <div class="row" style="margin-left: 0px;">
+                            <div class="col-10">
+                                <div class="row">
+                                    <div class="col-3">
+                                        <div class="card" style="background: rgb(41, 77, 118); color: white;border-radius: 10px;">
+                                            <div class="card-body">
+                                                <div class="total-car total-car-text summary-text">&nbsp;</div>
+                                                <div class="total-car total-car-cnt summary-cnt">&nbsp;</div>
+                                                <div class="total-car total-car-unit summary-unit">&nbsp;</div><br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="card" style="background: rgb(18, 106, 67); color: white;border-radius: 10px;">
+                                            <div class="card-body">
+                                                <div class="light-car light-car-text summary-text">&nbsp;</div>
+                                                <div class="light-car light-car-cnt summary-cnt">&nbsp;</div>
+                                                <div class="light-car light-car-unit summary-unit">&nbsp;</div><br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="card" style="background: rgb(117, 63, 36); color: white;border-radius: 10px;">
+                                            <div class="card-body">
+                                                <div class="heavy-car heavy-car-text summary-text">&nbsp;</div>
+                                                <div class="heavy-car heavy-car-cnt summary-cnt">&nbsp;</div>
+                                                <div class="heavy-car heavy-car-unit summary-unit">&nbsp;</div><br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="card" style="background: rgb(106, 104, 113); color: white;border-radius: 10px;">
+                                            <div class="card-body">
+                                                <div class="inactive-car inactive-car-text summary-text">&nbsp;</div>
+                                                <div class="inactive-car inactive-car-cnt summary-cnt">&nbsp;</div>
+                                                <div class="inactive-car inactive-car-unit summary-unit">&nbsp;</div><br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title"></h4>
+                        <div class="row sum-group-block">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="NetworkDetail">
+                    <div class="col-12">
+                        <article class="card mb-4">
+                            <div class="card-body">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2">
+                                        <h4 class="back-to-summary"><i class="fas fa-caret-left"></i>&nbsp;Back</h4>
+                                    </div>
+                                    <div class="col-10">
+                                        <h4 class="card-title section-title"></h4>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div id="near-by">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title"></h4>
+                        <div class="row sum-group-block">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

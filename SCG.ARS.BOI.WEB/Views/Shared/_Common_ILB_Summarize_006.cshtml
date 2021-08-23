@@ -1,0 +1,149 @@
+﻿<div id="Allsummary" class="row">
+    <div class="overlay section-loading" hidden="hidden">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 card-statistics">
+        <h1>Report Status การจองรถ</h1>
+        <h4 class="card-title"><span id="reportHeader"></span></h4>
+        <div id="summarize_div" class="sum_div">
+            <div class="row" id="div_summary" data-bind="foreach: summary">
+
+                @*<div id="total_shipment" class="col-12 col-sm-6 col-lg-3  mb-4" onclick="SearchCriteria(0);">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn btn-dark btn-rounded px-3 py-3 mr-2">
+                                        <i class="icon-docs md-18"></i>
+                                    </div>
+                                    <div class="mr-2">
+                                        <h6 class="card-title">จำนวน Shipment <br> ตก KPI </h6>
+                                        <h6 id="b1Text" data-bind="text: total_KPI"></h6>
+                                        <div class="progress progress-xs">
+                                            <div id="b1bar" class="progress-bar bg-dark" role="progressbar"
+                                                 data-bind="attr: {'aria-valuenow': (total_KPI/total_KPI)*100,} , style: {width:(total_KPI/total_KPI)*100+'%'}"
+                                                 aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar bg-info  w-100" role="progressbar" aria-valuenow="100" aria-valuemin="0"
+                                                aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+                <!--<div id="total_no_est" class="col-12 col-sm-6 col-lg-3 mb-4" onclick="SearchCriteria(1);">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-danger btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-calendar md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Receive Shipdoc <br>(Sea Freight)</h6>
+                                    <h6 id="b2Text" data-bind="text: total_recieve_ship_sea"></h6>
+                                    <div class="progress progress-xs">
+                                        <div id="b2Bar" class="progress-bar bg-danger" role="progressbar"
+                                             data-bind="attr: {'aria-valuenow': (total_recieve_ship_sea /total_KPI)*100,} , style: {width:(total_recieve_ship_sea /total_KPI)*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>-->
+                @*<div class="progress-bar bg-danger w-75" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+                    aria-valuemax="100"></div>*@
+                <!--</div>
+                                </div>
+                            </div>
+                            <div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="total_no_actual_etd" class="col-12 col-sm-6 col-lg-3 mb-4" onclick="SearchCriteria(2);">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-warning btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-basket md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Receive Shipdoc <br> (Air Freight)</h6>
+                                    <h6 id="b3Text" data-bind="text: total_recieve_ship_air"></h6>
+                                    <div class="progress progress-xs">
+                                        <div id="b3Bar" class="progress-bar bg-warning" role="progressbar"
+                                             data-bind="attr: {'aria-valuenow': (total_recieve_ship_air/total_KPI)*100,} , style: {width:(total_recieve_ship_air/total_KPI)*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>-->
+                @*<div class="progress-bar bg-warning w-50" role="progressbar" aria-valuenow="25"
+                    aria-valuemin="0" aria-valuemax="100"></div>*@
+                <!--</div>
+                                </div>
+                                <div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="total_no_delivery" class="col-12 col-sm-6 col-lg-3 mb-4" onclick="SearchCriteria(3);">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-primary btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-wallet md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Customs Clearance <br> (Sea Freight)</h6>
+                                    <h6 id="b4Text" data-bind="text: total_custom_clear_sea"></h6>
+                                    <div class="progress progress-xs">
+                                        <div id="b4Bar" class="progress-bar bg-primary" role="progressbar"
+                                             data-bind="attr: {'aria-valuenow': (total_custom_clear_sea/total_KPI)*100,} , style: {width:(total_custom_clear_sea/total_KPI)*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>-->
+                @*<div class="progress-bar bg-primary w-25" role="progressbar" aria-valuenow="25"
+                    aria-valuemin="0" aria-valuemax="100"></div>*@
+                <!--</div>
+                                </div>
+                                <div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="total_no_close" class="col-12 col-sm-6 col-lg-3 mb-4" onclick="SearchCriteria(4);">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-success btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-wallet md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Customs Clearance <br> (Air Freight)</h6>
+                                    <h6 id="b5Text" data-bind="text: total_custom_clear_air"></h6>
+                                    <div class="progress progress-xs">
+                                        <div id="b5Bar" class="progress-bar bg-success" role="progressbar"
+                                             data-bind="attr: {'aria-valuenow': (total_custom_clear_air/total_KPI)*100,} , style: {width:(total_custom_clear_air/total_KPI)*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>-->
+                @*<div class="progress-bar bg-success w-25" role="progressbar" aria-valuenow="25"
+                    aria-valuemin="0" aria-valuemax="100"></div>*@
+                <!--</div>
+                                </div>
+                                <div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+
+
+            </div>
+        </div>
+    </div>
+</div>
+

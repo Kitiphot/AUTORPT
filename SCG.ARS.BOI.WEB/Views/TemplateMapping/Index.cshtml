@@ -1,0 +1,1150 @@
+﻿
+@{
+    ViewData["Title"] = "Template Mapping";
+}
+
+<!-- Content Start -->
+<div class="content-wrapper">
+    <div class="row mb-4">
+        <div class="col-12 d-flex align-items-center justify-content-between">
+            <h4 class="page-title">Template Mapping</h4>
+            @* <div class="d-flex align-items-center">
+                <div class="wrapper mr-4 d-none d-sm-block">
+                    <p class="mb-0">
+                        Summary for
+                        <b class="mb-0">August 2018</b>
+                    </p>
+                </div>
+                <div class="wrapper">
+                    <a href="#" class="btn btn-link d-inline-flex font-weight-bold">
+                        <i class="icon-share-alt mr-1"></i>Export CSV
+                    </a>
+                </div>
+            </div> *@
+        </div>
+    </div>
+    @* <div class="row">
+        <div class="col-12 card-statistics">
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-3 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5 class="card-title">Todays Income</h5>
+                                <i class="icon-docs md-18"></i>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <p class="text-muted">Avg. Session</p>
+                                <p class="text-muted">max: 40</p>
+                            </div>
+                            <div class="progress progress-xs">
+                                <div class="progress-bar bg-info w-25" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+                                     aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5 class="card-title">Total Revenue</h5>
+                                <i class="icon-pie-chart md-18"></i>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <p class="text-muted">Avg. Session</p>
+                                <p class="text-muted">max: 120</p>
+                            </div>
+                            <div class="progress progress-xs">
+                                <div class="progress-bar bg-success w-25" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+                                     aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5 class="card-title">Pending Product</h5>
+                                <i class="icon-wallet md-18"></i>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <p class="text-muted">Avg. Session</p>
+                                <p class="text-muted">max: 54</p>
+                            </div>
+                            <div class="progress progress-xs">
+                                <div class="progress-bar bg-danger w-25" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+                                     aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between pb-2">
+                                <h5 class="card-title">Sales</h5>
+                                <i class="icon-screen-desktop md-18"></i>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <p class="text-muted">Avg. Session</p>
+                                <p class="text-muted">max: 143</p>
+                            </div>
+                            <div class="progress progress-xs">
+                                <div class="progress-bar bg-warning w-25" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+                                     aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Total Revenue</h4>
+                    <div class="w-75 mx-auto mt-4">
+                        <div class="d-flex justify-content-between text-center mb-2">
+                            <div class="wrapper">
+                                <h4>6,256</h4>
+                                <small class="text-muted">Total sales</small>
+                            </div>
+                            <div class="wrapper">
+                                <h4>8569</h4>
+                                <small class="text-muted">Open Campaign</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="morris-line-example" style="height:200px"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between pb-4">
+                        <h4 class="card-title mb-0">Email Campaign</h4>
+                        <p class="mb-0">
+                            Last 6 day
+                            <i class="mdi mdi-chevron-down"></i>
+                        </p>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="inner flex-grow">
+                                            <p class="mb-0">New orders</p>
+                                            <h4 class="font-weight-bold">16543</h4>
+                                        </div>
+                                        <div class="inner d-flex align-items-center">
+                                            <h1 class="text-primary font-weight-bold">13%</h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="inner flex-grow">
+                                            <p class="mb-0">New Users</p>
+                                            <h4 class="font-weight-bold">26458</h4>
+                                        </div>
+                                        <div class="inner d-flex align-items-center">
+                                            <h1 class="text-info font-weight-bold">64%</h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="inner flex-grow">
+                                            <p class="mb-0">Bounced</p>
+                                            <h4 class="font-weight-bold">2398</h4>
+                                        </div>
+                                        <div class="inner d-flex align-items-center">
+                                            <h1 class="text-danger font-weight-bold">24%</h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="inner flex-grow">
+                                            <p class="mb-0">Unique Visitors</p>
+                                            <h4 class="font-weight-bold">12790</h4>
+                                        </div>
+                                        <div class="inner d-flex align-items-center">
+                                            <h1 class="text-success font-weight-bold">30%</h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title">Sales Status</h4>
+                        <p class="text-muted d-none d-md-block">29-May-2018, 11.00 AM</p>
+                    </div>
+                    <div class="chart-container doughnut">
+                        <canvas class="mt-4" id="sales-status" height="200" width="200"></canvas>
+                        <div id="sales-status-legend" class="legend half-width-legend mt-4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7 mb-4 stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Total Sales By Products</h4>
+                    <div class="d-flex justify-content-between pb-4">
+                        <p class="card-description mb-0 d-none d-sm-block">Activity from 4 Jan 2017 to 10 Jan 2017</p>
+                        <div id="product-sales-legend" class="legend">
+                        </div>
+                    </div>
+                    <div class="chart-container line-chart">
+                        <canvas class="mt-4" id="product-sales" height="250" width="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4 stretch-card">
+            <div class="card dashboard-news-card">
+                <div class="card-body d-flex flex-column position-relative">
+                    <div class="d-flex justify-content-between pb-4">
+                        <h4 class="card-title text-white mb-0">News</h4>
+                        <i class="icon-reload text-white"></i>
+                    </div>
+                    <div class="text-white mt-auto">
+                        <div class="wrapper">
+                            <h4 class="border-bottom">The Idea Of God Is Not Henceforth Relevant</h4>
+                            <p>Vivamus suscipit tortor eget felis porttitor volutpat.</p>
+                            <a class="text-small text-white font-weight-bold" href="#">READ MORE</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title">Activity</h4>
+                    </div>
+                    <p class="card-description">What're people doing right now</p>
+                    <div class="list d-flex align-items-center border-bottom py-3">
+                        <img class="rounded-circle img-sm" src="../assets/images/users-thumbs/user-1.jpg" alt="profile-pic">
+                        <div class="wrapper w-100 ml-3">
+                            <p class="mb-0">
+                                <b>Dobrick </b>posted in Material
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <p class="mb-0">That's awesome!</p>
+                                </div>
+                                <small class="text-muted ml-auto">2 hours ago</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list d-flex align-items-center border-bottom py-3">
+                        <img class="rounded-circle img-sm" src="../assets/images/users-thumbs/user-2.jpg" alt="profile-pic">
+                        <div class="wrapper w-100 ml-3">
+                            <p class="mb-0">
+                                <b>Stella </b>posted in Material
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <p class="mb-0">That's awesome!</p>
+                                </div>
+                                <small class="text-muted ml-auto">3 hours ago</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list d-flex align-items-center border-bottom py-3">
+                        <img class="rounded-circle img-sm" src="../assets/images/users-thumbs/user-3.jpg" alt="profile-pic">
+                        <div class="wrapper w-100 ml-3">
+                            <p class="mb-0">
+                                <b>Peter </b>posted in Material
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <p class="mb-0">That's Great!</p>
+                                </div>
+                                <small class="text-muted ml-auto">1 hours ago</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list d-flex align-items-center pt-3">
+                        <img class="rounded-circle img-sm" src="../assets/images/users-thumbs/user-4.jpg" alt="profile-pic">
+                        <div class="wrapper w-100 ml-3">
+                            <p class="mb-0">
+                                <b>Natalia </b>posted in Material
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <p class="mb-0">That's awesome!</p>
+                                </div>
+                                <small class="text-muted ml-auto">1 hours ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 stretch-card">
+            <div class="card">
+                <div class="card-body d-flex flex-column">
+                    <h4 class="card-title">Sales Chart</h4>
+                    <p class="card-description">Based on last month analytics.</p>
+                    <div class="mt-auto" id="dashboard-sales-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div> *@
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card support-pane-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="card-title mb-0">Mapping List</h4>
+                        <div class="btn-toolbar mb-0 d-none d-sm-block" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group mr-3" role="group" aria-label="First group">
+                                <button type="button" class="btn btn-success">
+                                    <i class="mdi mdi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                            <div class="btn-group mr-3" role="group" aria-label="Second group">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-alert-circle-outline"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-delete-empty"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Third group">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-printer"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive support-pane no-wrap">
+                        <div class="t-row">
+                            <div class="thumb">
+                                <div class="img-sm bg-info">CDC</div>
+                            </div>
+                            <div class="content">
+                                <p class="font-weight-bold mb-2 d-inline-block">Internal Auto E-mail</p>
+                                <p class="text-muted mb-2 d-inline-block">30 Nov 2018</p>
+                                <p>รายงานส่งของขารับ สรุปภายในองค์กร</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Warehouse</p>
+                                <p class="font-weight-bold">CDC</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Type</p>
+                                <p class="font-weight-bold">E-mail</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Destination</p>
+                                <p class="font-weight-bold">SCG</p>
+                            </div>
+                        </div>
+                        <div class="t-row">
+                            <div class="thumb">
+                                <div class="img-sm bg-danger">ESC</div>
+                            </div>
+                            <div class="content">
+                                <p class="font-weight-bold mb-2 d-inline-block">E-mail For Customer</p>
+                                <p class="text-muted mb-2 d-inline-block">07 Sep 2018</p>
+                                <p>E-mail to customer monthly report confirmation</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Warehouse</p>
+                                <p class="font-weight-bold">ESC</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Type</p>
+                                <p class="font-weight-bold">E-mail</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Destination</p>
+                                <p class="font-weight-bold">ACER</p>
+                            </div>
+                        </div>
+                        <div class="t-row">
+                            <div class="thumb">
+                                <div class="img-sm bg-success">PKG</div>
+                            </div>
+                            <div class="content">
+                                <p class="font-weight-bold mb-2 d-inline-block">Web Truck Auto E-mail</p>
+                                <p class="text-muted mb-2 d-inline-block">06 Aug 2018</p>
+                                <p>E-mail message for Customer</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Warehouse</p>
+                                <p class="font-weight-bold">PKG</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Type</p>
+                                <p class="font-weight-bold">E-mail</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Destination</p>
+                                <p class="font-weight-bold">SCG</p>
+                            </div>
+                        </div>
+                        <div class="t-row">
+                            <div class="thumb">
+                                <div class="img-sm bg-warning">ESC</div>
+                            </div>
+                            <div class="content">
+                                <p class="font-weight-bold mb-2 d-inline-block">Line Message for SCG Operation</p>
+                                <p class="text-muted mb-2 d-inline-block">06 Apr 2018</p>
+                                <p>Massage comfirmation to operation</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Warehouse</p>
+                                <p class="font-weight-bold">ESC 3&4</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Type</p>
+                                <p class="font-weight-bold">Line</p>
+                            </div>
+                            <div class="tile">
+                                <p class="text-muted mb-2">Destination</p>
+                                <p class="font-weight-bold">SCG</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <p class="mb-0 d-none d-md-block">Showing 1 to 20 of 20 entries</p>
+                        <nav>
+                            <ul class="pagination rounded mb-0 pagination-success">
+                                <li class="page-item">
+                                    <a class="page-link" href="#">
+                                        <i class="mdi mdi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link active" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">4</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">
+                                        <i class="mdi mdi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="dvOverlay" class="overlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="card-title mb-0">Mapping Wizard</h4>
+                        @* <div class="btn-toolbar mb-0 d-none d-sm-block" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group mr-3" role="group" aria-label="First group">
+                                <button type="button" class="btn btn-success">
+                                    <i class="mdi mdi-plus-circle"></i> Add
+                                </button>
+                            </div>
+                            <div class="btn-group mr-3" role="group" aria-label="Second group">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-alert-circle-outline"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-delete-empty"></i>
+                                </button>
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Third group">
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="mdi mdi-printer"></i>
+                                </button>
+                            </div>
+                        </div> *@
+                    </div>
+                    <div id="smartwizard-1" class="smartwizard-example">
+                        <ul>
+                            <li>
+                                <a href="#smartwizard-1-step-1" class="mb-3">
+                                    <span class="sw-number">1</span>
+                                    <div class="text-muted small">FIRST STEP</div>
+                                    Select Datasource
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#smartwizard-1-step-2" class="mb-3">
+                                    <span class="sw-number">2</span>
+                                    <div class="text-muted small">SECOND STEP</div>
+                                    Select Columns
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#smartwizard-1-step-3" class="mb-3">
+                                    <span class="sw-number">3</span>
+                                    <div class="text-muted small">THIRD STEP</div>
+                                    Select Parameters
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#smartwizard-1-step-4" class="mb-3">
+                                    <span class="sw-number">4</span>
+                                    <div class="text-muted small">FORTH STEP</div>
+                                    Select Sending Platform
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#smartwizard-1-step-5" class="mb-3">
+                                    <span class="sw-number">5</span>
+                                    <div class="text-muted small">FIFTH STEP</div>
+                                    Select Template
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#smartwizard-1-step-6" class="mb-3">
+                                    <span class="sw-number">6</span>
+                                    <div class="text-muted small">SIXTH STEP</div>
+                                    Schedule Setting
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="mb-3">
+                            <div id="smartwizard-1-step-1" class="animated fadeIn">
+                                <div class="card-body">
+                                    <div id="div_schema" data-bind="foreach: schemas">
+                                        <fieldset class="form-group d-inline mr-3">
+                                            <div class="form-check">
+                                                <label class="custom-radio primary-radio" data-bind="css: {$index}">
+                                                    <input class="form-check-input" type="radio" data-bind="attr: {id: 'rdo_' + schema_name, value: schema_name}, event: { change: $parent.onSelectSchema }" name="rdoLocation">
+                                                    <!-- ko text: schema_display +' ('+ schema_name +')'--><!-- /ko -->
+                                                    <i class="input-helper"></i>
+                                                </label>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <div id="div_functions" class="list-group" data-bind="foreach: functions">
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start" data-bind="event: { click: $parent.onSelectFunction }">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1" data-bind="text: report_desc"></h5>
+                                                    <small></small>
+                                                    </div>
+                                                    <p class="mb-1"></p>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2"></div>
+                                        <div class="col-lg-6">
+                                            <div id="div_parameters" class="list-group" data-bind="foreach: parameters">
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start" data-bind="event: { click: $parent.onSelectParameter }">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1" data-bind="text: parameter_name"></h5>
+                                                    <h5 data-bind="text: parameter_mode"></h5>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="smartwizard-1-step-2" class="animated fadeIn">
+                                <div class="card-body">
+                                    <article class="card mb-4">
+                                        <div class="card-body">
+                                            <select multiple="multiple" size="10" id="duallistbox-example"> 
+                                                <option value="receiveddate" selected="selected">receiveddate</option>
+                                                <option value="statusid">statusid</option>
+                                                <option value="statusname" selected="selected">statusname</option>
+                                                <option value="po_invoice" selected="selected">po_invoice</option>
+                                                <option value="rc">rc</option>
+                                                <option value="ean">ean</option>
+                                                <option value="suppliercode">suppliercode</option>
+                                                <option value="suppliername">suppliername</option>
+                                                <option value="sku">sku</option>
+                                                <option value="productbarcode">productbarcode</option>
+                                                <option value="productdescription">productdescription</option>
+                                                <option value="weight">weight</option>
+                                                <option value="volume">volume</option>
+                                                <option value="qty_in_ewm">qty_in_ewm</option>
+                                                <option value="unit_code">unit_code</option>
+                                                <option value="uom">uom</option>
+                                                <option value="productgroupcode">productgroupcode</option>
+                                                <option value="productgroupname">productgroupname</option>
+                                                <option value="doctype">doctype</option>
+                                                <option value="docrefno">docrefno</option>
+                                                <option value="inbound">inbound</option>
+                                                <option value="entiled">entiled</option>
+                                                <option value="chargeunit">chargeunit</option>
+                                                <option value="chargeitem">chargeitem</option>
+                                            </select>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
+                            <div id="smartwizard-1-step-3" class="animated fadeIn">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <div id="lst_DataSource" class="list-group">
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start active">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">Customer Id</h5>
+                                                    <small>customer_id</small>
+                                                    </div>
+                                                    <p class="mb-1">customer id</p>
+                                                </a>
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">Date range</h5>
+                                                    <small>date_range</small>
+                                                    </div>
+                                                    <p class="mb-1">date range</p>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <select class="selectpicker" data-style="btn-success">
+                                                <option>Customer</option>
+                                                <option>Carrier</option>
+                                                <option>Vendor</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <select class="selectpicker" data-style="btn-warning">
+                                                <option>customer_id</option>
+                                                <option>carrier_id</option>
+                                                <option>vendor_id</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="table-responsive">
+                                                <div class="dataTables_wrapper">
+                                                    <table class="table table-striped" id="view_report_table" cellspacing="0" width="100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Position</th>
+                                                                <th>Office</th>
+                                                                <th>Age</th>
+                                                                <th>Start date</th>
+                                                                <th>Status</th>
+                                                                <th>Salary</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>Tiger Nixon</td>
+                                                                <td>System Architect</td>
+                                                                <td>Edinburgh</td>
+                                                                <td>61</td>
+                                                                <td>2011/04/25</td>
+                                                                <td>
+                                                                    <label class="badge badge-info">On hold</label>
+                                                                </td>
+                                                                <td>$320,800</td>
+                                                                <td>
+                                                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Garrett Winters</td>
+                                                                <td>Accountant</td>
+                                                                <td>Tokyo</td>
+                                                                <td>63</td>
+                                                                <td>2011/07/25</td>
+                                                                <td>
+                                                                    <label class="badge badge-danger">Pending</label>
+                                                                </td>
+                                                                <td>$170,750</td>
+                                                                <td>
+                                                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Ashton Cox</td>
+                                                                <td>Junior Technical Author</td>
+                                                                <td>San Francisco</td>
+                                                                <td>66</td>
+                                                                <td>2009/01/12</td>
+                                                                <td>
+                                                                    <label class="badge badge-success">Closed</label>
+                                                                </td>
+                                                                <td>$86,000</td>
+                                                                <td>
+                                                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Cedric Kelly</td>
+                                                                <td>Senior Javascript Developer</td>
+                                                                <td>Edinburgh</td>
+                                                                <td>22</td>
+                                                                <td>2012/03/29</td>
+                                                                <td>
+                                                                    <label class="badge badge-info">On hold</label>
+                                                                </td>
+                                                                <td>$433,060</td>
+                                                                <td>
+                                                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Airi Satou</td>
+                                                                <td>Accountant</td>
+                                                                <td>Tokyo</td>
+                                                                <td>33</td>
+                                                                <td>2008/11/28</td>
+                                                                <td>
+                                                                    <label class="badge badge-info">On hold</label>
+                                                                </td>
+                                                                <td>$162,700</td>
+                                                                <td>
+                                                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                     
+                            <div id="smartwizard-1-step-4" class="animated fadeIn">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-lg-3"></div>
+                                        <div class="col-lg-6">
+                                            <div id="lst_Function" class="list-group">
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start active">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">E-mail Message</h5>
+                                                    <i class="mdi mdi-email md-18 mr-2"></i>
+                                                    @* <small>last update: 10/06/2020</small> *@
+                                                    </div>
+                                                    <p class="mb-1">E-mail Message Channel</p>
+                                                    <small>customer_id</small>,
+                                                    <small>date_range</small>
+                                                </a>
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">Line Notify</h5>
+                                                    <i class="mdi mdi-message-text md-18 mr-2"></i>
+                                                    @* <small>last update: 13/06/2020</small> *@
+                                                    </div>
+                                                    <p class="mb-1">Line Notify Channell</p>
+                                                    <small>customer_id</small>,
+                                                    <small>date_range</small>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="smartwizard-1-step-5" class="animated fadeIn">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-lg-3"></div>
+                                        <div class="col-lg-6">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-3"></div>
+                                        <div class="col-lg-6">
+                                            <div id="lst_Function" class="list-group">
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start active">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">CDC/Acer-GR-Daily.xlsx</h5>
+                                                    @* <small>last update: 10/06/2020</small> *@
+                                                    </div>
+                                                    <p class="mb-1">GR Report</p>
+                                                    @* <small>customer_id</small>,
+                                                    <small>date_range</small> *@
+                                                </a>
+                                                <a href="javascript:void(0);" class="list-group-item list-group-item-action flex-column align-items-start">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">CDC/Acer-GI-Daily.xlsx</h5>
+                                                    @* <small>last update: 13/06/2020</small> *@
+                                                    </div>
+                                                    <p class="mb-1">GI Report</p>
+                                                    @* <small>customer_id</small>,
+                                                    <small>date_range</small> *@
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="smartwizard-1-step-6" class="animated fadeIn">
+                                <div class="card-body">
+                                    <div class="row">
+                                        @* <div class="col-lg-3"></div> *@
+                                        <div class="col-lg-12">
+                                            <h4 class="card-title mb-2">Schedule Configuration</h4>
+                                            <div class="form-row">
+                                                <div class="form-group col-lg-2">
+                                                    <label for="txt_repeat_interval"><b>Repeat Interval</b></label>
+                                                    <input type="number" id="txt_repeat_interval" value="1" min="1" max="10000" class="form-control">
+                                                </div>
+                                                <div class="form-group col-lg-2">
+                                                    <label for="sel_interval_unit"><b>Unit</b></label>
+                                                    <select id="sel_interval_unit" class="form-control">
+                                                        <option value="s" selected="selected">Second</option>
+                                                        <option value="m">Minute</option>
+                                                        <option value="h">Hour</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-check">
+                                                <label class="form-check-label" for="txt_repeat_forever">
+                                                    <input class="form-check-input" type="checkbox" id="txt_repeat_forever" value=""> Repeat Forever
+                                                </label>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group col-lg-2">
+                                                    <label for="dt_start_time"><b>Start Time of Day</b></label>
+                                                    <input type="time" id="dt_start_time" value="" class="form-control">
+                                                </div>
+                                                <div class="form-group col-lg-2">
+                                                    <label for="dt_end_time"><b>End Time of Day</b></label>
+                                                    <input type="time" id="dt_end_time" value="" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><b>Days of Week</b></label>
+                                                <div class="form-group">
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.monday]" value="True" checked=""> Monday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.tuesday]" value="True" checked=""> Tuesday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.wednesday]" value="True" checked=""> Wednesday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.thursday]" value="True" checked=""> Thursday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.friday]" value="True" checked=""> Friday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.saturday]" value="True" checked=""> Saturday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.sunday]" value="True" checked=""> Sunday
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->
+
+@section Styles{
+    <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+    <link rel="stylesheet" href="~/assets/vendor/morris/css/morris.css" />
+    <link rel="stylesheet" href="~/assets/vendor/smartwizard/css/smart_wizard.min.css" />
+    <!-- ================== BEGIN PAGE LEVEL END ================== -->
+}
+
+@section Scripts{
+    <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/morris/js/raphael.min.js"></script>
+    <script src="~/assets/vendor/morris/js/morris.min.js"></script>
+    @* <script src="~/assets/js/demo/dashboard-demo.js"></script> *@
+
+    <script src="~/assets/vendor/jquery-validation/js/jquery.validate.min.js"></script>
+    <script src="~/assets/vendor/smartwizard/js/jquery.smartWizard.min.js"></script>
+    <script src="~/assets/js/demo/smart-wizard-demo.js"></script>
+    <!-- ================== END PAGE LEVEL JS ================== -->
+}
+
+<script>
+
+    function ViewModel(){
+        var self = this;
+        self.schemas = ko.observableArray([]);
+        self.functions = ko.observableArray([]);
+        self.parameters = ko.observableArray([]);
+        
+        //selectedSchema =  ko.observable("wh");
+
+        self.onSelectSchema = function(item, event){
+            $('#dvOverlay').show();
+            console.log(item);
+            console.log(event);
+
+            request = {
+                schema: item.schema_name
+            };
+
+            var jqxhr = $.post("/Master/LoadTemplateReportMapping", request)
+            .done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    self.functions(result.data);
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvOverlay').hide();
+                //console.log( "finished" );
+            });
+        }
+
+        self.onSelectFunction = function(item, event){
+            $('#dvOverlay').show();
+            console.log(item);
+            console.log(event);
+
+            $(event.currentTarget).addClass('active').siblings().removeClass('active');
+
+            request = {
+                schema: item.specific_schema,
+                function_name: item.routine_name
+            };
+
+            console.log(request);
+
+            var jqxhr = $.post("/Master/LoadParameters", request)
+            .done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    self.parameters(result.data);
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvOverlay').hide();
+                //console.log( "finished" );
+            });
+        }
+
+        self.onSelectParameter = function(item, event){
+            console.log(item);
+            console.log(event);
+
+            $(event.currentTarget).addClass('active').siblings().removeClass('active');
+        }
+
+        $('#dvOverlay').show();
+        var jqxhr = $.post("/Master/LoadSchemas")
+        .done(function (result) {
+            console.log(result);
+            if (result.status) {
+                self.schemas(result.data);
+            } else {
+                toastr["error"](result.message);
+            }
+        })
+        .fail(function (e) {
+            console.log(e);
+        })
+        .always(function () {
+            $('#dvOverlay').hide();
+            //console.log( "finished" );
+        });
+    }
+
+    ko.applyBindings(new ViewModel());
+
+
+
+    $(document).ready(function(){
+        //$('#sel_interval_unit').on('change',function(){
+        //    console.log(this.value);
+        //    var interval = $('#txt_repeat_interval');
+        //    var unit = this.value;
+        //    interval.val("1");
+        //    if(unit == "s" || unit == "m"){
+        //        interval.attr("min","1");
+        //        interval.attr("max","59");
+        //    }else if(unit == "h"){
+        //        interval.attr("min","1");
+        //        interval.attr("max","23");
+        //    }
+        //});
+
+        $('#txt_repeat_interval').on('blur',function(){
+            if(this.value == null || this.value.length == 0)
+                this.value = 1;
+            else if(this.value > 10000)
+                this.value = 10000;
+        });
+
+        $('.list-group-item').on('click',function(){
+            $(this).addClass('active').siblings().removeClass('active');
+            //console.log(this.text);
+        });
+
+        //$('input[name=rdoLocation]').attr('checked','chedked');
+
+        //$('input[name=rdoLocation]').change(function() {
+        //    var request = {
+        //        schema: this.value
+        //    };
+        //    console.log(this.value);
+        //    //ko.applyBindings( new LoadFunctions());
+        //    LoadFunctions(request);
+//
+        //    //var jqxhr = $.post("/Master/LoadFunctions", request)
+        //    //.done(function (result) {
+        //    //    console.log(result);
+        //    //    if (result.status) {
+        //    //        toastr["success"](result.message);
+        //    //    } else {
+        //    //        toastr["error"](result.message);
+        //    //    }
+        //    //})
+        //    //.fail(function (e) {
+        //    //    console.log(e);
+        //    //})
+        //    //.always(function () {
+        //    //    $('#dvOverlay').hide();
+        //    //    //console.log( "finished" );
+        //    //});
+        //});
+
+        //var loc = $('input[name=rdoLocation]:checked').val();
+        //console.log(loc);
+
+        //$('#example-getting-started').multiselect({
+        //    includeSelectAllOption: true,
+        //    enableFiltering: true
+        //});
+    });
+
+
+    function LoadSchemas(request = null) {
+        $('#dvOverlay').show();
+        //console.log(request);
+        var jqxhr = $.post("/Master/LoadSchemas", request)
+        .done(function (result) {
+            console.log(result);
+            if (result.status) {
+                self.schemas(result.data);
+            } else {
+                toastr["error"](result.message);
+            }
+        })
+        .fail(function (e) {
+            console.log(e);
+        })
+        .always(function () {
+            $('#dvOverlay').hide();
+            //console.log( "finished" );
+        });
+    }
+
+    function getSchemaValue(rdo){
+        //console.log(rdo.value);
+        var request = {
+            schema: rdo.value
+        };
+        console.log(rdo.value);
+        //var funcs = $('#div_function')[0];
+        //         DataRowko.cleanNode(funcs);
+        
+        LoadFunctions(request);
+    }
+
+    function LoadFunctions(request = null) {
+        $('#dvOverlay').show();
+        //console.log(request);
+        if(request == null){
+            request = {
+                schema: " "
+            };
+        }
+        var jqxhr = $.post("/Master/LoadFunctions", request)
+        .done(function (result) {
+            console.log(result);
+            if (result.status) {
+                self.functions(result.data);
+            } else {
+                toastr["error"](result.message);
+            }
+        })
+        .fail(function (e) {
+            console.log(e);
+        })
+        .always(function () {
+            $('#dvOverlay').hide();
+            //console.log( "finished" );
+        });
+    }
+
+    function clickItem(item){
+        $(item).addClass('active').siblings().removeClass('active');
+    }
+</script>

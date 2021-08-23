@@ -1,0 +1,610 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles{
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <style>
+        #PieceSummaryMonthlyDetail thead,
+        #PieceSummaryMonthlyDetail th {
+            text-align: center !important;
+        }
+
+        #PieceSummaryYearlyDetail thead,
+        #PieceSummaryYearlyDetail th {
+            text-align: center !important;
+        }
+    </style>
+}
+
+@section Scripts{
+    @*<script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+        <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+        <script src="~/assets/js/uiHelpers.js"></script>*@
+    <script src="~/assets/js/transportation.js"></script>
+
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_008';
+        var column = [{ "data": "department", "name": "department", "title": "Department", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "section", "name": "section", "title": "Section", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "mat_freight", "name": "mat_freight", "title": "Mat Freight", "autoWidth": true, "className": "text-nowrap" },
+        //{ "data": "total_delivery", "name": "total_delivery", "title": "Total Delivery", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery1", "name": "delivery1", "title": "1", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery2", "name": "delivery2", "title": "2", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery3", "name": "delivery3", "title": "3", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery4", "name": "delivery4", "title": "4", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery5", "name": "delivery5", "title": "5", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery6", "name": "delivery6", "title": "6", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery7", "name": "delivery7", "title": "7", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery8", "name": "delivery8", "title": "8", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery9", "name": "delivery9", "title": "9", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery10", "name": "delivery10", "title": "10", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery11", "name": "delivery11", "title": "11", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery12", "name": "delivery12", "title": "12", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery13", "name": "delivery13", "title": "13", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery14", "name": "delivery14", "title": "14", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery15", "name": "delivery15", "title": "15", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery16", "name": "delivery16", "title": "16", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery17", "name": "delivery17", "title": "17", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery18", "name": "delivery18", "title": "18", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery19", "name": "delivery19", "title": "19", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery20", "name": "delivery20", "title": "20", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery21", "name": "delivery21", "title": "21", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery22", "name": "delivery22", "title": "22", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery23", "name": "delivery23", "title": "23", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery24", "name": "delivery24", "title": "24", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery25", "name": "delivery25", "title": "25", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery26", "name": "delivery26", "title": "26", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery27", "name": "delivery27", "title": "27", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery28", "name": "delivery28", "title": "28", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery29", "name": "delivery29", "title": "29", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery30", "name": "delivery30", "title": "30", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery31", "name": "delivery31", "title": "31", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger }];
+
+        var column_yearly = [{ "data": "department", "name": "department", "title": "Department", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "section", "name": "section", "title": "Section", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "mat_freight", "name": "mat_freight", "title": "Mat Freight", "autoWidth": true, "className": "text-nowrap" },
+        //{ "data": "total_delivery", "name": "total_delivery", "title": "Total Delivery", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery1", "name": "delivery1", "title": "1", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery2", "name": "delivery2", "title": "2", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery3", "name": "delivery3", "title": "3", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery4", "name": "delivery4", "title": "4", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery5", "name": "delivery5", "title": "5", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery6", "name": "delivery6", "title": "6", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery7", "name": "delivery7", "title": "7", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery8", "name": "delivery8", "title": "8", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery9", "name": "delivery9", "title": "9", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery10", "name": "delivery10", "title": "10", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery11", "name": "delivery11", "title": "11", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        { "data": "delivery12", "name": "delivery12", "title": "12", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger }];
+
+        function setCriteria(data) {
+            if (data == null) return;
+            var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+            $('#monthpicker').datepicker('setDate', dt);
+            $('#cboBusiness').val(data.criteria.business).trigger('change');
+            $('#cboFleet').val(data.criteria.fleet).trigger('change');
+            $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change');
+            $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change');
+            $('#cboMatfrg').val(data.criteria.matGroup).trigger('change');
+            $('#cboOrderType').val(data.criteria.orderType).trigger('change');
+            $('#cboTruckType').val(data.criteria.truckType).trigger('change');
+            //$('#cboPlannerName').val(data.criteria.plannerName).trigger('change');
+        }
+
+        function initialSearchCriteria() {
+            var ajax = [];
+            $('#CriteriaOveray').show();
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness'));
+            ajax.push(uiHelpers.initFleet('#cboFleet'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName'));
+            uiHelpers.initMonthYearpicker('#monthpicker');
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+            return result;
+        }
+
+        function getCriteria(filter) {
+            if (filter == null)
+                filter = { day: null, month: null, filter_group: null, carrier: null, product_group: null, aging: null, plannerName: getPlannerName() };
+            else
+                filter = { day: null || filter.day, month: null || filter.month, filter_group: null || filter.filter_group, carrier: null || filter.carrier, product_group: null || filter.product_group, aging: null || filter.aging, plannerName: null || filter.plannerName };
+
+            var date = moment(getSelectDate());
+            var startDate;
+            var endDate;
+            var yearStartDate;
+            var yearEndDate;
+
+            if (date != null) {
+                //var tmpStartDate = date.startOf('month').format('YYYY/MM/DD');
+                //var tmpEndDate = date.endDate._d;
+                startDate = date.startOf('month').format('YYYY/MM/DD');
+                endDate = date.endOf('month').format('YYYY/MM/DD');
+                yearStartDate = date.startOf('year').format('YYYY/MM/DD');
+                yearEndDate = date.endOf('year').format('YYYY/MM/DD');
+            }
+
+
+            var criteria = {
+                orderStartDate: startDate,
+                orderEndDate: endDate,
+                business: getBusiness_m(),
+                fleet: getFleet_m(),
+                customer: getCustomer_m(),
+                shippingPoint: getShippingPoint_m(),
+                shipToRegion: getShiptoRegion_m(),
+                orderType: getOrderType_m(),
+                truckType: getTruckType_m(),
+                plannerName: getPlannerName_m(),
+                matGroup: getMatfrg_m(),
+                yearStartDate: yearStartDate,
+                yearEndDate: yearEndDate
+            };
+
+            return criteria;
+        }
+
+        var mat_freight_cell, section_cell, department_cell, mat_freight_cnt, section_cnt, department_cnt;
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search);
+            mat_freight_cell = null;
+            section_cell = null;
+            department_cell = null;
+            mat_freight_cnt = 1;
+            section_cnt = 1;
+            department_cnt = 1;
+            var post_monthly = generateTableWithoutPaging('#OntimeSummaryMonthlyDetail', '@Url.Action("OntimeMonthlyDetail", "Transportation")', null,
+                null, column, created_row);
+
+            var post_yearly = generateTableWithoutPaging('#OntimeSummaryYearlyDetail', '@Url.Action("OntimeYearlyDetail", "Transportation")', null,
+                null, column_yearly, created_row);
+
+            post_monthly.always(function () {
+                var tab = $('#OntimeSummaryMonthlyDetail .section-table-render');
+                var tabdt = $('#OntimeSummaryMonthlyDetail .section-table-render').DataTable();
+
+                var adjustMerged = false;
+                //page changing event
+                tab.on('page.dt', function (e, setting) {
+                    adjustMerged = true;
+                });
+                //drawed event
+                tab.on('draw.dt', function (e, setting) {
+                    if (adjustMerged) {
+                        adjustMerged = false;
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').addClass('ontime-hide-cell');
+                        $(tab.find('tbody').find('tr')[0]).find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                    }
+                });
+            });
+
+            post_yearly.always(function () {
+                var tab = $('#OntimeSummaryYearlyDetail .section-table-render');
+                var tabdt = $('#OntimeSummaryYearlyDetail .section-table-render').DataTable();
+
+                var adjustMerged = false;
+                //page changing event
+                tab.on('page.dt', function (e, setting) {
+                    adjustMerged = true;
+                });
+                //drawed event
+                tab.on('draw.dt', function (e, setting) {
+                    if (adjustMerged) {
+                        adjustMerged = false;
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').addClass('ontime-hide-cell');
+                        $(tab.find('tbody').find('tr')[0]).find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                    }
+                });
+            });
+            generateSummary('#OntimeSummaryMonthly', '#overlayMonthlySummary', '@Url.Action("OntimeSummaryMonthly", "Transportation")');
+            generateSummary('#OntimeSummaryYearly','#overlayYearlySummary', '@Url.Action("OntimeSummaryYearly", "Transportation")');
+
+            generateGraphTransportSummary('#OntimeMonthly', '@Url.Action("OntimeMonthly", "Transportation")',
+            'bar', 'Shipment Date', 'Shipment','',
+                null, 'top');
+
+            generateGraphTransportSummary('#OntimeYearly', '@Url.Action("OntimeYearly", "Transportation")',
+            'bar', 'Shipment Month', 'Shipment','',
+            null, 'top',);
+
+            var selectedDate = getSelectDate();
+            var date = moment(selectedDate);
+            $('#SummaryMonthlyDate').text(uiHelpers.displayFullMonth(date) + ' ' + date.format('YYYY'));
+            $('#SummaryYearlyDate').text(date.format('YYYY'));
+        }
+
+        function generateSummary(controlID,overlaySection, serviceUrl) {
+            $(overlaySection + ' .section-loading').show();
+            var jqxhr = $.post(serviceUrl, getCriteria())
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        $(controlID + ' .ontime-percent').text(uiHelpers.displayN2(result.data[0].ontime_percent) + '%');
+                        $(controlID + ' .ontime').text(uiHelpers.displayInteger(result.data[0].ontime_delivery));
+                        $(controlID + ' .delay').text(uiHelpers.displayInteger(result.data[0].delay_delivery));
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $(overlaySection + ' .section-loading').hide();
+                })
+                ;
+        }
+
+        function created_row(row, data, dataIndex) {
+            //var tab = $('#OntimeDetail .section-table-render').DataTable();
+            //merge cell
+            if (data.total_type == 0) {
+                if (department_cell == null || data.department != department_cell.text()) {
+                    //if (region_cnt > 1)
+                    //    region_cell.attr("rowspan", region_cnt);
+                    department_cell = $($(row).find('td')[0]);
+                    department_cnt = 1;
+
+                    //if (section_cnt > 1)
+                    //    section_cell.attr("rowspan", section_cnt);
+                    section_cell = null;
+                    section_cnt = 1;
+
+                    if (mat_freight_cnt > 1)
+                        mat_freight_cell.attr("rowspan", mat_freight_cnt);
+                    mat_freight_cell = null;
+                    mat_freight_cnt = 1;
+                }
+                else {
+                    if (data.total_type != 7 && data.total_type != 31) {
+                        $($(row).find('td')[0]).attr('mark-remove', 1);
+                        department_cnt++;
+                    }
+                }
+
+                if (section_cell == null || data.section != section_cell.text()) {
+                    //if (section_cnt > 1)
+                    //    section_cell.attr("rowspan", section_cnt);
+                    section_cell = $($(row).find('td')[1]);
+                    section_cnt = 1;
+
+                    //if (fleet_cnt > 1)
+                    //    fleet_cell.attr("rowspan", fleet_cnt);
+                    mat_freight_cell = null;
+                    mat_freight_cnt = 1;
+                }
+                else {
+                    if (data.total_type != 3) {
+                        $($(row).find('td')[1]).attr('mark-remove', 1);
+                        section_cnt++;
+                    }
+                }
+
+                if (mat_freight_cell == null || data.mat_freight != mat_freight_cell.text()) {
+                    //if (fleet_cnt > 1)
+                    //    fleet_cell.attr("rowspan", fleet_cnt);
+                    mat_freight_cell = $($(row).find('td')[2]);
+                    mat_freight_cnt = 1;
+                }
+                else {
+                    if (data.total_type != 1) {
+                        $($(row).find('td')[2]).attr('mark-remove', 1);
+                        mat_freight_cnt++;
+                    }
+                }
+            }
+            //set color
+
+            if (data.total_type == 1) {
+                $(row).addClass('ontime-mat-frg-total-row');
+                $($(row).find('td')[2]).attr('colspan', 1);
+            }
+            else if (data.total_type == 3) {
+                $(row).addClass('ontime-section-total-row');
+                $($(row).find('td')[1]).attr('colspan', 2);
+                $($(row).find('td')[2]).remove();
+            }
+            else if (data.total_type == 7) {
+                $($(row).find('td')[0]).text('Grand Total');
+                $(row).addClass('ontime-grand-total-summary-row');
+                $($(row).find('td')[0]).attr('colspan', 2);
+                $($(row).find('td')[1]).remove();
+            }
+            else if (data.total_type == 31) {
+
+                $(row).addClass('ontime-grand-total-row');
+                $($(row).find('td')[0]).attr('colspan', 2);
+                $($(row).find('td')[1]).remove();
+                $($(row).find('td')[2]).remove();
+            }
+
+            //remove by set text and border color to transparent
+            if ($($(row).find('td')[2]).attr('mark-remove') == 1) {
+                $($(row).find('td')[2]).addClass('ontime-hide-cell');
+                $($(row).find('td')[2]).attr('title', $($(row).find('td')[2]).text());
+            }
+
+            if ($($(row).find('td')[1]).attr('mark-remove') == 1) {
+                $($(row).find('td')[1]).addClass('ontime-hide-cell');
+                $($(row).find('td')[1]).attr('title', $($(row).find('td')[1]).text());
+            }
+
+            if ($($(row).find('td')[0]).attr('mark-remove') == 1) {
+                $($(row).find('td')[0]).addClass('ontime-hide-cell');
+                $($(row).find('td')[0]).attr('title', $($(row).find('td')[0]).text());
+            }
+        }
+
+        $(document).ready(function () {
+            initialControl().then(() => {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            });
+            comboOnchange();
+            isActive();
+        });
+
+        function isActive() {
+            setTimeout(function () {
+                if ($('#filled-monthly').is(':visible')) {
+                    console.log('hide');
+                }
+                else if ($('#filled-yearly').is(':visible')) {
+                    console.log('show');
+                }
+            }, 100)
+        }
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Transportation</h1>
+            <h4 class="card-title">รายงานสรุปยอดขนส่ง (Transportation Summary) - Ontime</h4>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_Transportation_Criteria_06");
+    }
+    <article class="card mb-4 col-12">
+        <div class="card-body">
+            @*<h4 class="card-title mb-4">Filled Tabs</h4>*@
+            <ul class="nav filled-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active show" data-toggle="tab" href="#filled-monthly" onclick="isActive()">Monthly</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#filled-yearly" onclick="isActive()">Yearly</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active show" id="filled-monthly">
+                    <div class="row mt-4" id="OntimeSummaryMonthly">
+                        <div class="col-12 card-statistics">
+                            <h3>Ontime Delivery - <span id="SummaryMonthlyDate"></span></h3>
+                            <div class="row">
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4" id="overlayMonthlySummary">
+                                    <div class="card" style="padding:0 !important">
+                                        <div class="overlay section-loading">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pointer">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col text-center bg-summary-percent">
+                                                            <h4 class="align-middle ontime-percent pt-2">-%</h4>
+                                                            <h5>Ontime Delivery</h5>
+                                                            <br>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 bg-ontime-summary">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <h4 class="ontime pt-2">-</h4>
+                                                            <h5>Ontime</h5>
+                                                            <br>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 bg-delay-summary">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <h4 class="delay pt-2">-</h4>
+                                                            <h5>Late</h5>
+                                                            <br>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-9" id="OntimeMonthly">
+                                    <div class="card">
+                                        <div class="overlay section-loading">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center justify-content-between">
+                                            <h4 class="card-title report-title"></h4>
+                                            <div class="report-filename" style="display: none;"></div>
+                                            <div class="d-flex align-items-center">
+                                                <div class="wrapper">
+                                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#OntimeMonthly'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="chart-container report-container">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="OntimeSummaryMonthlyDetail">
+                        <div class="col-12">
+                            <article class="card mb-4">
+                                <div class="card-body">
+                                    <div class="overlay section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="card-title section-title"></h4>
+                                    <div class="table-responsive">
+                                        <div class="dataTables_wrapper">
+                                            <table class="table table-striped section-table-render" style="width:100%" data-stripe-classes="[]"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="filled-yearly">
+                    <div class="row mt-4" id="OntimeSummaryYearly">
+                        <div class="col-12 card-statistics">
+                            <h3>Ontime Delivery - <span id="SummaryYearlyDate"></span></h3>
+                            <div class="row">
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4" id="overlayYearlySummary">
+                                    <div class="card" style="padding:0 !important">
+                                        <div class="overlay section-loading">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body pointer">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <div class="col text-center bg-summary-percent">
+                                                            <h4 class="align-middle ontime-percent pt-2">-%</h4>
+                                                            <h5>Ontime Delivery</h5>
+                                                            <br>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 bg-ontime-summary">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <h4 class="ontime pt-2">-</h4>
+                                                            <h5>Ontime</h5>
+                                                            <br>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 bg-delay-summary">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <h4 class="delay pt-2">-</h4>
+                                                            <h5>Late</h5>
+                                                            <br>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-9" id="OntimeYearly">
+                                    <div class="card">
+                                        <div class="overlay section-loading">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex align-items-center justify-content-between">
+                                            <h4 class="card-title report-title"></h4>
+                                            <div class="report-filename" style="display: none;"></div>
+                                            <div class="d-flex align-items-center">
+                                                <div class="wrapper">
+                                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#OntimeYearly'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="chart-container report-container">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="OntimeSummaryYearlyDetail">
+                        <div class="col-12">
+                            <article class="card mb-4">
+                                <div class="card-body">
+                                    <div class="overlay section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="card-title section-title"></h4>
+                                    <div class="table-responsive">
+                                        <div class="dataTables_wrapper">
+                                            <table class="table table-striped section-table-render" style="width:100%" data-stripe-classes="[]"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+

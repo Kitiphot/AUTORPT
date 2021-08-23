@@ -1,0 +1,155 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    ViewBag.Title = "Index";
+}
+
+
+@section Styles{
+    <style>
+        #view_report_table th, td {
+            border-left: 1px solid;
+            border-right: 1px solid;
+        }
+
+        table[aria-describedby="view_report_table_info"] thead th {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+        .dataTables_wrapper .dataTable td {
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+        }
+
+        .dataTables_wrapper .dataTable .percent {
+            padding: 0px !important;
+        }
+    </style>
+}
+
+
+@section Scripts{
+
+    <script src="~/assets/js/SKIC.js"></script>
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        $(document).ready(function () {
+            loadCriteria02().then(Search);
+        });
+
+        function Search() {
+            DrawTableDetail();
+        }
+
+
+        function DrawTableDetail() {
+            var table = $("#view_report_table").DataTable().destroy();
+            table = $("#view_report_table").DataTable({
+                "ajax": {
+                    url: '@Url.Action("RPTPKG002_OverallFleetDomesticsReport", "Report")',
+                    type: 'POST',
+                    dataType: 'Json',
+                    //data: request
+                    data: getCriteriaParam02()
+                },
+                scrollX: true,
+                responsive: true,
+                dom: 'lTf<"html5buttons"B>gtip',
+                pageLength: 10,
+                buttons: [
+                    'copy',
+                    //'excel'
+                    {
+                        extend: 'excel',
+                        //text: 'Excel',
+                        title: 'Overall fleet domestic ' + $('#daterange-99').text(),
+                        
+                    }
+                ],
+                //ordering: false,
+                order: [],
+                autoWidth: false,
+                columnDefs: [
+                    {
+                        targets: '_all',
+                        orderabel: false
+                    },
+                ],
+                columns: [
+                    { data: "fleet" },
+                    { data: "truck_type" },
+                    { data: "truck_commit", width: "100px" },
+                    { data: "pending_count", width: "100px" },
+                    { data: "order_count", width: "100px" },
+                    { data: "book_count", width: "100px" },
+                    { data: "accept_count", width: "100px" },
+                    { data: "truck_wait", width: "100px" },
+                    {
+                        "data": null, width: "100px",
+                        render: function (data, type, row) {
+                            var val = row.pending_count + row.order_count - row.book_count;
+                            if (val > 0) {
+                                return '<div style="color:red">' + val + '</div>';
+                            } else {
+                                return 0;
+                            }
+                        }
+                    }
+                ],
+                "paging": false,
+                "info": false,
+                "initComplete": function (settings, json) {
+                    MergeGridCells($("#view_report_table"), [1]);
+                }
+            });
+        }
+
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h4 class="card-title">Overall Fleet Domestics</h4>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_SKIC_Criteria_02");
+    }
+    <div class="row" id="ShipmentStatusDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title" id="ShipmentStatusDetailText"></h4>
+                    @*<div class="table-responsive">
+                        <div class="dataTables_wrapper">*@
+                    <table class="table" id="view_report_table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Fleet</th>
+                                <th>Truck Type</th>
+                                <th>Commit</th>
+                                <th>Order คงค้างวันก่อนหน้า</th>
+                                <th>Order วันนี้</th>
+                                <th>จองคิว (คัน)</th>
+                                <th>ได้งาน (คัน)</th>
+                                <th>รถเหลือ (คัน)</th>
+                                <th>สรุป order ค้าง</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    @*</div>
+                        </div>*@
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

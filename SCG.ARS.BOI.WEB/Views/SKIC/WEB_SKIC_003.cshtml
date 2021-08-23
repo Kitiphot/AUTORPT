@@ -1,0 +1,179 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    ViewBag.Title = "Carrier Performance";
+}
+
+@section Styles{
+    <style>
+        #view_report_table th, td {
+            border-left: 1px solid;
+            border-right: 1px solid;
+        }
+
+        table[aria-describedby="view_report_table_info"] thead th {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+        .dataTables_wrapper .dataTable td {
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+        }
+
+        .dataTables_wrapper .dataTable .percent {
+            padding: 0px !important;
+        }
+    </style>
+}
+
+@section Scripts{
+<script src="~/assets/js/SKIC.js" language="javascript"></script>
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        $(document).ready(function () {
+            loadCriteria02().then(Search);
+        });
+
+        function Search() {
+            DrawTableDetail();
+        }
+
+        function DrawTableDetail() {
+            var loading = $('#table-loading-progress')
+            loading.show();
+            //var table = $("#view_report_table").DataTable().destroy();
+            if (!$.fn.DataTable.isDataTable('#view_report_table')) {
+                $("#view_report_table").DataTable({
+                    "ajax": {
+                        url: '@Url.Action("RPTPKG003_CarrierPerformanceReport", "Report")',
+                        type: 'POST',
+                        dataType: 'Json',
+                        //data: getDateRangeCriteria($('#daterange-99'))
+                        data: (d) => getCriteriaParam02()
+                    },
+
+                    scrollX: true,
+                    responsive: true,
+                    paging: false,
+                    info: false,
+                    searching: false,
+                    dom: 'lT<"html5buttons"B>gt',
+                    buttons: [
+                        'copy',
+                        {
+                            extend: 'excel',
+                            filename: 'Carrier Performance ' + $('#daterange-99').html(),
+                        }
+                    ],
+                    //ordering: false,
+                    order: [],
+                    autoWidth: false,
+                    columns: [
+                        { data: "fleet", title: "Fleet" },
+                        { data: "truck_type", title: "Truck Type" },
+                        { data: "carrier_name", title: "Carrier", title: "Fleet" },
+                        { data: "truck_register", title: "Truck Register" },
+                        { data: "truck_commit", title: "Truck Commit" },
+                        { data: "book_count", title: "จองคิว (คัน)" },
+                        { data: "book_percentage", title: "%จองคิว เทียบ commit" },
+                        { data: "accept_count", title: "ได้งาน (คัน)" },
+                        { data: "accept_percentage", title: "%ได้งาน เทียบ commit" },
+                    ],
+
+                    columnDefs: [
+                        {
+                            "targets": [6, 8],
+                            "render": function (data, type, row, meta) {
+                                if (data == 0) {
+                                    return '<div class="progress" style="height:40px;border-radius:0; "><div class="progress-bar" role="progressbar" style="color:black; font-size: 0.9rem; width: ' + data + '%;" aria-valuenow="' + data + '" aria-valuemin="0" aria-valuemax="100">' + data + '%</div></div>';
+                                } else if (data <= 50) {
+                                    return '<div class="progress" style="height:40px;border-radius:0; "><div class="progress-bar bg-danger" role="progressbar" style="font-size: 0.9rem; width: ' + data + '%;" aria-valuenow="' + data + '" aria-valuemin="0" aria-valuemax="100">' + data + '%</div></div>';
+                                } else if (data < 100) {
+                                    return '<div class="progress" style="height:40px;border-radius:0; "><div class="progress-bar bg-warning" role="progressbar" style="font-size: 0.9rem; width: ' + data + '%;" aria-valuenow="' + data + '" aria-valuemin="0" aria-valuemax="100">' + data + '%</div></div>';
+                                } else if (data >= 100) {
+                                    return '<div class="progress" style="height:40px;border-radius:0; "><div class="progress-bar bg-success" role="progressbar" style="font-size: 0.9rem; width: ' + data + '%;" aria-valuenow="' + data + '" aria-valuemin="0" aria-valuemax="100">' + data + '%</div></div>';
+                                }
+                            },
+                            className: 'percent'
+                        },
+                        {
+                            targets: '_all',
+                            orderable: false,
+                            width: '150px',
+                            className: 'text-nowrap'
+                        }
+                    ],
+                    //initComplete: function (settings, json) {
+                    drawCallback: function(settings) {
+                        MergeGridCells($('#view_report_table'), [1, 2]);
+                    }
+                });
+            } else {
+                var table = $('#view_report_table').DataTable();
+                table.ajax.reload();
+            }
+
+            loading.hide();
+        }
+    </script>
+}
+<!-- Content Start -->
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h4 class="card-title">Carrier Performance</h4>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_SKIC_Criteria_02");
+    }
+    <div class="row" id="ShipmentStatusDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="table-loading-progress" class="overlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title" id="ShipmentStatusDetailText"></h4>
+                        <div class="table-responsive">
+                            <div class="dataTables_wrapper">
+                                <table class="table" id="view_report_table" cellspacing="0" width="100%">
+                                    @*<thead>
+                                            <tr>
+                                                <th>Fleet</th>
+                                                <th>Truck Type</th>
+                                                <th>Carrier</th>
+                                                <th>Truck Register</th>
+                                                <th>Truck Commit</th>
+                                                <th>จองคิว (คัน)</th>
+                                                <th>%จองคิว เทียบ commit</th>
+                                                <th>ได้งาน (คัน)</th>
+                                                <th>%ได้งาน เทียบ commit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>*@
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

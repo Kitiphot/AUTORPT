@@ -1,0 +1,241 @@
+﻿
+@{
+    ViewBag.Title = "WEB_ILB_007";
+}
+@section OverrideStyles{
+    <style>
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable .percent {
+                padding: 0px !important;
+            }
+
+            .dataTables_wrapper .dataTable thead th {
+                padding: 5px 30px;
+            }
+
+        .pointer {
+            cursor: pointer;
+        }
+        .cbFormat {
+            border-color: rgba(0,0,0,0.3);
+            height: calc(2.25rem + 5.75px) !important;
+            width: 100%;
+        }
+
+    </style>
+}
+@section Scripts{
+    <script src="~/assets/js/ilb.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var screenID = 'WEB_ILB_007';
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        var column = [];
+        var vm;
+        $(document).ready(function () {
+            initialControl();
+            GetService().then(() => {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });            
+        });
+        function initialControl() {
+            var jqxhr = $.post("/ILB/getViewTableColumnILB007")
+                .done(function (result) {
+                    column = result;
+                    uiHelpers.initDatepicker('#daterange-tr01', null, null);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                });
+            
+            vm = new ViewModel();
+            ko.applyBindings(vm);
+
+            return jqxhr;
+        }
+        function drawChart(request) {
+            var currentdate = new Date(request.selectStartDate);
+            generateGraphNotStack("#RPTILB007", '@Url.Action("ILB007_Summary_Shpmnt_Chart", "ReportChart")', 'bar','วันที่','จำนวน Shipment'
+                , "Shipment Arrival"
+                , "รายละเอียด Shipment ประจำวันที่ " + uiHelpers.displayFullDate(currentdate) + ' - ' + uiHelpers.displayFullDate(addDays(currentdate, 6))
+                , 'top',
+                function (activePoint) {
+                    var date = activePoint._chart.data.labels[activePoint._index];
+                    var criteria = activePoint._model.datasetLabel;
+                    if (criteria == 'Air Freight') {
+                        criteria = 1;
+                    }
+                    else if (status = 'Sea Freight'){
+                        criteria = 2;
+                    }
+
+                    ChartDrawTableDetail(getRequest(), date, criteria,1)
+                },
+                request
+            );
+        }
+        function ChartDrawTableDetail(request, date, criteria,flagDate) {
+            date = moment(date, "DD-MM-YYYY");
+            request.selectStartDate = internalDate(date);
+            request.selectCriteria = criteria;
+            request.flagDate = flagDate;
+
+            var sectionSODetailText = document.getElementById('SODetailText');
+            if (date != null) sectionSODetailText.innerText = "รายละเอียด Shipment ประจำวันที่ " + uiHelpers.displayDate(date);
+            ILB007DrawTable(request);
+
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+            //Monthly chart
+            drawChart(getRequest());
+            //Monthly Table
+            DrawTableDetail(getRequest());
+            var selectDate = getSelectDate();
+
+            var sectionreportHeader = document.getElementById('reportHeader');
+            sectionreportHeader.innerText = 'รายงาน Shipment Arrival Daily ประจำวันที่ ' + uiHelpers.displayDate(selectDate) + ' - ' + uiHelpers.displayDate(addDays(selectDate, 6));
+
+            var sectionRPTILB007Text = document.getElementById('RPTILB007Text');
+            sectionRPTILB007Text.innerText = "สรุป Shipment Arrival ประจำวันที่ " + uiHelpers.displayDate(selectDate) + ' - ' + uiHelpers.displayDate(addDays(selectDate, 6));
+
+            setBox();
+        }
+
+        function getSelectDate() {
+            var selectDate = $('#daterange-tr01').datepicker('getDate');
+            if (selectDate == null)
+                selectDate = new Date(moment());
+            return selectDate;
+        }
+        function setCriteria(data) {
+            if (data == null) return;
+            //dt = new Date(data.criteria.selectStartDate);
+            //$('#daterange-tr01').datepicker('setDate', dt);
+            $('#cboService').val(data.criteria.selectServiceGroup).trigger('change');
+        }
+        function getRequest() {
+            var selectDate = getSelectDate();
+            var serviceGroup = $('#cboService').select2('data').map(x => x.id);
+            var flagDate = null;
+            var selectCriteria= null;
+            var criteria = {
+                selectStartDate: internalDate(selectDate),
+                selectServiceGroup: serviceGroup,
+                selectCriteria: selectCriteria,
+                flagDate: flagDate
+            };
+            return criteria;
+        }
+
+        function ILB007DrawTable(request) {
+            drawTable(request, "#SODetailOverlay", column, "/Report/RPTILB007_Report");
+        }
+
+        function DrawTableDetail(request) {
+            var selectDate = getSelectDate();
+            var sectionSODetailText= document.getElementById('SODetailText');
+            if (selectDate != null) sectionSODetailText.innerText = 'รายละเอียด Shipment Arrival ประจำวันที่ ' + uiHelpers.displayDate(selectDate) + ' - ' + uiHelpers.displayDate(addDays(selectDate, 6)) ;
+            ILB007DrawTable(request);
+        }
+
+        function setBox() {
+            var jqxhr = $.post("/ReportChart/RPTILB007_Summary_Status", getRequest())
+                .done(function (result) {
+                    vm.setsummary(result.data);
+                    console.log('Test Summary Data');
+                    console.log(self.summary);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //$('#dvOverlay').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function ViewModel() {
+            var self = this;
+            self.summary = ko.observableArray([]);
+            self.setsummary = function (data) { this.summary(data); };
+        }
+
+    </script>
+}
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Monitor Shipment Arrival Report(ETA)</h1>
+    <h4 class="card-title"><span id="reportHeader"></span></h4>
+    @{
+        await Html.RenderPartialAsync("_Common_ILB_Criteria_03");
+        await Html.RenderPartialAsync("_Common_ILB_Summarize_007");
+    }
+    <div class="row" id="RPTILB007">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB007Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title" id="RPTILB007Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#RPTILB007 .report-graph',$('#RPTILB007 .report-title').text(),{reportTitle:$('#RPTILB007 .report-title').text()}); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="RPTILB007Layout">
+                    <div id="RPTILB007Container" class="chart-container report-container">
+                        @*<canvas id="RPTILB007"></canvas>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="SODetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="SODetailOverlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title" id="SODetailText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->

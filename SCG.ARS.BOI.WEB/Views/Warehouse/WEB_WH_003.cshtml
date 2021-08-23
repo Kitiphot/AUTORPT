@@ -1,0 +1,1041 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<script src="~/assets/js/warehouse.js"></script>
+<link href="~/assets/css/warehouse.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.3.2/css/fixedColumns.dataTables.min.css">
+@*<script src="https://code.jquery.com/jquery-3.5.1.js"></script>*@
+<script src="https://cdn.datatables.net/fixedcolumns/3.3.2/js/dataTables.fixedColumns.min.js"></script>
+<head>
+
+    <style>
+        #TodayDispatching_Table th, td {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+        }
+
+        .dataTables_wrapper .dataTable thead th {
+            padding: 5px 30px;
+            margin: 0 auto;
+        }
+
+        table[aria-describedby="TodayDispatching_Table_info"] thead th {
+            border: 1px solid #eee;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+        hr.myhrline {
+            margin: 0px;
+        }
+
+        h4, h6, p {
+            margin: 2px;
+        }
+
+        div.card-body {
+            padding: 1% !important;
+        }
+
+
+        div.DTFC_LeftBodyWrapper {
+            background-color: white;
+        }
+
+        div.DTFC_LeftFootWrapper {
+            background-color: white;
+        }
+
+        div.DTFC_LeftBodyLiner {
+            overflow-y: hidden !important;
+        }
+
+        .text-weight-bold {
+            font-weight: bold;
+        }
+
+    </style>
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var isFirstLoad = 1;
+        var table = null;
+        var selected_customer = [];
+        var submitCriteria;
+        var selected_dc = [];
+        var screenID = 'WEB_WH_003';
+        var column = [
+            {
+                "data": "create_date", "name": "create_date", "title": "Create Date", "autoWidth": false, "width": 200, "className": "text-nowrap",
+                "render": uiHelpers.displayDateTime
+            },
+            { "data": "statusid", "name": "statusid", "title": "Status Id", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "statusname", "name": "statusname", "title": "Status Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_invoice", "name": "po_invoice", "title": "Po Invoice", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "so_number", "name": "so_number", "title": "SO Number", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "dn", "name": "dn", "title": "DN", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customercode", "name": "Customer Code", "title": "customercode", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customername", "name": "Customer Name", "title": "customername", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "doctype", "name": "doctype", "title": "Doc Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "docrefno", "name": "docrefno", "title": "Doc Ref No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "inbound", "name": "inbound", "title": "Inbound", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "ean", "name": "ean", "title": "EAN", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "sku", "name": "sku", "title": "SKU", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "productbarcode", "name": "productbarcode", "title": "Product Barcode", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "productcode", "name": "productcode", "title": "Product Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "productdescription", "name": "productdescription", "title": "Product Description", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "suppliercode", "name": "suppliercode", "title": "Supplier Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "suppliername", "name": "suppliername", "title": "Supplier Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "weight", "name": "weight", "title": "Weight", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderInteger },
+            { "data": "volume", "name": "volume", "title": "Volume", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderInteger },
+            { "data": "qty_in_ewm", "name": "qty_in_ewm", "title": "QTY in EWM", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "unit_code", "name": "unit_code", "title": "Unit Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "uom", "name": "uom", "title": "UOM", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "productgroupcode", "name": "productgroupcode", "title": "Product Group Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "productgroupname", "name": "productgroupname", "title": "Product Group Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "picking_instruction_date", "name": "picking_instruction_date", "title": "Picking Instruction Issue Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime },
+            { "data": "stock_hold_date", "name": "stock_hold_date", "title": "Stock Hold Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime },
+            { "data": "picking_date", "name": "picking_date", "title": "Picking Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime },
+            { "data": "shippingdate", "name": "shippingdate", "title": "Shipping Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime },
+            { "data": "shipmentnogroup", "name": "shipmentnogroup", "title": "Shipment No. Group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "finaldestinationcode", "name": "finaldestinationcode", "title": "Final Destination Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "finaldestinationlongname", "name": "finaldestinationlongname", "title": "Final Destination Longname", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "deliverydate", "name": "deliverydate", "title": "Delivery Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate },
+            { "data": "entiled", "name": "entiled", "title": "Entiled", "autoWidth": true, "className": "text-nowrap" }
+        ];
+
+
+        function initialSearchCriteria() {
+            var ajax = [];
+            $('#CriteriaOveray').show();
+            ajax.push(GetCustomer('CDC'));
+            ajax.push(GetDC('CDC'));
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+            return result;
+        }
+
+
+        $(document).ready(function () {
+            //Report Type
+            $('#SectionSummaryDispatch').show();
+            init_datepicker_criteria();
+
+            $('#cboDC').on("change", function (element, checked) {
+                GetCustomer('CDC', $('#cboDC').select2('data').map(x => x.id));
+            });
+
+            initialControl().then(() => {
+                //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+
+            $.contextMenu({
+                selector: '.context-menu',
+                trigger: 'hover',
+                delay: 100,
+                autoHide: true,
+                callback: function (key, options) {
+                    var link = $(options.selector + ".context-menu-active");
+                    //window.console && console.log(m);
+                    if (key == "download") {
+                        link[0].click();
+                    }
+                    else if (key == "downloadAll") {
+                        var chartID = $('.chartCanvas').map((idx, element) => { return '#' + $(element).prop('id') }).toArray();
+
+                        uiHelpers.downloadPDF(chartID, 'Dispatch Report Chart');
+                    }
+                    //if()
+                },
+                items: {
+                    "download": { name: "Download", icon: "fas fa-download" },
+                    "downloadAll": { name: "Download All", icon: "fas fa-file-download" },
+                }
+            });
+            //Search();
+
+        });
+
+
+    </script>
+
+    <script>
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+
+            submitCriteria = getRequest();
+            GetSummary(submitCriteria);
+            GetCompareChart(submitCriteria);
+            GetDispatchByTimeChart(submitCriteria);
+            DrawTableDetail(submitCriteria);
+
+            var paramDate = $('#daterange-99').data('daterangepicker').startDate._d;
+            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var dayName = days[paramDate.getDay()];
+
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+            $('#daterange-99').data('daterangepicker').setStartDate(new Date(data.criteria.selectStartDate));
+            $('#daterange-99').data('daterangepicker').setEndDate(new Date(data.criteria.selectEndDate));
+            $('#cboCountBy').val(data.criteria.CountBy).trigger('change');
+            $('#cboDC').val(data.criteria.selectDc).trigger('change');
+            $('#cboCustomer').val(data.criteria.selectCustomer).trigger('change');
+        }
+
+        function getSubmitRequest(filter) {
+            filter = {
+                CustomerName: null || filter.CustomerName, Status: null || filter.Status, Time: null || filter.Time, Datetype: null || filter.Datetype
+            };
+            $('#ModalTransactionDate').text(moment(filter.orderStartDate).format('DD/MM/YYYY') + '-' + moment(filter.orderEndDate).format('DD/MM/YYYY'));
+            return {
+                ...submitCriteria,
+                selectCustomerName: filter.CustomerName,
+                selectStatus: filter.Status,
+                selectTime: filter.Time,
+                selectDateType: filter.Datetype
+            }
+        }
+
+        function genTableModal(filter) {
+            $('#modals-transaction').modal('show');
+            generateTableLeadModal_SR('#DispatchDetailModal', '@Url.Action("RPTCDC003_DispatchingReport", "Warehouse")',
+                filter, '', column);
+        }
+
+        function getRequest(CustomerName = null, Status = null, Time = null, DateType = null) {
+            var customer = $('#cboCustomer').select2('data').map(x => x.id);;
+            var dc = $('#cboDC').select2('data').map(x => x.id);;
+            var tmpStartDate = $('#daterange-99').data('daterangepicker').startDate._d;
+            var tmpEndDate = $('#daterange-99').data('daterangepicker').endDate._d;
+            var startDate = tmpStartDate.getFullYear() + "/" + (tmpStartDate.getMonth() + 1) + "/" + tmpStartDate.getDate();
+            var endDate = tmpEndDate.getFullYear() + "/" + (tmpEndDate.getMonth() + 1) + "/" + tmpEndDate.getDate();
+            var CountBy = document.getElementById('cboCountBy').value;
+            var cboCountBy = document.getElementById('cboCountBy');
+            var CountByName = cboCountBy.options[cboCountBy.selectedIndex].text;
+            if (!customer) {
+                customer = null;
+            }
+            var request = {
+                selectStartDate: startDate,
+                selectEndDate: endDate,
+                selectDc: dc,
+                selectCustomer: customer,
+                CountBy: CountBy,
+                CountByName: CountByName,
+                selectCustomerName: CustomerName,
+                selectStatus: Status,
+                selectTime: Time,
+                selectDateType: DateType
+            };
+            return request;
+        }
+
+        function GetCompareChart(request) {
+            $('#barChartTodayDispatching').remove();
+            $('#barChartTodayDispatchingContainer').append('<canvas id="barChartTodayDispatching" class="chartCanvas"><canvas>');
+            //Placeholder for input currentdate
+            var sectionreportHeader = document.getElementById('TodayDispatchingDate');
+            var sectionChartDate= document.getElementById('ChartDate');
+            var DateDis = GetDateDisplay();
+            sectionreportHeader.innerText = DateDis.StartDate + " - " + DateDis.EndDate;
+            sectionChartDate.innerText = DateDis.StartDate + " - " + DateDis.EndDate;
+
+            $('#SectionTodayCompareDispatch').show();
+
+            var cboCountBy = document.getElementById('cboCountBy');
+            $.ajax({
+                url: '@Url.Action("RPTCDC003_TodayDispatchingChart", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                //Populate chart data and show the modal
+                console.log(response);
+                //PopulateDataShipmentStatus(response, reporttype);
+                $('#barChartTodayDispatchingContainer').height(200 + (25 * response.countData) + 'px');
+                var ctx = document.getElementById("barChartTodayDispatching").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'horizontalBar',
+                    data: response,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                //ticks: {
+                                //    min: 60
+                                //},
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: cboCountBy.options[cboCountBy.selectedIndex].text
+                                },
+                                maxBarThickness: 60
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "ลูกค้า"
+                                }
+                            }]
+                        },
+                        elements: {
+                            rectangle: {
+                                borderWidth: 1,
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false,
+                            text: 'Dispatching Today'
+                        }
+                    }
+                });
+                var canvas = document.getElementById('barChartTodayDispatching');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+                        //label
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var CustomerName = chartData.labels[idx];
+
+                        //data
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var data = activePoint._chart.data;
+                        var datasetIndex = activePoint._datasetIndex;
+                        var Status = data.datasets[datasetIndex].label;
+                        var Datetype = 'P';
+                        //console.log(status);
+                    }
+                    genTableModal({ CustomerName: CustomerName, Status: Status, Datetype: Datetype });
+                    @*DrawTableDetail(getRequest(Customerslabel, status, null,'P'));*@
+                };
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionTodayCompareDispatch').hide();
+                //console.log( "finished" );
+            });
+
+            var table = $("#TodayDispatching_Table").DataTable().destroy();
+            var table = $("#TodayDispatching_Table").DataTable({
+                "ajax": ({
+                    url: '@Url.Action("RPTCDC003_DispatchSummaryTable", "Warehouse")',
+                    type: 'POST',
+                    data: request,
+                    dataType: 'Json'
+                }),
+                scrollX: true,
+                order: [],
+                searching: false,
+                //"bSort": true,
+                //paging: false,
+                lengthChange: false,
+                pageLength: 10,
+                fixedColumns: {
+                    leftColumns: 2,
+                    scrollX: false,
+                },
+                Paginate: false,
+                bPaginate: false,
+                bScrollCollapse: true,
+                ScrollCollapse: true,
+                columnDefs: [
+                    { orderable: false, order: false, targets: 0},
+                    { orderable: false, order: false, targets: 1}
+                ],
+                columns: [
+                    { "data": "customer_name", className: "text-nowrap", orderable: false, order: false },
+                    { "data": "plan_qty", className: "text-nowrap", "render": uiHelpers.renderInteger, orderable: false, order: false },
+                    { "data": "new_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    { "data": "book_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    { "data": "issue_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    { "data": "incomplete_pick_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    { "data": "pick_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    { "data": "incomplete_ship_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    { "data": "ship_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    { "data": "gi_qty", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                    {
+                        "data": "gi_percent", className: "text-nowrap",
+                        "render": function (data, type, row, meta) {
+                            return parseFloat(data).toFixed(2);
+                        }
+                    },
+
+                ]
+            });
+
+            //new $.fn.dataTable.FixedColumns(table, { leftColumns: 2});
+
+        }
+
+        function GetDispatchByTimeChart(request) {
+
+
+            $('#SectionPieChartDispatchByCreateTime').show();
+            $('#SectionBarChartDispatchByShippingTime').show();
+
+            $('#barChartDispatchByCreateTime').remove();
+            $('#barChartDispatchByCreateTimeContainer').append('<canvas id="barChartDispatchByCreateTime" class="chartCanvas"><canvas>');
+
+            var cboCountBy = document.getElementById('cboCountBy');
+            $.ajax({
+                url: '@Url.Action("RPTCDC003_DispatchByCreateTimeBarChart", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                var ctx = document.getElementById("barChartDispatchByCreateTime").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "Time"
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: cboCountBy.options[cboCountBy.selectedIndex].text
+                                }
+                            }]
+                        },
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "bottom"
+                        },
+                        title: {
+                            display: true,
+                            text: "การจ่ายสินค้าตามช่วงเวลา (Create Time)"
+                        }
+                    }
+                });
+                var canvas = document.getElementById('barChartDispatchByCreateTime');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        //label
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var Timelabel = chartData.labels[idx];
+
+                        //data
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var data = activePoint._chart.data;
+                        var datasetIndex = activePoint._datasetIndex;
+                        var CustomerName = data.datasets[datasetIndex].label;
+                        Time = Timelabel.slice(0, -3);
+
+                    }
+                    genTableModal({ CustomerName: CustomerName, Time: Time, Datetype: 'C' });
+                };
+
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionBarChartDispatchByCreateTime').hide();
+                //console.log( "finished" );
+            });
+
+            $('#barChartDispatchByShippingTime').remove();
+            $('#barChartDispatchByShippingTimeContainer').append('<canvas id="barChartDispatchByShippingTime" class="chartCanvas"><canvas>');
+
+            var cboCountBy = document.getElementById('cboCountBy');
+            $.ajax({
+                url: '@Url.Action("RPTCDC003_DispatchByTimeBarChart", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                var ctx = document.getElementById("barChartDispatchByShippingTime").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "Time"
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: cboCountBy.options[cboCountBy.selectedIndex].text
+                                }
+                            }]
+                        },
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "bottom"
+                        },
+                        title: {
+                            display: true,
+                            text: "การจ่ายสินค้าตามช่วงเวลา (Shipping Time)"
+                        }
+                    }
+                });
+                var canvas = document.getElementById('barChartDispatchByShippingTime');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        //label
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var Timelabel = chartData.labels[idx];
+
+                        //data
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var data = activePoint._chart.data;
+                        var datasetIndex = activePoint._datasetIndex;
+                        var CustomerName = data.datasets[datasetIndex].label;
+
+                        Time = Timelabel.slice(0, -3);
+                    }
+                    genTableModal({ CustomerName: CustomerName, Time: Time, Datetype: 'A' });
+                };
+
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionBarChartDispatchByShippingTime').hide();
+                //console.log( "finished" );
+            });
+
+        }
+
+        function DrawTableDetail(request) {
+
+            var DateDis = GetDateDisplay()
+            //ESC Text
+            var sectionDispatchingDetailText = document.getElementById('DispatchingDetailText');
+            sectionDispatchingDetailText.innerText = "รายละเอียดยอดสินค้าขาจ่ายประจำวันที่ " + DateDis.StartDate + " - " + DateDis.EndDate;// + " ของวันที่ " + currentdate;
+
+
+            //if(table != null ) $("#dtList").DataTable().destroy();
+            $('#SectionDispatchingDetail').show();
+            var jqxhr = $.post("/Warehouse/RPTCDC003_DispatchingReport", request)
+                .done(function (result) {
+                    console.log(result);
+                    //if (result.status) {
+                    if (table == null) {
+                        GenerateDatatable(result.data, column);
+                    }
+                    else {
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                    //} else {
+                    //toastr["error"](result.message);
+                    //}
+                })
+                .fail(function (e) {
+                    console.log(e);
+                }).always(function (e) {
+                    $('#SectionDispatchingDetail').hide();
+                });
+
+
+
+
+
+        }
+
+        function GenerateDatatable(data, columns) {
+            //table = $("#dtList").DataTable().destroy();
+            table = $('#dtList').DataTable({
+                dom: 'lTf<"html5buttons"B > gtip',
+                buttons: [
+                    'copy', 'excel'
+                    //, 'csv', 'excel', 'pdf', 'print'
+                ],
+                scrollX: true,
+                "bSort": true,
+                scrollY:'40vh',
+                //ordering: false,
+                responsive: true,
+                pageLength: 10,
+                filter: true, // this is for disable filter (search box)
+                "orderMulti": false, // for disable multiple column at once
+                data: data,
+                columns: columns,
+                "bSort": true
+            });
+
+        }
+        function isEmpty(obj) {
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key))
+                    return false;
+            }
+            return true;
+        }
+
+        function downloadPDF(canvas, filename) {
+            console.log(canvas)
+            var newCanvas = document.querySelector(canvas);
+            var filename = document.getElementById(filename);
+
+            //create image from dummy canvas
+            var newCanvasImg = newCanvas.toDataURL("image/png", 1.0);
+
+            //creates PDF from img
+            var doc = new jsPDF('landscape');
+            doc.addImage(newCanvasImg, 'JPEG', 10, 10, 280, 70);
+            doc.save(filename.innerText);
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-base').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <input type="hidden" id="reporttype" />
+    <div class="content-wrapper">
+        <h1>Warehouse</h1>
+        <h4 class="card-title">รายงานการจ่ายสินค้า (Dispatching Report)</h4>
+        @*<h4 class="card-title mb-4">Filled Tabs</h4>*@
+        <ul class="nav filled-tabs">
+            <li class="nav-item">
+                <a class="nav-link active show" data-toggle="tab" href="#filled-dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#filled-rawdata">Raw Data</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            @{
+                await Html.RenderPartialAsync("_Common_WH_Criteria_03");
+            }
+            <div class="tab-pane active show" id="filled-dashboard">
+                <div class="row" style="margin-top:2%;">
+                    <div class="col-12 card-statistics">
+                        <div class="row" id="div_summary" data-bind="foreach: summary">
+                            <div id="SectionSummaryDispatch" class="overlay">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                                <div class="card">
+                                    <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-center">
+                                                    @*<h5>CDC วังน้อย</h5>*@
+                                                    <b data-bind="text: dc_name"></b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-center">
+                                                    <p data-bind="text:$parent.xAxisLabel">Order</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr class="myhrline" />
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-center">
+                                                    <b data-bind="text: formatCurrency(total_order)"></b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-center">
+                                                    <b>Due Today</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-start">
+                                                    <b data-bind="text: formatCurrency(dispatch_order)">1000</b>
+                                                </div>
+                                            </div>
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-end">
+                                                    <b data-bind="text: formatCurrency(outstanding_order)">2000</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-start">
+                                                    <p style="text-align:left">Done</p>
+                                                </div>
+                                            </div>
+                                            <div class="col align-items-center">
+                                                <div class="d-flex justify-content-end">
+                                                    <p style="text-align:right">OutStanding</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col align-items-center">
+
+                                                <div class="progress progress-xs">
+                                                    <div class="progress-bar bg-info" role="progressbar" data-bind="attr: {'aria-valuenow': formatCurrency((total_order/dispatch_order)*100),} , style: {width:(dispatch_order/total_order)*100+'%'}"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                    <div class="progress-bar bg-danger" role="progressbar" data-bind="attr: {'aria-valuenow': formatCurrency(100-((total_order/dispatch_order)*100)),} ,style: {width:100-((dispatch_order/total_order)*100)+'%'}"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">แผนการจ่ายสินค้าออกจากคลัง ประจำวันที่ <span id="TodayDispatchingDate"></span></h4>
+                                <div class="row" id="CompareDispatching">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div id="SectionTodayCompareDispatch" class="overlay">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 d-flex align-items-center justify-content-between">
+                                                <h4 class="card-title" id="TodayDispatchingText"></h4>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="wrapper">
+                                                        <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartTodayDispatching','Dispatch Chart'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                            <i class="icon-share-alt mr-1"></i>Download PDF
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                            <div class="card-body" id="barChartTodayDispatchingLayout">
+                                                <div id="barChartTodayDispatchingContainer" class="chart-container" style="position: relative; height:30vh;">
+                                                    <canvas id="barChartTodayDispatching"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*Yesterday Receiving*@
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div id="SectionSummaryCompareDispatch" class="overlay">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                                                <h4 class="card-title" id="TodayReceivingDetailText"></h4>
+                                                <div>
+                                                    <div class="dataTables_wrapper">
+                                                        @*<table id="dtList" class="table table-striped" style="width:100%"></table>*@
+                                                        <table class="table table-striped" id="TodayDispatching_Table" cellspacing="0" width="100%">
+                                                            <thead>
+                                                                <tr>
+
+                                                                    <th rowspan="2" style="text-align:center; min-width:270px !important;">Customer</th>
+                                                                    <th rowspan="2" style="text-align:center;">Plan</th>
+                                                                    <th colspan="8" scope="colgroup" style="text-align:center">Status</th>
+                                                                    <th rowspan="2" style="text-align:center">
+                                                                        <div>% Dispatch</div>
+                                                                        <div>Done</div>
+                                                                    </th>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <th style="text-align:center">New</th>
+                                                                    <th style="text-align:center">Stock Hold</th>
+                                                                    <th style="text-align:center">Picking<br>Instruction Issued</th>
+                                                                    <th style="text-align:center">Incomplete<br>Picking</th>
+                                                                    <th style="text-align:center">Complete<br>Picking</th>
+                                                                    <th style="text-align:center">Incomplete<br>Shipping</th>
+                                                                    <th style="text-align:center">Complete<br>Shipping</th>
+                                                                    <th style="text-align:center">Confirm<br>GI</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">สรุปการจ่ายสินค้าออกจากคลังตามช่วงเวลา ประจำวันที่ <span id="ChartDate"></span></h4>
+                                <div class="row" id="DispatchByTime">
+
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div id="SectionBarChartDispatchByCreateTime" class="overlay">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 d-flex align-items-center justify-content-between">
+                                                <h4 class="card-title" id="barChartDispatchByCreateTimeText"></h4>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="wrapper">
+                                                        <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartDispatchByCreateTime','การจ่ายสินค้าตามช่วงเวลา (Create Time)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                            <i class="icon-share-alt mr-1"></i>Download PDF
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-body" id="barChartDispatchByCreateTimeLayout">
+                                                <div id="barChartDispatchByCreateTimeContainer" class="chart-container" style="position: relative; height:60vh;">
+                                                    <canvas id="barChartDispatchByCreateTime"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div id="SectionBarChartDispatchByShippingTime" class="overlay">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 d-flex align-items-center justify-content-between">
+                                                <h4 class="card-title" id="barChartDispatchByShippingTimeText"></h4>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="wrapper">
+                                                        <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartDispatchByShippingTime','การจ่ายสินค้าตามช่วงเวลา Shipping Time'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                            <i class="icon-share-alt mr-1"></i>Download PDF
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-body" id="barChartDispatchByShippingTimeLayout">
+                                                <div id="barChartDispatchByShippingTimeContainer" class="chart-container" style="position: relative; height:60vh;">
+                                                    <canvas id="barChartDispatchByShippingTime"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="filled-rawdata">
+                <div class="row mt-4" id="DispatchingDetail">
+                    <div class="col-12">
+                        <article class="card mb-4">
+                            <div class="card-body">
+                                <div id="SectionDispatchingDetail" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title" id="DispatchingDetailText"></h4>
+                                <div class="dataTables_wrapper">
+                                    <table id="dtList" class="table table-striped" style="width:100%"></table>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Content End -->
+
+    <div class="modal modal-default" id="modals-transaction">
+        <div class="modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;margin:auto">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        รายละเอียดยอดสินค้าขาจ่ายประจำวันที่ <span id="ModalTransactionDate"></span>
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <div class="row" id="DispatchDetailModal">
+                                <div class="col-12">
+                                    <div class="overlay section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h4 class="card-title section-title"></h4>
+                                    <div class="table-responsive">
+                                        <div class="dataTables_wrapper">
+                                            <table class="table table-striped section-table-render" style="width:100%"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var model = {
+            summary: ko.observableArray([]),
+            xAxisLabel: ko.observable()
+        }
+
+        ko.applyBindings(model, document.getElementById("div_summary"));
+
+        function GetSummary(request) {
+
+            $('#SectionSummaryDispatch').show();
+
+            var jqxhr = $.post("/Warehouse/RPTCDC003_DispatchSummary", request)
+                .done(function (result) {
+                    model.summary(result.datalist);
+                    model.xAxisLabel(result.xAxislabelString);
+                    console.log('xAxislabelString');
+                    console.log(result.data);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#SectionSummaryDispatch').hide();
+                    //console.log( "finished" );
+                });
+        }
+        var formatCurrency = function (amount) {
+            if (!amount) {
+                return "0";
+            }
+            amount += '';
+            x = amount.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return "" + x1 + x2;
+        }</script>
+
+</body>

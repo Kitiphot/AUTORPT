@@ -1,0 +1,414 @@
+﻿
+@{
+    ViewBag.Title = "Carrier Delay";
+}
+
+@section OverrideStyles{
+    <style>
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable .percent {
+                padding: 0px !important;
+            }
+
+            .dataTables_wrapper .dataTable thead th {
+                padding: 5px 30px;
+            }
+
+        .pointer {
+            cursor: pointer;
+        }
+    </style>
+}
+@section Scripts{
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>*@
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/ilb.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var screenID = 'WEB_ILB_008';
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        var column = [];
+        let column_part1 = [
+            { data: "no", name: "no", title: "No.", autoWidth: true, className: "text-nowrap" },
+            { data: "status", name: "status", title: "Status", autoWidth: true, className: "text-nowrap" },
+            { data: "booking_id", name: "booking_id", title: "Booking Id", autoWidth: true, className: "text-nowrap" },
+            { data: "booker", name: "booker", title: "Booker", autoWidth: true, className: "text-nowrap" },
+            { data: "shiper", name: "shiper", title: "Shipper", autoWidth: true, className: "text-nowrap" },
+            { data: "cust_ref_1", name: "cust_ref_1", title: "Cust.Ref.1", autoWidth: true, className: "text-nowrap" },
+            { data: "cust_ref_2", name: "cust_ref_2", title: "Cust.Ref.2", autoWidth: true, className: "text-nowrap" },
+            { data: "carrier_bkg_no", name: "carrier_bkg_no", title: "Carrier Bkg .No.", autoWidth: true, className: "text-nowrap" },
+            { data: "mode", name: "mode", title: "Mode", autoWidth: true, className: "text-nowrap" },
+            { data: "incoterm", name: "incoterm", title: "Incoterm", autoWidth: true, className: "text-nowrap" },
+            { data: "carrier", name: "carrier", title: "Carrier", autoWidth: true, className: "text-nowrap" },
+            { data: "carrier_request_date", name: "carrier_request_date", title: "Carrier Request Date", autoWidth: true, className: "text-nowrap" },
+            { data: "carrier_response_date", name: "carrier_response_date", title: "Carrier Response Date", autoWidth: true, className: "text-nowrap" },
+            { data: "pol", name: "pol", title: "POL", autoWidth: true, className: "text-nowrap" },
+            { data: "country_pol", name: "country_pol", title: "CountryPOL", autoWidth: true, className: "text-nowrap" },
+            { data: "pod", name: "pod", title: "POD", autoWidth: true, className: "text-nowrap" },
+            { data: "country_pod", name: "country_pod", title: "Country POD", autoWidth: true, className: "text-nowrap" },
+            { data: "etd_first", name: "etd_first", title: "ETD First time", autoWidth: true, className: "text-nowrap" },
+            { data: "etd", name: "etd", title: "ETD", autoWidth: true, className: "text-nowrap" },
+            {
+                data: "delay", name: "delay", title: "Delay (days)", autoWidth: true, className: "text-nowrap",
+                render: function (data, type, row) {
+                    if (parseInt(data) <= 0) {
+                        return "0";
+                    } else if (data == null) {
+                        return "";
+                    } else {
+                        return `<span style='color:red'>${ data }</span>`;
+                    }
+                }
+            },
+            { data: "eta", name: "eta", title: "ETA", autoWidth: true, className: "text-nowrap" },
+        ];
+        let column_part3 = [
+            { data: "cy_place", name: "cy_place", title: "CY Place", autoWidth: true, className: "text-nowrap", render: $.fn.dataTable.render.ellipsis(50) },
+            { data: "cy_date", name: "cy_date", title: "CY date", autoWidth: true, className: "text-nowrap" },
+            { data: "return_place", name: "return_place", title: "Return Place", autoWidth: true, className: "text-nowrap", render: $.fn.dataTable.render.ellipsis(50) },
+            { data: "return_date", name: "return_date", title: "Return Date", autoWidth: true, className: "text-nowrap" },
+            { data: "scgl_confirm_load_date", name: "scgl_confirm_load_date", title: "SCGL Confirm Load Date", autoWidth: true, className: "text-nowrap" },
+            { data: "closing_date_time", name: "closing_date_time", title: "Closing Date Time", autoWidth: true, className: "text-nowrap" },
+            { data: "vessel_name_first", name: "vessel_name_first", title: "Vessel Name First time", autoWidth: true, className: "text-nowrap" },
+            { data: "vessel_name", name: "vessel_name", title: "Vessel Name", autoWidth: true, className: "text-nowrap" },
+            { data: "scgl_ref_no", name: "scgl_ref_no", title: "SCGL Ref No.", autoWidth: true, className: "text-nowrap" },
+            { data: "cargo_desc", name: "cargo_desc", title: "Cargo Desc.", autoWidth: true, className: "text-nowrap" },
+            { data: "move_perspective", name: "move_perspective", title: "Move Perspective", autoWidth: true, className: "text-nowrap" },
+            { data: "group_rate", name: "group_rate", title: "Group Rate", autoWidth: true, className: "text-nowrap" },
+            { data: "rate_type", name: "rate_type", title: "Rate Type", autoWidth: true, className: "text-nowrap" },
+        ];
+
+        var vm;
+        $(document).ready(function () {
+            initialControl().done(function () {
+                return GetService();
+            }).done(function () {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+        });
+
+        function init_datepicker(dateType) {
+            var start = moment().startOf('month');
+            var end = moment().endOf('month');
+
+            var control = $('#daterange-' + dateType)
+
+            function cb(start, end) {
+                if (start.isSame(end, 'day')) {
+                    control.html(uiHelpers.displayDate(start));
+                } else {
+                    control.html(uiHelpers.displayDate(start) + '-' + uiHelpers.displayDate(end));
+                }
+            }
+
+            control.daterangepicker({
+                startDate: start,
+                endDate: end,
+                locale: {
+                    format: uiHelpers.dateFormat.DayMonthYear
+                },
+                ranges: datepicker_ranges_week,
+                maxSpan: {
+                    'months': 1,
+                    'days': -1
+                }
+            }, cb);
+
+            cb(start, end);
+        }
+
+        function initialControl() {
+            var jqxhr = $.post("/ILB/getViewTableContainerTypeColumn")
+                .done(function (result) {
+                    //console.log(result);
+                    column = column_part1.concat(result, column_part3);
+                    //uiHelpers.initMonthYearpicker('#daterange-tr01');
+                    init_datepicker('CY');
+                    init_datepicker('Return');
+                    vm = new ViewModel();
+                    ko.applyBindings(vm);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                });
+            return jqxhr;
+        }
+
+        function drawChart(dateType, request) {
+            //var currentdate = new Date(request.selectStartDate);
+            let [startDate, endDate] = getSelectDate(dateType);
+            generateGraph('#RPTILB008_' + dateType + 'Date', '/ReportChart/ILB008_' + dateType + 'Date_Chart', 'bar', dateType + ' Date', 'Booking'
+                , 'Carrier delay of ' + dateType + ' date : ' + uiHelpers.displayFullDate(startDate) + ' - ' + uiHelpers.displayFullDate(endDate)
+                , "xxxx", 'top',
+                function (activePoint) {
+                    //var day = activePoint._chart.data.labels.indexOf(activePoint._model.label) + 1;
+                    //currentDay = parseInt(day, 10);
+                    //currentmonth = currentdate.getMonth();
+                    //currentyear = currentdate.getFullYear();
+                    //ChartDrawTableDetail(getRequest(), currentDay, currentmonth, currentyear)
+                    let date = activePoint._chart.data.labels[activePoint._index];
+                    ChartDrawTableDetail(dateType, getRequest(), date)
+                },
+                { request, dateType }
+            );
+        }
+        function ChartDrawTableDetail(dateType, request, date) {
+            date = moment(date, "DD-MM-YYYY");
+            request.selectStartDate = internalDate(date);
+            request.selectEndDate = internalDate(date);
+
+            var sectionDetailText = document.getElementById(dateType + 'DateTableText');
+            if (date != null) sectionDetailText.innerText = "รายละเอียด Carrier delay (Confirm Booking) " + type + ': ' + uiHelpers.displayFullDate(date);
+            drawTable(dateType, request);
+
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+
+            drawChart('CY', getRequest('CY'));
+            drawChart('Return', getRequest('Return'));
+            DrawTableDetail('CY', getRequest('CY'));
+            DrawTableDetail('Return', getRequest('Return'));
+            let [startDate, endDate] = getSelectDate('CY');
+            var sectionreportHeader = document.getElementById('reportHeader');
+            sectionreportHeader.innerText = 'รายงาน Carrier delay (Confirm Booking) CY Date: ' + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate);
+            setBox();
+        }
+
+        function setBox() {
+            var jqxhr = $.post("/ReportChart/RPTILB008_Summary_Status", getRequest('CY'))
+                .done(function (result) {
+                    //console.log('DataDashBoard');
+                    //console.log(result);
+                    vm.setsummary(result.data);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //$('#dvOverlay').hide();
+                    //console.log( "finished" );
+                });
+            return jqxhr;
+        }
+
+        function getSelectDate(dateType) {
+            let daterange = $('#daterange-' + dateType).data('daterangepicker');
+
+            let startDate = daterange.startDate._d;
+            let endDate = daterange.endDate._d;
+
+            return [startDate, endDate];
+
+            //var selectDate = $('#daterange-tr01').datepicker('getDate');
+            //if (selectDate == null)
+            //    selectDate = new Date(moment());
+            //return selectDate;
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            dt = new Date(data.criteria.selectStartDate);
+            //$('#daterange-tr01').datepicker('setDate', dt);
+            //$('#cboServiceGroup').val(data.criteria.selectServiceGroup).trigger('change');
+        }
+
+        function getRequest(dateType) {
+            //var selectDate = getSelectDate();
+            //var d = new Date(selectDate),
+            //    month = d.getMonth(),
+            //    year = d.getFullYear();
+            //var firstDay = new Date(year, month, 1);
+            //var lastDay = new Date(year, month + 1, 0);
+            //var serviceGroup = document.getElementById('cboServiceGroup').value;
+            let [startDate, endDate] = getSelectDate(dateType);
+            var criteria = {
+                selectStartDate: internalDate(startDate),
+                selectEndDate: internalDate(endDate),
+                selectServiceGroup: $('#cboService').val()
+            };
+            return criteria;
+        }
+
+        function ILB008DrawTable(dateType, request) {
+            drawTable({ request, dateType }, '#RPTILB008_' + dateType + 'Overlay', column, '/Report/RPTILB008_Report');
+        }
+
+        function DrawTableDetail(dateType, request) {
+            let [startDate, endDate] = getSelectDate(dateType);
+            //var sectionTableText= document.getElementById(dateType + 'DateTableText');
+            //sectionTableText.innerText = 'รายงาน KPI Carrier (Confirm Booking) of ' + dateType + ' date: ' + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate);
+            //ILB008DrawTable(dateType, request);
+
+            generateTable('#' + dateType + 'DateTable', '/Report/RPTILB008_Report',
+                { request, dateType },
+                'รายงาน Carrier delay (Confirm Booking) of ' + dateType + ' date: ' + uiHelpers.displayDate(startDate) + ' - ' + uiHelpers.displayDate(endDate),
+                column);
+        }
+
+        function ViewModel() {
+            var self = this;
+            self.summary = ko.observableArray([]);
+            self.setsummary = function (data) { this.summary(data); };
+        }
+
+    </script>
+}
+<!-- Content Start -->
+<div class="content-wrapper">
+    <div class="row mb-4">
+        @{
+            await Html.RenderPartialAsync("_Common_ILB_Criteria_02");
+        }
+        <div id="total_shipment" class="col-12 col-sm-6 col-lg-3  mb-3" onclick="SearchCriteria(0);">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-around align-items-center">
+                        <div class="btn btn-primary btn-rounded px-3 py-3 mr-2">
+                            <i class="icon-docs md-18"></i>
+                        </div>
+                        <div class="mr-2">
+                            <h6 class="card-title">Confirmed Booking </h6>
+                            <h6 id="b1Text" data-bind="text: total"></h6>
+                            <div class="progress progress-xs">
+                                <div id="b1bar" class="progress-bar bg-blue" role="progressbar"
+                                     data-bind="attr: {'aria-valuenow': (total/total)*100,} , style: {width:(total/total)*100+'%'}"
+                                     aria-valuemin="0" aria-valuemax="100"></div>
+                                @*<div class="progress-bar bg-info  w-100" role="progressbar" aria-valuenow="100" aria-valuemin="0"
+                                    aria-valuemax="100"></div>*@
+                            </div>
+                        </div>
+                        <div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_ILB_Summarize_008");
+    }
+    <div class="row mt-4 mb-4" id="RPTILB008_CYDate">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB008_CYDateOverlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="RPTILB008_CYDateText"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#chart','RPTILB008_CYDateText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="RPTILB008_CYDateLayout">
+                    <div id="RPTILB008_CYDateContainer" class="chart-container report-container">
+                        @*<canvas id="RPTILB008"></canvas>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4 mb-4" id="RPTILB008_ReturnDate">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB008_ReturnDateOverlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="RPTILB008_ReturnDateText"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#chart','RPTILB008_ReturnDateText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="RPTILB008_ReturnDateLayout">
+                    <div id="RPTILB008_ReturnDateContainer" class="chart-container report-container">
+                        @*<canvas id="RPTILB008"></canvas>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="CYDateTable">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="CYDateTableOverlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title" id="CYDateTableText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped section-table-render" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+    <div class="row" id="ReturnDateTable">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="ReturnDateTableOverlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title" id="ReturnDateTableText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList2" class="table table-striped section-table-render" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->

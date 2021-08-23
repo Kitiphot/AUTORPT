@@ -1,0 +1,252 @@
+﻿<div id="Allsummary" class="row">
+    <div class="overlay section-loading" hidden="hidden">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 card-statistics">
+
+        <div id="summarize_div" class="sum_div">
+            <div class="row" id="div_summary" data-bind="foreach: summary">
+                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                    <div class="card">
+                        <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <b>Receive Shipdoc</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <p>(Sea Freight)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="myhrline" />
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <b data-bind="text: formatCurrency(receive_ship_sea_ontime)">1000</b>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <b data-bind="text: formatCurrency(receive_ship_sea_delay)">2000</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(2);">
+                                    <div class="d-flex justify-content-start">
+                                        <p style="text-align:left">Pass</p>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(1);">
+                                    <div class="d-flex justify-content-end">
+                                        <p style="text-align:right">Fail</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+
+                                    <div class="progress progress-lg">
+                                        <div class="progress-bar bg-info pointer" onclick="SearchCriteria(2);" role="progressbar" data-bind="attr: {'aria-': formatCurrency((receive_ship_sea_ontime/(receive_ship_sea_ontime+receive_ship_sea_delay))*100),} , style: {width:(receive_ship_sea_ontime/(receive_ship_sea_ontime+receive_ship_sea_delay))*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text: (receive_ship_sea_ontime + receive_ship_sea_ontime != 0) ? (uiHelpers.displayDecimal((receive_ship_sea_ontime/(receive_ship_sea_ontime+receive_ship_sea_delay)*100),2)+'%') : (0+'%')">2000</span></div>
+                                        <div class="progress-bar bg-danger pointer" onclick="SearchCriteria(1);" role="progressbar" data-bind="attr: {'aria-': formatCurrency(100-((receive_ship_sea_ontime/(receive_ship_sea_ontime+receive_ship_sea_delay))*100)),} ,style: {width:100-((receive_ship_sea_ontime/(receive_ship_sea_ontime+receive_ship_sea_delay))*100)+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text:  (receive_ship_sea_ontime + receive_ship_sea_ontime != 0) ? (uiHelpers.displayDecimal((receive_ship_sea_delay/(receive_ship_sea_ontime+receive_ship_sea_delay)*100),2)+'%') : (0+'%')">2000</span></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                    <div class="card">
+                        <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <b>Receive Shipdoc</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <p>(Air Freight)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="myhrline" />
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <b data-bind="text: formatCurrency(receive_ship_air_ontime)">1000</b>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <b data-bind="text: formatCurrency(receive_ship_air_delay)">2000</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(4);">
+                                    <div class="d-flex justify-content-start">
+                                        <p style="text-align:left">Pass</p>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(3);">
+                                    <div class="d-flex justify-content-end">
+                                        <p style="text-align:right">Fail</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+
+                                    <div class="progress progress-lg">
+                                        <div class="progress-bar bg-info pointer" onclick="SearchCriteria(4);" role="progressbar" data-bind="attr: {'aria-': formatCurrency((receive_ship_air_ontime/(receive_ship_air_ontime+receive_ship_air_delay))*100),} , style: {width:(receive_ship_air_ontime/(receive_ship_air_ontime+receive_ship_air_delay))*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text: uiHelpers.displayDecimal((receive_ship_air_ontime/(receive_ship_air_ontime+receive_ship_air_delay)*100),2)+'%'">2000</span></div>
+                                        <div class="progress-bar bg-danger pointer" onclick="SearchCriteria(3);" role="progressbar" data-bind="attr: {'aria-': formatCurrency(100-((receive_ship_air_ontime/(receive_ship_air_ontime+receive_ship_air_delay))*100)),} ,style: {width:100-((receive_ship_air_ontime/(receive_ship_air_ontime+receive_ship_air_delay))*100)+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text: uiHelpers.displayDecimal((receive_ship_air_delay/(receive_ship_air_ontime+receive_ship_air_delay)*100),2)+'%'">2000</span></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card">
+                        <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <b>Customs Clearance</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <p>(Sea Freight)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="myhrline" />
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <b data-bind="text: formatCurrency(custom_clear_sea_ontime)">1000</b>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <b data-bind="text: formatCurrency(custom_clear_sea_delay)">2000</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(6);">
+                                    <div class="d-flex justify-content-start">
+                                        <p style="text-align:left">Pass</p>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(5);">
+                                    <div class="d-flex justify-content-end">
+                                        <p style="text-align:right">Fail</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+
+                                    <div class="progress progress-lg">
+                                        <div class="progress-bar bg-info pointer" onclick="SearchCriteria(6);" role="progressbar" data-bind="attr: {'aria-': formatCurrency((custom_clear_sea_ontime/(custom_clear_sea_ontime+custom_clear_sea_delay))*100),} , style: {width:(custom_clear_sea_ontime/(custom_clear_sea_ontime+custom_clear_sea_delay))*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text: uiHelpers.displayDecimal((custom_clear_sea_ontime/(custom_clear_sea_ontime+custom_clear_sea_delay)*100),2)+'%'">2000</span></div>
+                                        <div class="progress-bar bg-danger pointer" onclick="SearchCriteria(5);" role="progressbar" data-bind="attr: {'aria-': formatCurrency(100-((custom_clear_sea_ontime/(custom_clear_sea_ontime+custom_clear_sea_delay))*100)),} ,style: {width:100-((custom_clear_sea_ontime/(custom_clear_sea_ontime+custom_clear_sea_delay))*100)+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text: uiHelpers.displayDecimal((custom_clear_sea_delay/(custom_clear_sea_ontime+custom_clear_sea_delay)*100),2)+'%'">2000</span></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card">
+                        <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <b>Customs Clearance</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <p>(Air Freight)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="myhrline" />
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <b data-bind="text: formatCurrency(custom_clear_air_ontime)">1000</b>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <b data-bind="text: formatCurrency(custom_clear_air_delay)">2000</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(8);">
+                                    <div class="d-flex justify-content-start">
+                                        <p style="text-align:left">Pass</p>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center pointer" onclick="SearchCriteria(7);">
+                                    <div class="d-flex justify-content-end">
+                                        <p style="text-align:right">Fail</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+
+                                    <div class="progress progress-lg">
+                                        <div class="progress-bar bg-info pointer" onclick="SearchCriteria(8);" role="progressbar" data-bind="attr: {'aria-': formatCurrency((custom_clear_air_ontime/(custom_clear_air_ontime+custom_clear_air_delay))*100),} , style: {width:(custom_clear_air_ontime/(custom_clear_air_ontime+custom_clear_air_delay))*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text: uiHelpers.displayDecimal((custom_clear_air_ontime/(custom_clear_air_ontime+custom_clear_air_delay)*100),2)+'%'">2000</span></div>
+                                        <div class="progress-bar bg-danger pointer" onclick="SearchCriteria(7);" role="progressbar" data-bind="attr: {'aria-': formatCurrency(100-((custom_clear_air_ontime/(custom_clear_air_ontime+custom_clear_air_delay))*100)),} ,style: {width:100-((custom_clear_air_ontime/(custom_clear_air_ontime+custom_clear_air_delay))*100)+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"><span data-bind="text: uiHelpers.displayDecimal((custom_clear_air_delay/(custom_clear_air_ontime+custom_clear_air_delay)*100),2)+'%'">2000</span></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,252 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> @ViewData["Title"] </title>
+    @*<link rel="shortcut icon" href="~/assets/images/favicon.png" type="image/x-icon" />*@
+    <link rel="apple-touch-icon" sizes="180x180" href="~/assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/assets/images/favicon-16x16.png">
+    <!-- ================== APP CSS START ================== -->
+    <link rel="stylesheet" href="~/assets/css/style.css" />
+    <link rel="stylesheet" href="~/lib/toastr.js/toastr.min.css" />
+
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/regular.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/solid.min.css" />
+    <!-- ================== APP CSS END ================== -->
+    <script src="~/assets/vendor/jQuery/js/jquery-3.5.1.min.js"></script>
+    <script src="~/assets/vendor/bootstrap/js/popper.min.js"></script>
+    <script src="~/lib/toastr.js/toastr.min.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <script src="~/assets/js/sha512.min.js"></script>
+
+    <style>
+        .hidepassword {
+            cursor: pointer;
+        }
+
+        .field-icon {
+            float: right;
+            margin-left: -17px;
+            margin-top: 10px;
+            left: -5px;
+            position: relative;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex flex-wrap">
+        <div class="col-md-4 banner-section">
+            <div class="slide-content bg-1">
+                <img src="~/assets/images/logo-scg-logistics_W400.png" alt="letstart">
+            </div>
+        </div>
+        <div class="col-12 col-md-8 bg-white">
+            <div class="auth-container-2 d-flex align-items-center justify-content-center">
+                @*<div class="nav-get-started d-flex align-items-center">
+            <p>Don't have an account?</p>
+            <a class="btn get-started-btn" href="/Auth/@Pages.Register2.Value">GET STARTED</a>
+        </div>*@
+                @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { DefaultButton = "btnSignIn", id = "form" }))
+                {
+                    @* <form action="#" class="auth-form-2"> *@
+                    <h3 class="mr-auto">Hello! let's get started</h3>
+                    <p class="mb-5 mr-auto">Enter your details below.</p>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="mdi mdi-account-outline"></i></span>
+                            </div>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Username" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group" id="grp-password">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="mdi mdi-lock-outline"></i></span>
+                            </div>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" autocomplete="off">
+                            <span toggle="#password" class="fa fa-fw fa-eye input-group-append field-icon toggle-password"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary mt-3" style="vertical-align: sub;margin-right: 10px" id="btnLogin">SIGN IN</button>
+                        <i style="display: none; color: mediumseagreen;" id="is-loading" class="fas fa-spinner fa-pulse fa-2x" title="Login in progress"></i>
+                    </div>
+                    @*<div class="wrapper mt-5 text-gray">
+                <p class="footer-text">Copyright © 2019 Admin. All rights reserved.</p>
+                <ul class="auth-footer text-gray d-flex">
+                    <li><a href="#">Terms &amp; Conditions</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                </ul>
+            </div>*@
+                    @* </form> *@
+                }
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function genHash(str) {
+            return b64_sha512(str) + '==';
+            //return crypto.subtle.digest("SHA-512", new TextEncoder("utf-8").encode(str)).then(buf => {
+            //    var ctArray = Array.from(new Uint8Array(buf));
+            //    var ctStr = ctArray.map(byte => String.fromCharCode(byte)).join('');
+            //    return btoa(ctStr);
+            //});
+        }
+        $(document).ready(function () {
+            $('#btnLogin').on('click', function (e) {
+                e.preventDefault();
+                $('#username').prop('readonly', true);
+                $('#password').prop('readonly', true);
+                $('#btnLogin').prop('disabled', true);
+                $('#is-loading').show();
+                if (login(e)) {
+                    var pass = $('#password').val(); //genHash($('#password').val());
+                    var jqxhr = $.ajax({
+                        url: '@Url.Action("Login", "Account")',
+                        type: 'post',
+                        data: JSON.stringify({ userName: $('#username').val(), password: pass }),
+                        headers: {
+                            RequestVerificationToken: $('input[name=__RequestVerificationToken]').val(),
+                            'Content-Type': 'application/json'
+                        },
+                        dataType: 'json',
+                    })
+                        .done(function (result) {
+                            if (uiHelpers.errorHandler(result)) {
+                                window.location = result.url;
+                            }
+                            else {
+                                $('#username').prop('readonly', false);
+                                $('#password').prop('readonly', false);
+                                $('#btnLogin').prop('disabled', false);
+                                $('#is-loading').hide();
+                            }
+                        })
+                        .fail(uiHelpers.postFailHandler)
+                        .fail(function (e) {
+                            $('#username').prop('readonly', false);
+                            $('#password').prop('readonly', false);
+                            $('#btnLogin').prop('disabled', false);
+                            $('#is-loading').hide();
+                        })
+                        .always(function (e) {
+                            loadTimer = null;
+                            setTimeout(function () {
+                                $('#username').prop('readonly', false);
+                                $('#password').prop('readonly', false);
+                                $('#btnLogin').prop('disabled', false);
+                                $('#is-loading').hide();
+                            }, 2000);
+                        })
+                        ;
+                }
+                else {
+                    $('#is-loading').hide();
+                }
+                return false;
+            });
+            var errMsg = "@String.Join('.', ViewData.ModelState.Where(n => n.Value.Errors.Count > 0).Select(c => c.Value.Errors.FirstOrDefault()?.ErrorMessage).ToList())";
+            if (errMsg != '')
+                toastr["warning"](errMsg);
+
+        });
+
+        $(".toggle-password").on("mousedown",function() {
+            $(this).removeClass("fa-eye");
+            $(this).addClass("fa-eye-slash");
+            var input = $($(this).attr("toggle"));
+            input.attr("type", "text");
+
+        });
+
+        $(".toggle-password").on("mouseup",function() {
+            $(this).removeClass("fa-eye-slash");
+            $(this).addClass("fa-eye");
+            var input = $($(this).attr("toggle"));
+            input.attr("type", "password");
+        });
+
+        //$(".toggle-password").click(function () {
+        //    $(this).toggleClass("fa-eye fa-eye-slash");
+        //    var input = $($(this).attr("toggle"));
+        //    if (input.attr("type") == "password") {
+        //        input.attr("type", "text");
+        //    } else {
+        //        input.attr("type", "password");
+        //    }
+        //});
+        @*
+        function showpassword(controlID) {
+            $(controlID + ' input').attr('type', 'text');
+            $(controlID + ' .eye').removeClass("fa-eye-slash");
+            $(controlID + ' .eye').addClass("fa-eye");
+        }
+        function hidepassword(controlID) {
+            $(controlID + ' input').attr('type', 'password');
+            $(controlID + ' .eye').removeClass("fa-eye-slash");
+            $(controlID + ' .eye').addClass("fa-eye");
+        }*@
+        $(document).on('keypress', function (e) {
+            kCode = e.keyCode || e.charCode; //for cross browser
+            if (kCode == 13) {
+                var defaultbtn = $("#form").attr("DefaultButton");
+                $("#" + defaultbtn).click();
+                return false;
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.which === 13) { // return
+                $('#btnLogin').trigger('click');
+                return false;
+            }
+        });
+
+        function login(e) {
+            var msg = '';
+            $('#username').removeClass('is-invalid');
+            $('#password').removeClass('is-invalid');
+            if ($('#username').val() == '') {
+                $('#username').addClass('is-invalid');
+                msg = 'Username'
+            }
+            if ($('#password').val() == '') {
+                $('#password').addClass('is-invalid');
+                if (msg.length > 0)
+                    msg += ' and Password';
+                else
+                    msg = 'Password';
+            }
+
+            if (msg != '') {
+                toastr.warning('Enter ' + msg + '.');
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        }
+
+        function togglePasswordDisplay() {
+            var textbox = document.getElementById("password");
+            if (textbox.type === "password") {
+                textbox.type = "text";
+            } else {
+                textbox.type = "password";
+            }
+        }
+    </script>
+</body>
+</html>

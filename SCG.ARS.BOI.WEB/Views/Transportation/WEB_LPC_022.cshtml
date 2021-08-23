@@ -1,0 +1,629 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles{
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <style>
+    </style>
+}
+
+@section Scripts{
+    @*<script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+        <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+        <script src="~/assets/js/uiHelpers.js"></script>*@
+    <link rel="stylesheet" href="~/assets/css/transportation.css">
+    <script src="~/assets/js/transportation.js"></script>
+
+    <style>
+        h4, h5, h6, p {
+            padding: 5px;
+        }
+        .dataTables_wrapper .dataTable thead th {
+            padding: 5px 30px;
+        }
+        .modal-dialog {
+            overflow-y: initial !important
+        }
+
+        .modal-body {
+            max-height: 80vh;
+            overflow-y: hidden;
+            overflow-x: hidden;
+        }
+    </style>
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_022';
+        
+        var column = [{ "data": "carrier_code", "name": "carrier_code", "title": "Carrier Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "carrier_name", "name": "carrier_name", "title": "Carrier Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_code", "name": "customer_code", "title": "Customer Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_name", "name": "customer_name", "title": "Customer Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "truck_license", "name": "truck_license", "title": "Truck License", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "fleet_name", "name": "fleet_name", "title": "Fleet Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_number", "name": "po_number", "title": "PO Number", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipment_no", "name": "shipment_no", "title": "Shipment No", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "dn_number", "name": "dn_number", "title": "DN Number", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_code", "name": "origin_code", "title": "Origin Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_name", "name": "origin_name", "title": "Origin Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_amphur", "name": "origin_amphur", "title": "Origin Amphur", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_province", "name": "origin_province", "title": "Origin Province", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_code", "name": "destination_code", "title": "Dstination Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_name", "name": "destination_name", "title": "Destination Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_address", "name": "destination_address", "title": "Destination Address", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_amphur", "name": "destination_amphur", "title": "Destination Amphur", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_province", "name": "destination_province", "title": "Destination Province", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_region", "name": "destination_region", "title": "Destination Region", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_postal_code", "name": "destination_postal_code", "title": "Destination Postal Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "order_aging", "name": "order_aging", "title": "order_aging", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderInteger }];
+
+        function setCriteria(data) {
+            if (data == null) return;
+            var ajax = [];
+            ajax.push(uiHelpers.initBusiness('#cboBusiness', [], [], [], [], []).always(() => { $('#cboBusiness').val(data.criteria.business).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg', [], [], data.criteria.business, [], [], []).always(() => { $('#cboMatfrg').val(data.criteria.matGroup).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initFleet('#cboFleet', [], [], data.criteria.business, data.criteria.matGroup, [], []).always(() => { $('#cboFleet').val(data.criteria.fleet).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, []).always(() => { $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, data.criteria.shippingPoint).always(() => { $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change.select2'); }));
+            ajax.push(uiHelpers.setSelectedCriteria('#cboCustomer', '/Report/GetCustomerTransport', data.criteria.customer));
+            ajax.push($('#cboOrderType').val(data.criteria.orderType).trigger('change.select2'));
+            ajax.push($('#cboTruckType').val(data.criteria.truckType).trigger('change.select2'));
+            ajax.push($('#cboPlannerName').val(data.criteria.plannerName).trigger('change.select2'));
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').fadeOut('xslow'); });
+        }
+
+        var fleet_cell, section_cell, region_cell, fleet_cnt, section_cnt, region_cnt;
+
+        // ============================>
+        // ==== Raw Data Function =====>
+        // ============================>
+
+        function searchRawdata() {
+            genTable(null);
+        }
+
+        function initialSearchCriteria_Rawdata() {
+            var ajax = [];
+            $('#CriteriaOveray_Raw').fadeIn('xslow');
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer_Raw'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness_Raw'));
+            ajax.push(uiHelpers.initFleet('#cboFleet_Raw'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint_Raw'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion_Raw'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg_Raw'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType_Raw'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType_Raw'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName_Raw'));
+
+            init_datepicker_criteria_one_month();
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray_Raw').fadeOut('xslow'); });//$('#CriteriaOveray_Raw').hide(); });
+            return result;
+        }
+
+        function getCriteria_Raw(filter) {
+            if (filter == null)
+                filter = { day: null, month: null, filter_group: null, carrier: null, product_group: null, aging: null, plannerName: getPlannerName() };
+            else
+                filter = { day: null || filter.day, month: null || filter.month, filter_group: null || filter.filter_group, carrier: null || filter.carrier, product_group: null || filter.product_group, aging: null || filter.aging, plannerName: null || filter.plannerName };
+            var date = $('#daterange-99').data('daterangepicker');
+            var startDate;
+            var endDate;
+            if (date != null) {
+                var tmpStartDate = date.startDate._d;
+                var tmpEndDate = date.endDate._d;
+                startDate = tmpStartDate.getFullYear() + "/" + (tmpStartDate.getMonth() + 1) + "/" + tmpStartDate.getDate();
+                endDate = tmpEndDate.getFullYear() + "/" + (tmpEndDate.getMonth() + 1) + "/" + tmpEndDate.getDate();
+            }
+
+            var criteria = {
+                orderStartDate: startDate,
+                orderEndDate: endDate,
+                business: getCombo_Raw('#cboBusiness_Raw'),
+                fleet: getCombo_Raw('#cboFleet_Raw'),
+                customer: getCombo_Raw('#cboCustomer_Raw'),
+                shippingPoint: getCombo_Raw('#cboShippingPoint_Raw'),
+                shipToRegion: getCombo_Raw('#cboShiptoRegion_Raw'),
+                orderType: getCombo_Raw('#cboOrderType_Raw'),
+                truckType: getCombo_Raw('#cboTruckType_Raw'),
+                plannerName: getCombo_Raw('#cboPlannerName_Raw'),
+                matGroup: getCombo_Raw('#cboMatfrg_Raw'),
+                carrier: filter.carrier,
+                aging: filter.aging,
+                product_group: filter.product_group,
+                filter_group: filter.filter_group
+            };
+            return criteria;
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search);
+            generateSummaryShipment('#DocReturnSummary', '@Url.Action("DocReturnStatus", "Transportation")');
+            var start = moment().subtract(1, 'months');
+            var end = moment();
+            $('#SummaryDate').text(start.format('DD/MM/YYYY') + '-' + end.format('DD/MM/YYYY'));
+            $('#ModalTransactionDate').text(start.format('DD/MM/YYYY') + '-' + end.format('DD/MM/YYYY'));
+            generateGraph('#DocReturnByBusiness', '@Url.Action("DocReturnByBusiness", "Transportation")',
+                'horizontalBar', 'DN', 'Product Group', '',
+                'DN ที่ยังไม่ได้ปิด Doc หลัง GI แยกตาม Product Group และอายุ DN ', 'top',
+                function (activePoint) {
+                    //var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                    var product_group = activePoint._model.label;
+                    var aging = activePoint._model.datasetLabel;
+                    //var filter = { carrier: carrier, filter_group: aging };
+                    var filter = { product_group: product_group};
+                    $('#modals-transaction').modal('show');
+                    genTableModal(filter);
+                });
+
+            generateGraph('#DocReturnByCarrier', '@Url.Action("DocReturnByCarrier", "Transportation")',
+                'horizontalBar', 'DN', 'Carrier', '',
+                'DN ที่ยังไม่ได้ปิด Doc หลัง GI แยกตาม Carrier และอายุ DN ', 'top',
+                function (activePoint) {
+                    //var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                    var carrier = activePoint._model.label;
+                    var aging = activePoint._model.datasetLabel;
+                    var filter = { carrier: carrier };
+                    $('#modals-transaction').modal('show');
+                    genTableModal(filter);
+                });
+
+        }
+
+        $(document).ready(function () {
+            initialControl().then(() => {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+            initialSearchCriteria_Rawdata();
+            $('#criteriaDate').text('GI Date');
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            });
+            comboOnchange();
+        });
+
+        function initialSearchCriteria() {
+            var ajax = [];
+            $('#CriteriaOveray').show();
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness'));
+            ajax.push(uiHelpers.initFleet('#cboFleet'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName'));
+            uiHelpers.initMonthYearpicker('#monthpicker');
+            init_datepicker_criteria_one_month();
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+            return result;
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-base').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+
+        function getCriteria(filter) {
+            if (filter == null)
+                filter = { day: null, month: null, filter_group: null, carrier: null, product_group: null, aging: null, plannerName: getPlannerName() };
+            else
+                filter = { day: null || filter.day, month: null || filter.month, filter_group: null || filter.filter_group, carrier: null || filter.carrier, product_group: null || filter.product_group, aging: null || filter.aging, plannerName: null || filter.plannerName };
+            var date = $('#daterange-99').data('daterangepicker');
+            var startDate;
+            var endDate;
+            if (date != null) {
+                var tmpStartDate = date.startDate._d;
+                var tmpEndDate = date.endDate._d;
+                startDate = tmpStartDate.getFullYear() + "/" + (tmpStartDate.getMonth() + 1) + "/" + tmpStartDate.getDate();
+                endDate = tmpEndDate.getFullYear() + "/" + (tmpEndDate.getMonth() + 1) + "/" + tmpEndDate.getDate();
+            }
+
+            var criteria = {
+                orderStartDate: startDate,
+                orderEndDate: endDate,
+                business: getBusiness_m(),
+                customer: getCustomer_m(),
+                fleet: getFleet_m(),
+                shippingPoint: getShippingPoint_m(),
+                shipToRegion: getShiptoRegion_m(),
+                orderType: getOrderType_m(),
+                truckType: getTruckType_m(),
+                plannerName: filter.plannerName,
+                matGroup: getMatfrg_m(),
+                carrier: filter.carrier,
+                aging: filter.aging,
+                product_group: filter.product_group,
+                filter_group: filter.filter_group
+            };
+
+            return criteria;
+        }
+
+        function genTable(filter) {
+            let date = $('#daterange-99').data('daterangepicker');
+            let startDate = moment(date.startDate._d).format('DD/MM/YYYY');
+            let endDate = moment(date.endDate._d).format('DD/MM/YYYY');
+            generateTableLead('#DocReturnDetail', '@Url.Action("DocReturnDetail", "Transportation")',
+                filter, 'ข้อมูล DN ที่ยังไม่ได้ปิด Doc หลัง GI ระหว่างวันที่ ' + startDate + '-' + endDate, column);
+        }
+
+        function genTableModal(filter) {
+            let date = $('#daterange-99').data('daterangepicker');
+            let startDate = moment(date.startDate._d).format('DD/MM/YYYY');
+            let endDate = moment(date.endDate._d).format('DD/MM/YYYY');
+            generateTableLeadModal('#DocReturnDetailModal', '@Url.Action("DocReturnDetail", "Transportation")',
+                filter, null, column);
+        }
+
+
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Transportation</h1>
+            <h4 class="card-title">รายงาน DN ที่ไม่ได้ปิดสถานะเอกสาร (Document Return Monitoring)</h4>
+        </div>
+    </div>
+    <div class="row">
+        <article class="card mb-4 col-12">
+            <div class="card-body">
+                @*<h4 class="card-title mb-4">Filled Tabs</h4>*@
+                <ul class="nav filled-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active show" data-toggle="tab" href="#filled-dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#filled-rawdata">Raw Data</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active show" id="filled-dashboard">
+                        @{
+                            await Html.RenderPartialAsync("_Common_Transportation_Criteria_05");
+                        }
+                        <div class="row mt-4" id="DocReturnSummary">
+                            <div class="col-12 card-statistics">
+                                <h3>DN ที่ยังไม่ได้ปิด Doc หลัง GI ระหว่างวันที่ <span id="SummaryDate"></span></h3>
+                                <div class="row">
+                                    <div class="col-12 col-sm-6 col-lg-2 mb-4" onclick="searchSummary(1)">
+                                        <div class="card" style="padding:0 !important">
+                                            <div class="overlay section-loading">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body bg-one-day pointer">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5 class="align-middle bg-one-day-h">1 Day</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="section-box-1">-</h4>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5>DN</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-lg-2 mb-4" onclick="searchSummary(2)">
+                                        <div class="card" style="padding:0 !important">
+                                            <div class="overlay section-loading">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body bg-two-three-day pointer">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5 class="align-middle bg-two-three-day-h">2-3 Day</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="section-box-2">-</h4>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5>DN</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-lg-2 mb-4" onclick="searchSummary(3)">
+                                        <div class="card" style="padding:0 !important">
+                                            <div class="overlay section-loading">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body bg-four-five-day pointer">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5 class="align-middle bg-four-five-day-h">4-5 Days</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="section-box-3">-</h4>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5>DN</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-lg-2 mb-4" onclick="searchSummary(4)">
+                                        <div class="card" style="padding:0 !important">
+                                            <div class="overlay section-loading">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body bg-six-seven-day pointer">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5 class="align-middle bg-six-seven-day-h">6-7 Days</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="section-box-4">-</h4>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5>DN</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-lg-2 mb-4" onclick="searchSummary(5)">
+                                        <div class="card" style="padding:0 !important">
+                                            <div class="overlay section-loading">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body bg-eight-ten-day pointer">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5 class="align-middle bg-eight-ten-day-h">8-10 Days</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="section-box-5">-</h4>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5>DN</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-lg-2 mb-4" onclick="searchSummary(6)">
+                                        <div class="card" style="padding:0 !important">
+                                            <div class="overlay section-loading">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body bg-more-ten-day pointer">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5 class="align-middle bg-more-ten-day-h">> 10 Days</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="section-box-6">-</h4>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h5>DN</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" id="DocReturnByBusiness">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="DocReturnByBusiness section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 d-flex align-items-center justify-content-between">
+                                        <h4 class="card-title report-title"></h4>
+                                        <div class="report-filename" style="display: none;"></div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="wrapper">
+                                                <a href="#" id="downloadPdf" onclick="downloadPDF('#DocReturnByBusiness'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                    <i class="icon-share-alt mr-1"></i>Download PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body report-frame pt-0">
+                                        <div class="chart-container report-container">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" id="DocReturnByCarrier">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="DocReturnByCarrier section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 d-flex align-items-center justify-content-between">
+                                        <h4 class="card-title report-title"></h4>
+                                        <div class="report-filename" style="display: none;"></div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="wrapper">
+                                                <a href="#" id="downloadPdf" onclick="downloadPDF('#DocReturnByCarrier'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                    <i class="icon-share-alt mr-1"></i>Download PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body report-frame pt-0">
+                                        <div class="chart-container report-container">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="filled-rawdata">
+                        @{
+                            await Html.RenderPartialAsync("_Common_Transportation_Criteria_Rawdata_05");
+                        }
+                        <div class="row mt-4" id="DocReturnDetail">
+                            <div class="col-12">
+                                <article class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="overlay section-loading">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h4 class="card-title section-title"></h4>
+                                        <div class="table-responsive">
+                                            <div class="dataTables_wrapper">
+                                                <table class="table table-striped section-table-render"></table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+
+<div class="modal modal-default" id="modals-transaction">
+    <div class="modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;margin:auto">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    ข้อมูล DN ที่ยังไม่ได้ปิด Doc หลัง GI ระหว่างวันที่ <span id="ModalTransactionDate"></span>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col">
+                        <div class="row" id="DocReturnDetailModal">
+                            <div class="col-12">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">Close</button>
+                @*<button type="button" class="btn btn-primary" onclick="SaveStock()">Save</button>*@
+            </div>
+        </form>
+    </div>
+</div>

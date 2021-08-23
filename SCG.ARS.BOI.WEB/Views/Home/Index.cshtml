@@ -1,0 +1,135 @@
+﻿
+@{
+    ViewData["Title"] = "Home";
+}
+@using SCG.ARS.BOI.WEB.Entities.MasterDb
+@using SCG.ARS.BOI.WEB.Repositories
+@using Microsoft.AspNetCore.Http
+@using SCG.ARS.BOI.WEB.Security
+@inject IMasterRepository MasterRepository
+@inject IHttpContextAccessor httpContextAccessor
+@inject ISecurityService sec
+
+<style>
+    .container {
+        position: relative;
+        height: 100%;
+    }
+
+    .center {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding-top: 18%;
+    }
+</style>
+
+
+<div class="container">
+    <div class="center">
+        <h1>Welcome : @await sec.GetFullname()</h1>
+        @*<iframe src="https://10.41.20.145:3000/d/Rzi6OyBMz/plai-iot-sensor-monitoring?orgId=2&from=1597151886893&to=1619826551273" height="800" width="1000"></iframe>
+        <a>=========================================================================================================================</a>
+        <iframe src="https://10.41.20.145:3000/dashboard/snapshot/1i2p2PgDbvDiaaiEYatjOgaOz5DjHaXp" height="800" width="1000"><iframe>*@
+    </div>
+</div>
+
+
+
+@*
+    <div style="margin: auto; width: 50%; border: 3px solid green; padding: 20px;">
+        Site Map
+    </div>
+    <div style="margin: auto; width: 50%; border: 3px solid green; padding: 20px;">
+        @foreach (var item in MasterRepository.GetMasterMenu())
+        {
+            <div>
+                @if (!string.IsNullOrEmpty(item.menu_icon) && item.menu_icon.StartsWith("fa"))
+                {
+                    <div style="line-height: 50px;">
+                        <span class="@item.menu_icon md-18 mr-2"></span><span class="menu-title">@item.menu_name</span>
+                    </div>
+                }
+                else
+                {
+                    <span class="@item.menu_icon md-18 mr-2"></span><span class="menu-title">@item.menu_name</span>
+                }
+                <div style="padding-left: 25px;">
+                    @foreach (var sub_item in MasterRepository.GetSubMenu(item.menu_id))
+                    {
+
+                            @if (!string.IsNullOrEmpty(sub_item.menu_icon) && sub_item.menu_icon.StartsWith("fa"))
+                            {
+                                <i class="@sub_item.menu_icon md-18 mr-2"></i>
+                            }
+                            else
+                            {
+                                <i class="@sub_item.menu_icon md-18 mr-2"></i>
+                            }
+                            @sub_item.menu_name
+                        <div style="padding-left: 25px">
+                                @foreach (var sub_item2 in MasterRepository.GetSubMenu(sub_item.menu_id))
+                                {
+                                    @if (!string.IsNullOrEmpty(sub_item2.menu_icon) && sub_item2.menu_icon.StartsWith("fa"))
+                                    {
+                                        <i class="@sub_item2.menu_icon md-18 mr-2"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="@sub_item2.menu_icon md-18 mr-2"></i>
+                                    }
+                                    @sub_item2.menu_name
+                                    <div class="sub-menu level3" style="padding-left: 25px; padding-right:0px">
+                                        @foreach (var page_item in MasterRepository.GetPageMenu(sub_item2.menu_id))
+                                        {
+                                            @if (httpContextAccessor.HttpContext.User.IsAllow(page_item.menu_page, SCG.ARS.BOI.WEB.Attributes.Permission.View))
+                                            {
+                                                <a class="nav-link nav-link-to-page @Html.IsSelected(controller: "ReportChart", action: @page_item.menu_page)" href="/@page_item.menu_path">
+                                                    @if (!string.IsNullOrEmpty(page_item.menu_icon))
+                                                    {
+                                                        <i class="@page_item.menu_icon md-18 mr-2"></i>
+                                                    }
+                                                    @page_item.menu_name
+                                                </a>
+                                            }
+                                        }
+                                    </div>
+                                }
+                                @foreach (var page_item in MasterRepository.GetPageMenu(sub_item.menu_id))
+                                {
+                                    @if (httpContextAccessor.HttpContext.User.IsAllow(page_item.menu_page, SCG.ARS.BOI.WEB.Attributes.Permission.View))
+                                    {
+                                        <a class="nav-link nav-link-to-page @Html.IsSelected(controller: "ReportChart", action: @page_item.menu_page)" href="/@page_item.menu_path">
+                                            @if (!string.IsNullOrEmpty(page_item.menu_icon))
+                                            {
+                                                <i class="@page_item.menu_icon md-18 mr-2"></i>
+                                            }
+                                            @page_item.menu_name
+                                        </a>
+                                    }
+                                }
+                        </div>
+                    }
+                    @foreach (var page_item in MasterRepository.GetPageMenu(item.menu_id))
+                    {
+                        @if (httpContextAccessor.HttpContext.User.IsAllow(page_item.menu_page, SCG.ARS.BOI.WEB.Attributes.Permission.View))
+                        {
+                            <a class="nav-link nav-link-to-page @Html.IsSelected(controller: "ReportChart", action: @page_item.menu_page)" href="/@page_item.menu_path">
+                                @if (!string.IsNullOrEmpty(page_item.menu_icon))
+                                {
+                                    <i class="@page_item.menu_icon md-18 mr-2"></i>
+                                }
+                                @page_item.menu_name
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    </div>*@
+<!-- Left Navigation End -->
+@*<video playsinline="" autoplay="" loop="" muted="">
+        <source src="https://www.scglogistics.co.th/wp-content/uploads/2020/08/SCGLogistics_Homepage_VDO_Cut.mp4" type="video/mp4">
+    </video>*@

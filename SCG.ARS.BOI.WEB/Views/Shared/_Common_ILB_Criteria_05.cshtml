@@ -1,0 +1,48 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@*<div id="div_criteria">*@
+<div id="div_criteria" class="col-md-12 col-lg-8 col-sm-12 mt-4 pl-0">
+    <div class="card">
+        <div id="CriteriaOveray" class="overlay">
+            <div class="loader-wrap">
+                <div class="bar-loader">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+            <div class="form-row">
+                <div class="form-group col-lg-4">
+                    <label for="daterange-tr01">Date</label>
+                    <button id="daterange-tr01" style="width:100%" class="btn btn-default dropdown-toggle md-btn-flat"></button>
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="cboCustomer">Business Unit</label>
+                    @*@Html.DropDownList("service", new List<SelectListItem>
+                        {
+                            new SelectListItem{ Text="Select All" },
+                            new SelectListItem{ Text="SCG international", Value = "1" },
+                            new SelectListItem{ Text="Non-SCG,CBM", Value = "2" },
+                            new SelectListItem{ Text="SCG-Packaing,Chemical", Value = "3" }
+                        }
+                        , new { @class = "form-control", @id = "cboServiceGroup" })*@
+                    @Html.DropDownListFor(m => m.Service, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboService", @name = "Service[]", multiple = "multiple", @style = "width: 100%" })
+
+                </div>
+
+                <div class="form-group col-lg-4 mt-2">
+                    <div id="search-button">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row d-flex align-items-center">
+            </div>
+        </div>
+    </div>
+</div>
+
+

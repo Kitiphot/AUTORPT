@@ -1,0 +1,1748 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Index";
+}
+<script src="~/assets/js/warehouse.js"></script>
+<link href="~/assets/css/warehouse.css" rel="stylesheet" />
+<style>
+    #TodayReceiving_Table th, td {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+
+    #TodayReceiving_Table th {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .dataTables_wrapper .dataTable thead th {
+        padding: 5px 30px;
+    }
+
+    table[aria-describedby="TodayReceiving_Table_info"] thead th {
+        border: 1px solid #eee;
+        text-align: center;
+    }
+
+    .dataTables_wrapper .dataTable {
+        margin: 0 !important;
+    }
+
+    hr.myhrline {
+        margin: 0px;
+    }
+
+    h4, h5, h6, p {
+        margin: 2px;
+    }
+
+    div.card-body {
+        padding: 1% !important;
+    }
+</style>
+
+<script>
+    /*-----------------------*/
+    /*Initial on Webpage Load*/
+    /*-----------------------*/
+    var screenID = 'WEB_WH_OVERALL';
+
+    function initialSearchCriteria() {
+        var ajax = [];
+        $('#CriteriaOveray').show();
+        ajax.push(GetCustomer('CDC'));
+        ajax.push(GetDC('CDC'));
+        var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+        return result;
+    }
+
+    $(document).ready(function () {
+        uiHelpers.initMonthYearpicker('#monthpicker');
+
+        $('#cboDC').on("change", function (element, checked) {
+            GetCustomer('CDC', $('#cboDC').select2('data').map(x => x.id));
+        });
+
+        initialControl().then(() => {
+            //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+            uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+        });
+
+        $.contextMenu({
+            selector: '.context-menu',
+            trigger: 'hover',
+            delay: 100,
+            autoHide: true,
+            callback: function (key, options) {
+                var link = $(options.selector + ".context-menu-active");
+                //window.console && console.log(m);
+                if (key == "download") {
+                    link[0].click();
+                }
+                else if (key == "downloadAll") {
+                    var chartID = $('.chartCanvas').map((idx, element) => { return '#'+$(element).prop('id') }).toArray();
+                    
+                    uiHelpers.downloadPDF(chartID, 'WarehouseOverallChart');
+                }
+                //if()
+            },
+            items: {
+                "download": { name: "Download", icon: "fas fa-download" },
+                "downloadAll": { name: "Download All", icon: "fas fa-file-download" },
+            }
+        });
+
+    });
+
+    function getSelectDate() {
+        var selectDate = $('#monthpicker').datepicker('getDate');
+        if (selectDate == null)
+            selectDate = new Date();
+        return selectDate;
+    }
+
+    function Search() {
+
+        uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+        GetReceivedAndDispatchChart(getRequest());
+        GetReceiveDispatchOverAllChart(getRequest());
+        GetUtilizationChart(getRequest());
+        GetAgingProductChart(getRequest());
+
+    }
+    function setCriteria(data) {
+        if (data == null) return;
+        var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+        $('#monthpicker').datepicker('setDate', dt);
+        $('#cboDC').val(data.criteria.selectDc).trigger('change');
+        $('#cboCustomer').val(data.criteria.selectCustomer).trigger('change');
+    }
+
+        function getRequest() {
+            var customer = $('#cboCustomer').select2('data').map(x => x.id);
+            var dc = $('#cboDC').select2('data').map(x => x.id);
+            var selectedDate = getSelectDate();
+            var day = selectedDate.getDate();
+            var month = selectedDate.getMonth() + 1;
+            var year = selectedDate.getFullYear();
+
+            if (!customer) {
+                customer = null;
+            }
+            if (!dc) {
+                dc = null;
+            }
+            var request = {
+                selectDc: dc,
+                selectCustomer: customer,
+                selectDay: day,
+                selectMonth: month,
+                selectYear: year
+            };
+            return request;
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-base').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+
+function GetReceivedAndDispatchChart(request) {
+    $('#barReceiveAccuracyOrder').remove();
+    $('#barReceiveAccuracyOrderContainer').append('<canvas id="barReceiveAccuracyOrder" class="chartCanvas"><canvas>');
+    $('#SectionbarReceiveAccuracyOrder').show();
+    var cboCountBy = document.getElementById('cboCountBy');
+    $.ajax({
+        url: '@Url.Action("RPTCDC000_ReceiveAccuracyOrder", "Warehouse")',
+        type: 'POST',
+        data: request,
+        dataType: 'Json'
+    }).done(function (response) {
+        var ctx = document.getElementById("barReceiveAccuracyOrder").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน PO"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Receive Accuracy"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "การรับสินค้า (PO)"
+                }
+            }
+        });
+
+    }).fail(function (error) {
+        console.log(error);
+    }).always(function () {
+        $('#SectionbarReceiveAccuracyOrder').hide();
+    });
+
+    $('#barReceiveAccuracyQty').remove();
+    $('#barReceiveAccuracyQtyContainer').append('<canvas id="barReceiveAccuracyQty" class="chartCanvas"><canvas>');
+    $('#SectionbarReceiveAccuracyQty').show();
+    var cboCountBy = document.getElementById('cboCountBy');
+    $.ajax({
+        url: '@Url.Action("RPTCDC000_ReceiveAccuracyQty", "Warehouse")',
+        type: 'POST',
+        data: request,
+        dataType: 'Json'
+    }).done(function (response) {
+        var ctx = document.getElementById("barReceiveAccuracyQty").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน (ชิ้น)"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Receive Accuracy"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "การรับสินค้า (ชิ้น)"
+                }
+            }
+        });
+
+    }).fail(function (error) {
+        console.log(error);
+    }).always(function () {
+        $('#SectionbarReceiveAccuracyQty').hide();
+    });
+
+    $('#barDispatchAccuracyOrder').remove();
+    $('#barDispatchAccuracyOrderContainer').append('<canvas id="barDispatchAccuracyOrder" class="chartCanvas"><canvas>');
+    $('#SectionbarDispatchAccuracyOrder').show();
+
+    $.ajax({
+        url: '@Url.Action("RPTCDC000_DispatchAccuracyOrder", "Warehouse")',
+        type: 'POST',
+        data: request,
+        dataType: 'Json'
+    }).done(function (response) {
+        var ctx = document.getElementById("barDispatchAccuracyOrder").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน SO"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Dispatch Accuracy"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "การจ่ายสินค้า (SO)"
+                }
+            }
+        });
+    }).fail(function (error) {
+        console.log(error);
+    }).always(function () {
+        $('#SectionbarDispatchAccuracyOrder').hide();
+    });
+
+    $('#barDispatchAccuracyQty').remove();
+    $('#barDispatchAccuracyQtyContainer').append('<canvas id="barDispatchAccuracyQty" class="chartCanvas"><canvas>');
+    $('#SectionbarDispatchAccuracyQty').show();
+
+    $.ajax({
+        url: '@Url.Action("RPTCDC000_DispatchAccuracyQty", "Warehouse")',
+        type: 'POST',
+        data: request,
+        dataType: 'Json'
+    }).done(function (response) {
+        var ctx = document.getElementById("barDispatchAccuracyQty").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน (ชิ้น)"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Dispatch Accuracy"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "การจ่ายสินค้า (ชิ้น)"
+                }
+            }
+        });
+    }).fail(function (error) {
+        console.log(error);
+    }).always(function () {
+        $('#SectionbarDispatchAccuracyQty').hide();
+    });
+
+    }
+
+function GetReceiveDispatchOverAllChart(request) {
+    $('#barReceivedDispatchOrder').remove();
+    $('#barReceivedDispatchOrderContainer').append('<canvas id="barReceivedDispatchOrder" class="chartCanvas"><canvas>');
+    $('#SectionbarReceivedDispatchOrder').show();
+
+    $.ajax({
+        url: '@Url.Action("RPTCDC000_ReceiveDispatchOrder", "Warehouse")',
+        type: 'POST',
+        data: request,
+        dataType: 'Json'
+    }).done(function (response) {
+        var ctx = document.getElementById("barReceivedDispatchOrder").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน PO"
+                                },
+                                type: 'linear'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "ยอดรับ-จ่ายสินค้า(PO)"
+                }
+            }
+        });
+
+    }).fail(function (error) {
+        console.log(error);
+    }).always(function () {
+        $('#SectionbarReceivedDispatchOrder').hide();
+    });
+
+     $('#barReceivedDispatchQty').remove();
+    $('#barReceivedDispatchQtyContainer').append('<canvas id="barReceivedDispatchQty" class="chartCanvas"><canvas>');
+    $('#SectionbarReceivedDispatchQty').show();
+
+    $.ajax({
+        url: '@Url.Action("RPTCDC000_ReceiveDispatchQty", "Warehouse")',
+        type: 'POST',
+        data: request,
+        dataType: 'Json'
+    }).done(function (response) {
+        var ctx = document.getElementById("barReceivedDispatchQty").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวนชิ้น"
+                                },
+                                type: 'linear'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "ยอดรับ-จ่ายสินค้า(ชิ้น)"
+                }
+            }
+        });
+
+    }).fail(function (error) {
+        console.log(error);
+    }).always(function () {
+        $('#SectionbarReceivedDispatchQty').hide();
+    });
+    }
+    
+    function genChartASRSUtilization(response) {
+        var maxVal = Math.max.apply(this, response.utilizationDataASRS.data);
+        console.log(maxVal);
+        var ctx = document.getElementById("barStockUtilizationASRS").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.utilizationDataASRS,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Location"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Utilization"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Stock Utilization - ASRS"
+                }
+            }
+        });
+    }
+
+    function genChartRackUtilization(response) {
+        var ctx = document.getElementById("barStockUtilizationRack").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.utilizationDataRack,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Location"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Utilization"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Stock Utilization - Selective rack"
+                }
+            }
+        });
+    }
+
+    function genChartMezzanineUtilization(response) {
+        var ctx = document.getElementById("barStockUtilizationMezzanine").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.utilizationDataMezzanine,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Location"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Utilization "
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Stock Utilization - Mezzanine"
+                }
+            }
+        });
+    }
+
+    function genChartFloorUtilization(response) {
+        var ctx = document.getElementById("barStockUtilizationFloor").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.utilizationDataFloor,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: false,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Location"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                            {
+                                gridLines: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: 100
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "% Utilization"
+                                },
+                                stacked: false,
+                                id: 'right-axis',
+                                position: 'right'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Stock Utilization - On floor"
+                }
+            }
+        });
+    }
+
+    function GetUtilizationChart(request){
+        $('#barStockUtilizationASRS').remove();
+        $('#barStockUtilizationASRSContainer').append('<canvas id="barStockUtilizationASRS" class="chartCanvas"><canvas>');
+        $('#SectionbarStockUtilizationASRS').show();
+
+        $('#barStockUtilizationRack').remove();
+        $('#barStockUtilizationRackContainer').append('<canvas id="barStockUtilizationRack" class="chartCanvas"><canvas>');
+        $('#SectionbarStockUtilizationRack').show();
+
+        $('#barStockUtilizationMezzanine').remove();
+        $('#barStockUtilizationMezzanineContainer').append('<canvas id="barStockUtilizationMezzanine" class="chartCanvas"><canvas>');
+        $('#SectionbarStockUtilizationMezzanine').show();
+
+        $('#barStockUtilizationFloor').remove();
+        $('#barStockUtilizationFloorContainer').append('<canvas id="barStockUtilizationFloor" class="chartCanvas"><canvas>');
+        $('#SectionbarStockUtilizationFloor').show();
+
+        $.ajax({
+            url: '@Url.Action("RPTCDC000_StockUtilization", "Warehouse")',
+            type: 'POST',
+            data: request,
+            dataType: 'Json'
+        }).done(function (response) {
+            genChartASRSUtilization(response);
+            genChartRackUtilization(response);
+            genChartMezzanineUtilization(response);
+            genChartFloorUtilization(response);
+
+        }).fail(function (error) {
+            console.log(error);
+        }).always(function () {
+            $('#SectionbarStockUtilizationASRS').hide();
+            $('#SectionbarStockUtilizationRack').hide();
+            $('#SectionbarStockUtilizationMezzanine').hide();
+            $('#SectionbarStockUtilizationFloor').hide();
+        });
+    }
+
+    function GetAgingProductChart(request){
+        $('#barAgingProductASRS').remove();
+        $('#barAgingProductASRSContainer').append('<canvas id="barAgingProductASRS" class="chartCanvas"><canvas>');
+        $('#SectionbarAgingProductASRS').show();
+
+        $('#barAgingProductRack').remove();
+        $('#barAgingProductRackContainer').append('<canvas id="barAgingProductRack" class="chartCanvas"><canvas>');
+        $('#SectionbarAgingProductRack').show();
+
+        $('#barAgingProductMezzanine').remove();
+        $('#barAgingProductMezzanineContainer').append('<canvas id="barAgingProductMezzanine" class="chartCanvas"><canvas>');
+        $('#SectionbarAgingProductMezzanine').show();
+
+        $('#barAgingProductFloor').remove();
+        $('#barAgingProductFloorContainer').append('<canvas id="barAgingProductFloor" class="chartCanvas"><canvas>');
+        $('#SectionbarAgingProductFloor').show();
+
+        $.ajax({
+            url: '@Url.Action("RPTCDC000_AgingProduct", "Warehouse")',
+            type: 'POST',
+            data: request,
+            dataType: 'Json'
+        }).done(function (response) {
+            genChartASRSAgingProduct(response);
+            genChartRackAgingProduct(response);
+            genChartMezzanineAgingProduct(response);
+            genChartFloorAgingProduct(response);
+
+        }).fail(function (error) {
+            console.log(error);
+        }).always(function () {
+            $('#SectionbarAgingProductASRS').hide();
+            $('#SectionbarAgingProductRack').hide();
+            $('#SectionbarAgingProductMezzanine').hide();
+            $('#SectionbarAgingProductFloor').hide();
+        });
+    }
+
+    function genChartASRSAgingProduct(response) {
+        var ctx = document.getElementById("barAgingProductASRS").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.agingProductDataASRS,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        gridLines: {
+                            display: false,
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Product SKU"
+                                },
+                                type: 'linear'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Aging Product in ASRS"
+                }
+            }
+        });
+    }
+
+    function genChartRackAgingProduct(response) {
+        var ctx = document.getElementById("barAgingProductRack").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.agingProductDataRack,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Product SKU"
+                                },
+                                type: 'linear'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Aging Product in Selective"
+                }
+            }
+        });
+    }
+
+    function genChartMezzanineAgingProduct(response) {
+        var ctx = document.getElementById("barAgingProductMezzanine").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.agingProductDataMezzanine,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Product SKU"
+                                },
+                                type: 'linear'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Aging Product in Mezzanine"
+                }
+            }
+        });
+    }
+
+    function genChartFloorAgingProduct(response) {
+        var ctx = document.getElementById("barAgingProductFloor").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: response.agingProductDataFloor,
+            options: {
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                        gridLines: {
+                            display: false,
+                        }
+                        ,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "วัน"
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 0
+                        },
+                    }],
+                    yAxes:
+                        [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน Product SKU"
+                                },
+                                type: 'linear'
+                            }
+                        ]
+                },
+                elements: {
+                    line: {
+                        fill: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: "top"
+                },
+                title: {
+                    display: true,
+                    text: "Aging Product On floor"
+                }
+            }
+        });
+    }
+
+
+</script>
+
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Warehouse</h1>
+    <h4 class="card-title">ภาพรวมคลังสินค้า (Warehouse Performance)</h4>
+
+    @{
+        await Html.RenderPartialAsync("_Common_WH_Criteria_00");
+    }
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    @*<h4 class="card-title">สรุปการรับสินค้าเข้าคลังตามช่วงเวลา</h4>*@
+                    <div class="row" id="ReceivedByTime">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarReceiveAccuracyOrder" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barReceiveAccuracyOrderText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barReceiveAccuracyOrder','การรับสินค้า(PO)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barReceiveAccuracyOrderLayout">
+                                    <div id="barReceiveAccuracyOrderContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barReceiveAccuracyOrder"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarReceiveAccuracyQty" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barReceiveAccuracyQtyText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barReceiveAccuracyQty','การรับสินค้า(ชิ้น)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barReceiveAccuracyQtyLayout">
+                                    <div id="barReceiveAccuracyQtyContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barReceiveAccuracyQty"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarDispatchAccuracyOrder" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barDispatchAccuracyOrderText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barDispatchAccuracyOrder','การจ่ายสินค้า(PO)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barDispatchAccuracyOrderLayout">
+                                    <div id="barDispatchAccuracyOrderContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barDispatchAccuracyOrder"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarDispatchAccuracyQty" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barDispatchAccuracyQtyText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barDispatchAccuracyQty','การจ่ายสินค้า(ชิ้น)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barDispatchAccuracyQtyLayout">
+                                    <div id="barDispatchAccuracyQtyContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barDispatchAccuracyQty"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarReceivedDispatchOrder" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barReceivedDispatchOrderText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barReceivedDispatchOrder','ยอดรับ-จ่ายสินค้า(PO)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barReceivedDispatchOrderLayout">
+                                    <div id="barReceivedDispatchOrderContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barReceivedDispatchOrder"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarReceivedDispatchQty" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barReceivedDispatchQtyText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barReceivedDispatchQty','ยอดรับ-จ่ายสินค้า(ชิ้น)'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barReceivedDispatchQtyLayout">
+                                    <div id="barReceivedDispatchQtyContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barReceivedDispatchQty"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarStockUtilizationASRS" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barStockUtilizationASRSText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barStockUtilizationASRS','Stock Utilization - ASRS'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barStockUtilizationASRSLayout">
+                                    <div id="barStockUtilizationASRSContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barStockUtilizationASRS"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarStockUtilizationRack" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barStockUtilizationRackText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barStockUtilizationRack','Stock Utilization - Selective Rack'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barStockUtilizationRackLayout">
+                                    <div id="barStockUtilizationRackContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barStockUtilizationRack"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarStockUtilizationMezzanine" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barStockUtilizationMezzanineText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barStockUtilizationMezzanine','Stock Utilization - Mezzanine'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barStockUtilizationMezzanineLayout">
+                                    <div id="barStockUtilizationMezzanineContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barStockUtilizationMezzanine"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarStockUtilizationFloor" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barStockUtilizationFloorText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barStockUtilizationFloor','Stock Utilization - On floor'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barStockUtilizationFloorLayout">
+                                    <div id="barStockUtilizationFloorContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barStockUtilizationFloor"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarAgingProductASRS" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barAgingProductASRSText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barAgingProductASRS','Aging Product in ASRS'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barAgingProductASRSLayout">
+                                    <div id="barAgingProductASRSContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barAgingProductASRS"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarAgingProductRack" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barAgingProductRackText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barAgingProductRack','Aging Product in Selective Rack'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barAgingProductRackLayout">
+                                    <div id="barAgingProductRackContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barAgingProductRack"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarAgingProductMezzanine" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barAgingProductMezzanineText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barAgingProductMezzanine','Aging Product in Mezzanine'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body" id="barAgingProductMezzanineLayout">
+                                    <div id="barAgingProductMezzanineContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barAgingProductMezzanine"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionbarAgingProductFloor" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barAgingProductFloorText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barAgingProductFloor','Aging Product on Floor'); return false;" class="btn btn-link d-inline-flex font-weight-bold context-menu">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barAgingProductFloorLayout">
+                                    <div id="barAgingProductFloorContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barAgingProductFloor"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- Content End -->

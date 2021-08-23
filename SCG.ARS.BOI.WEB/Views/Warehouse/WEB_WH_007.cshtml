@@ -1,0 +1,546 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<!doctype html>
+<html lang="en">
+<head>
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        var cdc_column = [
+            {
+                "data": "receiveddate", "name": "receiveddate", "title": "receiveddate", "autoWidth": true,
+                "render": function (data, type, row, meta) {
+                    return data == null ? "" : moment(new Date(data)).format("DD/MM/YYYY");
+                }
+            },
+            { "data": "statusid", "name": "statusid", "title": "statusid", "autoWidth": true },
+            { "data": "statusname", "name": "statusname", "title": "statusname", "autoWidth": true },
+            { "data": "po_invoice", "name": "po_invoice", "title": "po_invoice", "autoWidth": true },
+            { "data": "rc", "name": "rc", "title": "rc", "autoWidth": true },
+            { "data": "ean", "name": "ean", "title": "ean", "autoWidth": true },
+            { "data": "suppliercode", "name": "suppliercode", "title": "suppliercode", "autoWidth": true },
+            { "data": "suppliername", "name": "suppliername", "title": "suppliername", "autoWidth": true },
+            { "data": "sku", "name": "sku", "title": "sku", "autoWidth": true },
+            { "data": "productbarcode", "name": "productbarcode", "title": "productbarcode", "autoWidth": true },
+            { "data": "productcode", "name": "productcode", "title": "productcode", "autoWidth": true },
+            { "data": "productdescription", "name": "productdescription", "title": "productdescription", "autoWidth": true },
+            { "data": "weight", "name": "weight", "title": "weight", "autoWidth": true },
+            { "data": "volumn", "name": "volumn", "title": "volumn", "autoWidth": true },
+            { "data": "qty_in_ewm", "name": "qty_in_ewm", "title": "qty_in_ewm", "autoWidth": true },
+            { "data": "unit_code", "name": "unit_code", "title": "unit_code", "autoWidth": true },
+            { "data": "uom", "name": "uom", "title": "uom", "autoWidth": true },
+            { "data": "productgroupcode", "name": "productgroupcode", "title": "productgroupcode", "autoWidth": true },
+            { "data": "productgroupname", "name": "productgroupname", "title": "productgroupname", "autoWidth": true },
+            { "data": "doctype", "name": "doctype", "title": "doctype", "autoWidth": true },
+            { "data": "docrefno", "name": "docrefno", "title": "docrefno", "autoWidth": true },
+            { "data": "inbound", "name": "inbound", "title": "inbound", "autoWidth": true },
+            { "data": "entiled", "name": "entiled", "title": "entiled", "autoWidth": true },
+            { "data": "chargeunit", "name": "chargeunit", "title": "chargeunit", "autoWidth": true }
+        ];
+        $(document).ready(function () {
+            //Report Type
+            var type = "Barite";
+            init_datepicker();
+            document.getElementById('reporttype').value = type;
+            GetCustomer('CDC');
+
+            $('#cboCustomer').on("change", function (element, checked) {
+                var brands = $('#cboCustomer option:selected');
+                selected = [];
+                $(brands).each(function (index, brand) {
+                    selected.push([$(this).val()]);
+                    console.log(selected);
+                });
+            });
+
+            $('#cboCustomer').on("select2:select select2:unselect", function (element, checked) {
+                var brands = $('#cboCustomer option:selected');
+                selected = [];
+                $(brands).each(function (index, brand) {
+                    selected.push([$(this).val()]);
+                    console.log(selected);
+                });
+            });
+               
+            //Search();
+
+        });
+
+        function init_datepicker() {
+            var start = moment().subtract(1, 'days');
+            var end = moment().subtract(1, 'days');
+
+            function cb(start, end) {
+                $('#daterange-99').html(start.format('MMM D, YYYY') + ' - ' + end.format('MMM D, YYYY'));
+            }
+
+            $('#daterange-99').daterangepicker({
+                startDate: start,
+                endDate: end,
+                ranges: datepicker_ranges,
+                opens: (isRtl ? 'left' : 'right')
+            }, cb);
+
+            cb(start, end);
+        }
+    </script>
+
+    <script>
+        function Search() {
+            //Monthly chart
+            GetMonthlyChartTable(getRequest());
+            //Monthly Table
+            DrawTableDetail(getRequest());
+
+            var sectionMonthlyTable = document.getElementById('ReceivingDetail');
+            sectionMonthlyTable.style.visibility = 'hidden';
+
+            var sectionMonthlyChartText = document.getElementById('DailyReceivingCDCText');
+            sectionMonthlyChartText.innerText = "สรุปยอดสินค้าขารับประจำเดือน" + getMonthName($('#daterange-99').data('daterangepicker').startDate._d.getMonth() + 1);
+            var paramDate = $('#daterange-99').data('daterangepicker').startDate._d;
+            var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var dayName = days[paramDate.getDay()];
+            var sectionreportHeader = document.getElementById('reportHeader');
+            sectionreportHeader.innerText = dayName + ', ' + paramDate.getDate() + ' ' + getMonthName(paramDate.getMonth() + 1) + ' ' + paramDate.getFullYear();
+        }
+
+
+        function getRequest() {
+            var reporttype = document.getElementById('reporttype').value;
+            var customer = selected;
+            var startDate = $('#daterange-99').data('daterangepicker').startDate._d;
+            var endDate = $('#daterange-99').data('daterangepicker').endDate._d;
+            if (!customer) {
+                customer = null;
+            }
+            var request = {
+                selectStartDate: startDate,
+                selectEndDate: endDate,
+                reportType: reporttype,
+                selectCustomer: customer
+            };
+            return request;
+        }
+
+        function GetMonthlyChartTable(request) {
+            $('#barChartReceivingCDC').remove();
+            $('#barChartReceivingCDCContainer').append('<canvas id="barChartReceivingCDC"><canvas>');
+            //Placeholder for input parameters
+            var sectionCDCChart = document.getElementById('DailyReceivingCDC');
+            var sectionDetailTable = document.getElementById('ReceivingDetail');
+            var currentmonthname = getMonthName(request.selectStartDate.getMonth() + 1);
+            request.selectStartDate = request.selectStartDate.toISOString();
+            request.selectEndDate = request.selectEndDate.toISOString();
+            console.log(request);
+            console.log(currentmonthname);
+            //Get Monthly Chart Data
+            $.ajax({
+                url: '@Url.Action("RPTCDC001_RecivingReportChart", "ReportChart")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                //Populate chart data and show the modal
+                console.log(response);
+                sectionCDCChart.style.visibility = 'visible';
+                sectionDetailTable.style.visibility = 'visible'; 
+                //PopulateDataShipmentStatus(response, reporttype);
+
+                var ctx = document.getElementById("barChartReceivingCDC").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "วันที่"
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวนสินค้า (Qty in ewm)"
+                                }
+                            }]
+                        },
+                        annotation: {
+                            annotations: [{
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'y-axis-0',
+                                value: 50000,
+                                borderColor: 'rgba(255, 0, 0,1)',
+                                borderWidth: 2,
+                                label: {
+                                    enabled: false,
+                                    content: 'Test label'
+                                }
+                            }]
+                        },
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "top"
+                        },
+                        title: {
+                            display: true,
+                            text: "สรุปยอดสินค้าขารับประจำเดือน " + currentmonthname
+                        }
+                    }
+                });
+            var canvas = document.getElementById('barChartReceivingCDC');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+
+                        var label = chartData.labels[idx];
+                        var value = chartData.datasets[0].data[idx];
+
+                        var url = label + " value=" + value;
+                        //alert(url);
+                    }
+                    //var activePoint = myChart.getElementAtEvent(evt)[0];
+                    //var data = activePoint._chart.data;
+                    //var datasetIndex = activePoint._datasetIndex;
+                    ////var labels = data.datasets[datasetIndex].;
+                    //var label = data.datasets[datasetIndex].label;
+                    //var value = data.datasets[datasetIndex].data[activePoint._index];
+                    //var active_index = activePoint._index + 1;
+                    ////console.log(label, value);
+                    ////console.log(active_index);
+                    ////console.log(currentmonth, active_index);
+                    ////RefreshData(currentmonth, active_index);
+                    //alert(label + ' ' + value + ' ' + value.xAxes + ' ' + value.yAxes);
+                    currentmonth = new Date(label).getMonth()+1;
+                    currentyear = new Date(label).getFullYear();
+                    currentdate = new Date(label).getDate();
+                    customer = document.getElementById('cboCustomer').value;
+                    alert("month:" + currentmonth + "year:" + currentyear + "customer:" + customer);
+                    DrawTableDetail(getRequest());
+                };
+
+            }).fail(function (error) {
+                console.log(error);
+            });
+
+        }
+
+        function DrawTableDetail(request) {
+            
+            var currentmonthname = getMonthName(request.selectStartDate.getMonth() + 1);
+            var currentdate = request.selectStartDate.getDate();
+
+            //ESC Text
+            var sectionReceivingDetailText= document.getElementById('ReceivingDetailText');
+            if (currentdate != null) sectionReceivingDetailText.innerText = "รายละเอียดยอดสินค้าขารับประจำเดือน " + currentmonthname + " ของวันที่ " + currentdate;
+
+            request.selectStartDate = request.selectStartDate.toISOString();
+            request.selectEndDate = request.selectEndDate.toISOString();
+
+            var table = $("#view_report_table").DataTable().destroy();
+            var table = $("#view_report_table").DataTable({
+                "ajax": {
+                    url: '@Url.Action("RPT007_ReportForLPC", "Warehouse")',
+                    type: 'POST',
+                    data: request,
+                    dataType: 'Json'
+                },
+                scrollX: true,//
+                ordering: true,//
+                responsive: true,
+                dom: 'lTf<"html5buttons"B>gtip',
+                pageLength: 10,
+                buttons: [
+                    'copy', 'excel'
+                ],
+                columns: [
+                    {
+                        "data": "curr_date", className: "text-nowrap",
+                        "render": function (data, type, row, meta) {
+                            return data == null ? "" : moment(new Date(data)).format("DD/MMM/YYYY");
+                        }
+                    },
+                    { "data": "do_number", className: "text-nowrap" },
+                    { "data": "customer_code", className: "text-nowrap" },
+                    { "data": "product_code", className: "text-nowrap" },
+                    { "data": "sum_qty", className: "text-nowrap" },
+                    { "data": "sum_weight", className: "text-nowrap" },
+                    { "data": "sum_volumn", className: "text-nowrap" },
+                    { "data": "route_id", className: "text-nowrap" },
+                    { "data": "customer_name", className: "text-nowrap" },
+                    { "data": "customer_address", className: "text-nowrap" },
+                    { "data": "city", className: "text-nowrap" },
+                    { "data": "province", className: "text-nowrap" },
+                    { "data": "actual_weight", className: "text-nowrap" },
+                    { "data": "ship_by", className: "text-nowrap" },
+                    { "data": "route_line_no", className: "text-nowrap" },
+                    { "data": "pallet_id", className: "text-nowrap" },
+                    { "data": "shipping_mark", className: "text-nowrap" },
+                    { "data": "shipto_sub_code", className: "text-nowrap" },
+                    { "data": "request_date", className: "text-nowrap" },
+                    { "data": "tu_number", className: "text-nowrap" },
+                    { "data": "service_type", className: "text-nowrap" }
+                ]
+            });
+
+
+        }
+
+        function RefreshData(selectyear, selectmonth, selectdate) {
+
+            //Monthly chart
+            //GetMonthlyChartTable(selectmonth);
+            //Monthly Table
+            DrawTableDetail(selectyear, selectmonth, selectdate);
+
+            var currentmonthname = getMonthName(selectmonth);
+            //var sectionMonthlyChartText = document.getElementById('DailyShipmentStatusText');
+            //sectionMonthlyChartText.innerText = "สรุปการจัดเที่ยวประจำเดือน " + currentmonthname;
+            var sectionReceivingCDCDetailText = document.getElementById('ReceivingCDCDetailText');
+            sectionReceivingCDCDetailText.innerText = "รายละเอียดยอดสินค้าขารับประจำเดือน " + currentmonthname;
+        }
+
+        function getMonthName(index) {
+            var month = new Array();
+            month[0] = "มกราคม";
+            month[1] = "กุมภาพันธ์";
+            month[2] = "มีนาคม";
+            month[3] = "เมษายน";
+            month[4] = "พฤษภาคม";
+            month[5] = "มิถุนายน";
+            month[6] = "กรกฎาคม";
+            month[7] = "สิงหาคม";
+            month[8] = "กันยายน";
+            month[9] = "ตุลาคม";
+            month[10] = "พฤศจิกายน";
+            month[11] = "ธันวาคม";
+            return month[index - 1];
+        }
+
+        function isEmpty(obj) {
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key))
+                    return false;
+            }
+            return true;
+        }
+
+        function downloadPDF(canvas,filename) {
+            var newCanvas = document.querySelector(canvas);
+            var filename = document.getElementById(filename);
+
+            //create image from dummy canvas
+            var newCanvasImg = newCanvas.toDataURL("image/png", 1.0);
+
+            //creates PDF from img
+            var doc = new jsPDF('landscape');
+            doc.addImage(newCanvasImg, 'JPEG', 10, 10, 280, 70);
+            doc.save(filename.innerText);
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-base').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+        function GetCustomer(warehouse = 'CDC') {
+            //console.log(request);
+            var jqxhr = $.post("/Report/GetCustomer", { selectwarehouse: warehouse })
+                .done(function (result) {
+                    //console.log(result);
+                    $('#cboCustomer').empty();
+                    if (result.status) {
+                        $.each(result.data, function (index, item) {
+                            $('#cboCustomer').append($('<option>').text(item.dataDisplay).attr('value', item.dataValue_Key));
+                        });
+
+                        $('#cboCustomer').select2({
+                            enableFiltering: true,
+                            placeholder: "Select a Customer",
+                            allowClear: true
+                                //onChange: function (element, checked) {
+                                //    var brands = $('#cboCustomer option:selected');
+                                //    selected = [];
+                                //    $(brands).each(function (index, brand) {
+                                //        selected.push([$(this).val()]);
+                                //    });
+                            //}
+                        });
+
+                        if (isFirstLoad == 1) {
+                            Search();
+                            isFirstLoad = 0;
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+        }
+
+        //$('#cboWarehouse').onchange = function () { GetCustomer(document.getElementById('cboWarehouse').value) }
+
+    </script>
+</head>
+<body>
+    <input type="hidden" id="reporttype" />
+    <!-- Content Start -->
+    <div class="content-wrapper">
+        @{
+            await Html.RenderPartialAsync("_Common_Summarize");
+            await Html.RenderPartialAsync("_Common_WH_Criteria_02");
+        }
+        <div class="row" id="DailyReceivingCDC">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <h4 class="card-title" id="DailyReceivingCDCText"></h4>
+                        <div class="d-flex align-items-center">
+                            <div class="wrapper">
+                                <a href="#" id="downloadPdf" onclick="downloadPDF('#barChartReceivingCDC','DailyReceivingCDCText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                    <i class="icon-share-alt mr-1"></i>Download PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                    <div class="card-body" id="barChartReceivingCDCLayout">
+                        <div id="barChartReceivingCDCContainer" class="chart-container">
+                            <canvas id="barChartReceivingCDC"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="ReceivingDetail">
+            <div class="col-12">
+                <article class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title" id="ReceivingDetailText"></h4>
+                        <div class="table-responsive">
+                            <div class="dataTables_wrapper">
+                                @*<table id="dtList" class="table table-striped" style="width:100%"></table>*@
+                                <table class="table table-striped" id="view_report_table" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>curr_date</th>
+                                            <th>do_number</th>
+                                            <th>customer_code</th>
+                                            <th>product_code</th>
+                                            <th>sum_qty</th>
+                                            <th>sum_weight</th>
+                                            <th>sum_volumn</th>
+                                            <th>route_id</th>
+                                            <th>customer_name</th>
+                                            <th>customer_address</th>
+                                            <th>city</th>
+                                            <th>province</th>
+                                            <th>actual_weight</th>
+                                            <th>ship_by</th>
+                                            <th>route_line_no</th>
+                                            <th>pallet_id</th>
+                                            <th>shipping_mark</th>
+                                            <th>shipto_sub_code</th>
+                                            <th>request_date</th>
+                                            <th>tu_number</th>
+                                            <th>service_type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <!-- Content End -->
+
+    @section Styles{
+        <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+        <link href="~/assets/vendor/data-table/css/jquery.dataTables.min.css" />
+        <link href="~/assets/vendor/data-table/css/buttons.dataTables.min.css" />
+        <link href="~/assets/vendor/data-table/css/dataTables.bootstrap.min.css" />
+        <!-- ================== BEGIN PAGE LEVEL END ================== -->
+        <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css" />
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-daterangepicker/css/daterangepicker.css" />
+        <!-- ================== BEGIN PAGE LEVEL END ================== -->
+        <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-select/css/bootstrap-select.min.css" />
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-multiselect/css/bootstrap-multiselect.css" />
+        <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+        <!-- ================== BEGIN PAGE LEVEL END ================== -->
+    }
+
+    @section Scripts{
+
+        <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+        <script src="~/assets/vendor/data-table/js/jquery.dataTables.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/dataTables.buttons.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/buttons.flash.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/jszip.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/pdfmake.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/vfs_fonts.js"></script>
+        <script src="~/assets/vendor/data-table/js/buttons.html5.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/buttons.print.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/dataTables.bootstrap.min.js"></script>
+        <!-- ================== END PAGE LEVEL JS ================== -->
+        <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+        <script src="~/assets/js/demo/pickers-demo.js"></script>
+        <script src="~/assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-daterangepicker/js/moment.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-daterangepicker/js/daterangepicker.js"></script>
+        <script src="~/assets/vendor/minicolors/js/jquery.minicolors.js"></script>
+        <script src="~/assets/vendor/pignose-calender/js/pignose.calendar.full.min.js"></script>
+        <script src="~/assets/vendor/fullcalender/js/fullcalendar.min.js"></script>
+        <!-- ================== END PAGE LEVEL JS ================== -->
+        <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+        <script src="~/assets/vendor/bootstrap-select/js/bootstrap-select.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-multiselect/js/bootstrap-multiselect.min.js"></script>
+        <script src="~/assets/vendor/select2/js/select2.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-tagsinput/js/bootstrap-tagsinput.js"></script>
+        <script src="~/assets/js/demo/selects-tags-demo.js"></script>
+        <!-- ================== END PAGE LEVEL JS ================== -->
+    }
+
+
+
+</body>
+</html>

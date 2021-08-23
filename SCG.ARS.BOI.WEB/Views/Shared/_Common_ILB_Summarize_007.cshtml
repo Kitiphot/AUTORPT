@@ -1,0 +1,75 @@
+﻿<div id="Allsummary" class="row">
+    <div class="overlay section-loading" hidden="hidden">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 card-statistics mt-4 mb-4">
+        <div class="row" id="div_summary" data-bind="foreach: summary">
+
+            <div class="col-lg-4 col-xl-4 col-md-12 col-sm-12 pr-0 ">
+                <div class="form-row">
+                    <div id="total_no_close" class="col-sm-12 col-lg-12 mb-12 pointer" onclick="SearchCriteria(1);">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-around align-items-center">
+                                    <div class="btn btn-primary btn-rounded px-3 py-3 mr-2">
+                                        <i class="fas fa-plane md-18"></i>
+                                    </div>
+                                    <div class="mr-2">
+                                        <h6 class="card-title">Air Freight Shipment</h6>
+                                        <h5 data-bind="text: air_shipment"></h5>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                 data-bind="attr: {'aria-valuenow': (air_shipment/total_shipment)*100,} , style: {width:(air_shipment/total_shipment)*100+'%'}"
+                                                 aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-xl-4 col-md-12 col-sm-12 pr-0 ">
+                <div class="form-row">
+                    <div id="total_no_close" class="col-sm-12 col-lg-12 mb-12 pointer" onclick="SearchCriteria(2);">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-around align-items-center">
+                                    <div class="btn btn-success btn-rounded px-3 py-3 mr-2">
+                                        <span class="mdi mdi-24px mdi-ferry"></span>
+                                    </div>
+                                    <div class="mr-2">
+                                        <h6 class="card-title">Sea Freight Shipment</h6>
+                                        <h5 data-bind="text: sea_shipment"></h5>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar bg-success" role="progressbar"
+                                                 data-bind="attr: {'aria-valuenow': (sea_shipment/total_shipment)*100,} , style: {width:(sea_shipment/total_shipment)*100+'%'}"
+                                                 aria-valuemin="0" aria-valuemax="100"></div>
+                                            @*<div class="progress-bar bg-success w-25" role="progressbar" aria-valuenow="25"
+                                        aria-valuemin="0" aria-valuemax="100"></div>*@
+                                        </div>
+                                    </div>
+                                    <div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+

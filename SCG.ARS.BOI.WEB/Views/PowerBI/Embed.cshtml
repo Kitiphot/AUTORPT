@@ -1,0 +1,230 @@
+﻿@{
+    ViewBag.Title = "Power BI Embedded";
+    //Layout = "";
+}
+@using SCG.ARS.BOI.WEB.ViewModels;
+
+@model PowerBIEmbeddedViewModel;
+
+<!-- Copyright (c) Microsoft Corporation.
+Licensed under the MIT license. -->
+
+@section Styles{
+    <style>
+        /* Copyright (c) Microsoft Corporation.
+            Licensed under the MIT license. */
+
+        header {
+            background-color: #007FFF;
+            height: 75px;
+            width: 100%;
+        }
+
+            header > p {
+                color: #FFFFFF;
+                font: bold 1.6em "segoe ui", arial, sans-serif;
+                margin-left: 31px;
+                padding-top: 20px;
+            }
+
+        main {
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        #text-container > div > p {
+            font: 1.2em "segoe ui", arial, sans-serif;
+        }
+
+        #report-container {
+            height: calc(0.5625 * 65vw); /* 16:9 aspect ratio */
+        }
+
+        footer > p {
+            font: 1em "segoe ui", arial, sans-serif;
+        }
+
+        iframe {
+            border: none;
+        }
+
+        @@ media only screen and (max-width: 574px) {
+            #report-container {
+                height: calc(0.5625 * 100vw); /* 16:9 aspect ratio */
+            }
+        }
+
+        .select-ellipsis {
+            width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .select-ellipsis:hover {
+            overflow: visible;
+        }
+    </style>
+}
+<div>
+    <div>
+        <a data-toggle-fullscreen id="btnFullDisplay" href="javascript:void()">
+            <img src="~/assets/images/fullsize.png" style=" width: 20px; position: absolute; 
+                right: 6px; margin-top: 161px;" />
+        </a>
+        <div class="embed-container" id="report-container"
+             style=" display: block; margin-left: auto; margin-right: auto;">
+        </div>
+    </div>
+</div>
+@*<button onclick="fullScreen()" ;>Full screen</button>*@
+<!-- Used to display report embed error messages -->
+<section class="error-container m-5">
+</section>
+
+@section Scripts{
+    <script src="https://npmcdn.com/es6-promise@3.2.1"></script>
+    <script src="~/assets/vendor/PowerBI/js/powerbi.js"></script>
+    <script>
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation.
+        // Licensed under the MIT license.
+        // ----------------------------------------------------------------------------
+
+        $(document).ready(function () {
+            Embed();
+        });
+
+        function Embed() {
+            //$('#reportid').select2({
+            //    placeholder: "Report Id",
+            //    tags: true
+            //});
+
+            var models = window["powerbi-client"].models;
+            var reportContainer = $("#report-container").get(0);
+
+            // Initialize iframe for embedding report
+            powerbi.reset(reportContainer);
+            powerbi.bootstrap(reportContainer, { type: "report" });
+            let reportid = '@Model.ReportID';
+
+            $.ajax({
+                type: "GET",
+                url: "/PowerBI/GetEmbedInfo",
+                type: 'POST',
+                data: { reportId: reportid },
+                success: function (data) {
+                    embedData = $.parseJSON(data);
+                    reportLoadConfig = {
+                        type: "report",
+                        tokenType: models.TokenType.Embed,
+                        accessToken: embedData.EmbedToken.Token,
+                        // You can embed different reports as per your need
+                        embedUrl: embedData.EmbedUrl,
+
+                        // Enable this setting to remove gray shoulders from embedded report
+                        // settings: {
+                        //     background: models.BackgroundType.Transparent
+                        // }
+                    };
+
+                    // Use the token expiry to regenerate Embed token for seamless end user experience
+                    // Refer https://aka.ms/RefreshEmbedToken
+                    tokenExpiry = embedData.EmbedToken.Expiration;
+
+                    // Embed Power BI report when Access token and Embed URL are available
+                    var report = powerbi.embed(reportContainer, reportLoadConfig);
+
+                    // Clear any other loaded handler events
+                    report.off("loaded");
+
+                    // Triggers when a report schema is successfully loaded
+                    report.on("loaded", function () {
+                        console.log("Report load successful");
+                    });
+
+                    // Clear any other rendered handler events
+                    report.off("rendered");
+
+                    // Triggers when a report is successfully embedded in UI
+                    report.on("rendered", function () {
+                        console.log("Report render successful");
+                    });
+
+                    // Clear any other error handler events
+                    report.off("error");
+
+                    // Handle embed errors
+                    report.on("error", function (event) {
+                        var errorMsg = event.detail;
+
+                        // Use errorMsg variable to log error in any destination of choice
+                        console.error(errorMsg);
+                        return;
+                    });
+                },
+                error: function (err) {
+
+                    // Show error container
+                    var errorContainer = $(".error-container");
+                    $(".embed-container").hide();
+                    errorContainer.show();
+
+                    // Format error message
+                    var errMessageHtml = "<strong> Error Details: </strong> <br/>" + err.responseText;
+                    errMessageHtml = errMessageHtml.split("\n").join("<br/>");
+
+                    // Show error message on UI
+                    errorContainer.append(errMessageHtml);
+                }
+            });
+        }
+
+        function fullScreen() {
+            var reportContainer = $("#report-container").get(0);
+
+            // Get a reference to the embedded report.
+            report = powerbi.get(reportContainer);
+
+            // Displays the report in full screen mode.
+            report.fullscreen();
+        }
+
+        $( "#btnFullDisplay" ).click( function ()
+        {
+            var elem = document.getElementById( "report-container" );
+            if ( ( document.fullScreenElement !== undefined && document.fullScreenElement === null ) || ( document.msFullscreenElement !== undefined && document.msFullscreenElement === null ) || ( document.mozFullScreen !== undefined && !document.mozFullScreen ) || ( document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen ) )
+            {
+                if ( elem.requestFullScreen )
+                {
+                    elem.requestFullScreen();
+                } else if ( elem.mozRequestFullScreen )
+                {
+                    elem.mozRequestFullScreen();
+                } else if ( elem.webkitRequestFullScreen )
+                {
+                    elem.webkitRequestFullScreen( Element.ALLOW_KEYBOARD_INPUT );
+                } else if ( elem.msRequestFullscreen )
+                {
+                    elem.msRequestFullscreen();
+                }
+            }
+            else
+            {
+                if ( document.cancelFullScreen )
+                {
+                    document.cancelFullScreen();
+                } else if ( document.mozCancelFullScreen )
+                {
+                    document.mozCancelFullScreen();
+                } else if ( document.webkitCancelFullScreen )
+                {
+                    document.webkitCancelFullScreen();
+                } else if ( document.msExitFullscreen )
+                {
+                    document.msExitFullscreen();
+                }
+            }
+        } );
+    </script>
+}

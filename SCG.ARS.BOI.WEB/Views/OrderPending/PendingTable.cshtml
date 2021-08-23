@@ -1,0 +1,327 @@
+﻿
+@{
+    ViewData["Title"] = "PendingTable";
+}
+
+
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/fixedHeader.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/select.dataTables.min.css" rel="stylesheet" />
+
+<style>
+
+    .table-bordered td, .table-bordered th {
+        border: 1px solid #030303 !important;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    thead tr td {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+</style>
+@*<div id="dvOverlay" class="overlay">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>*@
+
+<div class="content-wrapper">
+
+    <!-- Heading Start -->
+    <section class="heading">
+        <h4 class="mb-2">Pending Table</h4>
+    </section><!-- Heading End -->
+
+    @*<div id="accordionOne" class="accordion">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseOne"
+                   aria-expanded="false" aria-controls="collapseOne">
+                    Search Parameter
+                </a>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
+                <div class="card-body">
+
+                </div>
+            </div>
+        </div>
+    </div>*@
+  
+    <div class="row">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="row" style="margin-top:20px;margin-left:10px;margin-right:10px">
+                    <div class="col-sm-3" style="border:double;padding-right:0px;">
+                        <label><b>Business group : </b></label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <label id="lblBusinessgroup"><b></b></label>
+                    </div>
+                    <div class="col-sm-3" style="border:double;padding-right:0px;">
+                        <label><b>Customer Group : </b></label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <label id="lblCustomerGroup"><b></b></label>
+                    </div>
+                    <div class="col-sm-3" style="border:double;padding-right:0px;">
+                        <label><b>Product Group : </b></label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <label id="lblProductGroup"><b></b></label>
+                    </div>
+                    <div class="col-sm-3" style="border:double;padding-right:0px;">
+                        <label><b>Status : </b></label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <label id="lblstatus"><b></b></label>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    <table id="dtPendingTableList" class="table table-striped table-condensed" border="1">
+                        <thead style="background-color: #dfdfdf">
+                            <tr>
+                                <td style="text-align:center;width:120px">Create Order date</td>
+                                <td style="text-align:center;width:100px">Shipment date</td>
+                                <td style="text-align:center;width:100px">Requested date</td>
+                                <td style="text-align:center;width:100px">SO</td>
+                                <td style="text-align:center;width:200px">Customer Name</td>
+                                <td style="text-align:center;width:100px">Line</td>
+                                <td style="text-align:center;width:250px">ตรา/ชนิดปูน (Item Description)</td>
+                                <td style="width:100px">นน. (kg.)</td>
+                                <td style="text-align:center;width:300px">อำเภอ</td>
+                                <td style="text-align:center;width:150px">จังหวัด</td>
+                                <td style="text-align:center;width:300px">Destination Name (Ship-to)</td>
+                                <td style="text-align: center;width:150px">DN</td>
+                                <td style="text-align: center;width:150px">Load</td>
+                                <td style="text-align: center;width:150px">ผรม.</td>
+                                <td style="text-align: center;width:500px">memo เงื่อนไขพิเศษ</td>
+                                <td style="text-align: center;width:150px">ประเภทรถขนส่ง</td>
+                                <td style="text-align: center;width:150px">ชื่อประเภทรถขนส่ง</td>
+                                <td style="text-align: center;width:150px">Customer Code</td>
+                                <td style="text-align: center;width:150px">ขาย</td>
+                                <td style="text-align: center;width:150px">Origin Code</td>
+                                <td style="text-align: center;width:150px">Origin Name</td>
+                                <td style="text-align: center;width:150px">Destination Code</td>
+                                <td style="text-align: center;width:150px">Zone</td>
+                                <td style="text-align: center;width:150px">ภาค</td>
+                                <td style="text-align: center;width:150px">MatFreightGroup</td>
+                                <td style="text-align: center;width:150px">shipping condition</td>
+                                <td style="text-align: center;width:150px">shipping condition description</td>
+                                <td style="text-align: center;width:150px">สถานะ Shipment</td>
+                                <td style="text-align: center;width:150px">สถานะ Load</td>
+                                <td style="text-align: center;width:150px">Planner Name</td>
+                                <td style="text-align: center;width:150px">Status</td>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </div>
+        </div>
+    </div>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="~/assets/vendor/data-table/js/jquery.dataTables.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.bootstrap.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.buttons.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.rowsGroup.js"></script>
+<script src="~/assets/vendor/data-table/js/buttons.html5.min.js"></script>
+
+<script>
+    var orderPendingList = @Html.Raw(Json.Serialize(ViewBag.OrderPendingList));
+    var paramList = @Html.Raw(Json.Serialize(ViewBag.ParamList));
+    var statusindex = "";
+
+    $(document).ready(function () {
+        $('#dvOverlay').show();
+        if (paramList[3] == "lasttender") {
+            statusindex = "Booking - Last Tender ";
+        }
+        else if (paramList[3] == "bookingtoday7") {
+            statusindex = "Booking - Pending - Today-7 ";
+        }
+        else if (paramList[3] == "bookingordersameday") {
+            statusindex = "Booking - Pending - Order Same Day ";
+        }
+        else if (paramList[3] == "bookingorderleadtime") {
+            statusindex = "Booking - Pending - Order Leadtime ";
+        }
+        else if (paramList[3] == "bookingtender") {
+            statusindex = "Booking - Tender ";
+        }
+        else if (paramList[3] == "waitinglisttoday14") {
+            statusindex = "Waiting - Create Order ";
+        }
+        else if (paramList[3] == "waitinglisttoday13") {
+            statusindex = "Waiting - Requested Date ";
+        }
+        // LoadOrderList();
+        $('#lblBusinessgroup').text(paramList[0]);
+        $('#lblCustomerGroup').text(paramList[1]);
+        $('#lblProductGroup').text(paramList[2]);
+        $('#lblstatus').text(statusindex);
+        bindPendingGroup(orderPendingList);
+    });
+
+    function LoadOrderList() {
+        //$('#dvOverlay').show();
+        //var jqxhr = $.post("/OrderPending/LoadOrderPending")
+        //    .done(function (result) {
+        //        //console.log(result);
+        //        if (result.status) {
+        //            data = result.data;
+        //            bindPendingGroup(data);
+        //        }
+        //    })
+        //    .fail(function (e) {
+        //        console.log(e);
+        //    })
+        //    .always(function () {
+        //        $('#dvOverlay').hide();
+        //    });
+    }
+
+    function bindPendingGroup(data) {
+        $('#dvOverlay').hide();
+        var table = $('#dtPendingTableList').DataTable({
+            destroy: true,
+            scrollX: true,
+            searching: false,
+            //paging: true,
+            //pageLength: true,
+            //info: false,
+            //lengthChange: false,
+            ordering: true,
+            scrollCollapse: true,
+            //"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            lengthMenu: [[10, 50, 100, -1], [10, 50, 100, "All"]],
+            dom: 'lTf<"html5buttons"B > gtip',
+            buttons: [
+                'excel'
+            ],
+            data: data,
+            columns: [
+                {
+                    data: null,  className: 'text-center',
+                    render: function (data, type, full) {
+                        var day = data.orderdate.substring(8, 10);
+                        var month = data.orderdate.substring(5, 7);
+                        var year = data.orderdate.substring(0, 4);
+                        html = '<label>' + day + "/" + month + "/" +  year + '</label>';
+
+                        return html;
+                    }
+                },
+                {
+                    data: null,  className: 'text-center',
+                    render: function (data, type, full) {
+                        //var day = data.orderdate.substring(8, 10);
+                        //var month = data.orderdate.substring(5, 7);
+                        //var year = data.orderdate.substring(0, 4);
+                        //html = '<label>' + day + "/" + month + "/" + year + '</label>';
+                        var shipmentdate = "";
+                        return shipmentdate;
+                    }
+                },
+                {
+                    data: null,  className: 'text-center',
+                    render: function (data, type, full) {
+                        var day = data.requesteddate.substring(8, 10);
+                        var month = data.requesteddate.substring(5, 7);
+                        var year = data.requesteddate.substring(0, 4);
+                        html = '<label>' + day + "/" + month + "/" + year + '</label>';
+
+                        return html;
+                    }
+                },
+                //{ data: "orderdate" ,className: 'text-center' },
+                //{ data: "orderdate" ,className: 'text-center' },  //ยังไม่ได้
+                //{ data: "requesteddate" ,className: 'text-center' },
+                { data: "sonumber", className: 'text-center' },
+                { data: "customername"},
+                { data: "booknumber", className: 'text-center' },
+                { data: "materialname" },
+                {
+                    data: null, 
+                    render: function (data, type, full) {
+
+                        html = '<label style="text-align:right;padding-left:20px"> ' + data.totalnetweight + '</label>';
+
+                        return html;
+                    }
+                },
+                //{ data: "totalnetweight", className: 'text-right' },
+                { data: "shiptoaddress" },
+                { data: "shiptocity" },
+                { data: "destinationname" },
+                { data: "dnnumber", className: 'text-center' },
+                { data: "shipmentloadid", className: 'text-center' },
+                { data: "carriername" },
+                { data: "shipmentmemo" },
+                { data: "vehicletypecode" },
+                { data: "vehicletypename" },
+                { data: "customercode" },
+                {
+                    data: null, 
+                    render: function (data, type, full) {
+
+                        html = " ";
+
+                       
+
+                        return html;
+                    }
+                },
+                //{ data: "orderline" }, //ยังไม่ได้
+                { data: "origincode", className: 'text-center' },
+                { data: "originname" },
+                { data: "destinationcode", className: 'text-center' },
+                //{
+                //    data: null, 
+                //    render: function (data, type, full) {
+
+                //        var html="";
+                //        debugger;
+                //        if (data.zone == null) {
+                //            debugger;
+                //            html = "";
+                //        } else {
+                //            html = '<label style="text-align:center;"> ' + data.zone + '</label>';
+                //        }
+
+                //        return html;
+                //    }
+                //},
+                { data: "zone", className: 'text-center' },  //ยังไม่ได้
+                { data: "shiptoregioncode", className: 'text-center' },
+                { data: "materialfreightgroup" },
+                { data: "shippingcondition" },
+                { data: "shippingconditiondescription" },
+                { data: "dnnanme" },
+                { data: "loadstatus", className: 'text-center' }, //ยังไม่ได้
+                { data: "plannername" }, //ยังไม่ได้
+                {
+                    data: null, 
+                    render: function (data, type, full) {
+
+                        html = "";
+
+                        return html;
+                    }
+                }
+                //{ data: "status", className: 'text-center' } //ยังไม่ได้
+
+            ],
+        });
+    }
+
+
+</script>

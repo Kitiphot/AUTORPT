@@ -1,0 +1,341 @@
+﻿.dataTables_wrapper .dataTable {
+    margin: 0 !important;
+}
+
+.card-body-nopadding {
+    flex: 1 1 auto;
+    padding: 1rem 1.81rem !important;
+}
+
+.card-status-title {
+    font-weight: bold;
+}
+
+.card-dn-title {
+    font-weight: bold;
+}
+
+.text-right {
+    text-align: end;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.min_r_l_padding {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.no_r_l_padding {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.outter-bar {
+    width: 50px;
+    text-align: center;
+}
+
+.inner-bar {
+    height: 20px;
+    display: inline-block;
+}
+
+.total-row {
+    font-weight: bold;
+}
+
+.red-cell {
+    background-color: rgb(255, 199, 206);
+}
+
+.green-cell {
+    background-color: rgb(198, 236, 206);
+}
+
+.total-order-qty {
+    font-weight: bold;
+    color: gray;
+}
+
+.total-order-text {
+    font-weight: bold;
+    color: black;
+    font-size: x-small;
+}
+
+.os-text-right {
+    text-align: end;
+}
+
+.os-text-center {
+    text-align: center;
+}
+
+.bottom-border {
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: black;
+}
+
+.os-complete-qty {
+    color: rgb(47, 203, 158);
+    font-weight: bold;
+}
+
+.os-status-text {
+    font-size: x-small;
+}
+
+.os-onprocess-qty {
+    color: rgb(204, 0, 0);
+    font-weight: bold;
+}
+
+.os-outter-bar {
+    width: 100%;
+    display: block;
+    padding: 0px 0px 10px 0px;
+    margin: 0;
+    display: flex;
+}
+
+.os-inner-bar {
+    display: inline-block;
+    height: 10px;
+    width: 99%;
+}
+
+.os-complete-bg {
+    background: rgb(47, 203, 158);
+}
+
+.os-onprocess-bg {
+    background: rgb(204, 0, 0);
+}
+
+.os-border {
+    padding: 0px;
+    border-left: 1px;
+    border-right: 1px;
+    border-top: 1px;
+    border-bottom: 0px;
+    border-style: solid;
+}
+
+.os-cell {
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.os-header-cell {
+    background: rgb(51, 63, 79);
+    color: white;
+}
+
+.os-canvas {
+}
+
+.os-card-bg {
+    background: rgb(214, 220, 228);
+}
+
+.os-two-line-header {
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.os-border-lrb {
+    border-left: 1px;
+    border-left-style: solid;
+    border-right: 1px;
+    border-right-style: solid;
+    border-bottom: 1px;
+    border-bottom-style: solid;
+}
+
+.ontime-fleet-total-row {
+    background: rgb(221, 235, 247) !important;
+    font-weight: bold;
+}
+
+.ontime-mat-frg-total-row {
+    background: rgb(221, 235, 247) !important;
+    font-weight: bold;
+}
+
+.ontime-section-total-row {
+    background: rgb(155, 194, 230) !important;
+    font-weight: bold;
+}
+
+.ontime-region-total-row {
+    background: rgb(47, 117, 181) !important;
+    font-weight: bold;
+}
+
+.ontime-grand-total-row {
+    background: rgb(31, 78, 120) !important;
+    font-weight: bold;
+}
+.ontime-grand-total-summary-row {
+    background: rgb(31, 78, 120) !important;
+    color:white;
+    font-weight: bold;
+}
+
+.ontime-hide-cell {
+    color: transparent !important;
+    border-top: 1px solid transparent !important;
+}
+.bg-one-day {
+    background-color: rgb(222, 242, 250);
+    padding:0 !important;
+}
+.bg-one-day-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(94, 190, 228);
+}
+.bg-two-three-day {
+    background-color: rgb(222, 242, 250);
+    padding: 0 !important;
+}
+.bg-two-three-day-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(68, 84, 106);
+}
+.bg-four-five-day {
+    background-color: rgb(255, 223, 121);
+    padding: 0 !important;
+}
+.bg-four-five-day-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(255, 192, 0);
+}
+.bg-six-seven-day {
+    background-color: rgb(255, 223, 121);
+    padding: 0 !important;
+}
+.bg-six-seven-day-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(180,137,0);
+}
+.bg-eight-ten-day {
+    background-color: rgb(255, 185, 185);
+    padding: 0 !important;
+}
+.bg-eight-ten-day-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(255, 5, 5);
+}
+.bg-more-ten-day {
+    background-color: rgb(255, 185, 185);
+    padding: 0 !important;
+}
+.bg-more-ten-day-h {
+    color: white;
+    font-weight:bold;
+    background-color: rgb(192, 0,0);
+}
+.pointer {
+    cursor: pointer !important;
+}
+.bg-summary-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(94, 190, 228);
+    padding:0 !important;
+}
+
+.bg-summary {
+    background-color: rgb(222, 242, 250);
+/*    padding: 0 !important;*/
+}
+
+.bg-summary-percent {
+    font-weight: bold;
+    background-color: rgb(98, 191, 148);
+    padding: 0 !important;
+}
+.bg-ontime-summary {
+    background-color: rgb(150, 255, 217);
+    color: forestgreen;
+    /*    padding: 0 !important;*/
+}
+.bg-delay-summary {
+    background-color: rgb(150, 255, 217);
+    color: crimson;
+    /*    padding: 0 !important;*/
+}
+
+.bg-day-one {
+    background-color: rgb(222, 242, 250);
+    padding: 0 !important;
+}
+
+.bg-day-one-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(94, 190, 228);
+}
+
+.bg-day-two {
+    background-color: rgba(57, 204, 123,0.8);
+    padding: 0 !important;
+}
+
+.bg-day-two-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(0, 204, 102);
+}
+
+.bg-day-three {
+    background-color: rgb(255,205,80);
+    padding: 0 !important;
+}
+
+.bg-day-three-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(255, 192, 0);
+}
+
+.bg-day-four {
+    background-color: rgba(232, 81, 81,0.8);
+    padding: 0 !important;
+}
+
+.bg-day-four-h {
+    color: white;
+    font-weight: bold;
+    background-color: rgb(201, 73, 73);
+}
+
+.select2-search__field {
+    width: 100% !important
+}
+
+.dropdown-criteria {
+    background-color: rgb(247, 247, 247);
+    box-shadow: rgb(187, 187, 187) 2px 2px 8px;
+}
+
+.cbFormat {
+    border-color: rgba(0,0,0,0.3);
+    height: calc(2.25rem + 5.75px) !important;
+    width: 100%;
+    padding-left: 5px !important;
+    line-height: 27px;
+}

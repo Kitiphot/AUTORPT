@@ -1,0 +1,2721 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Master Setting</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        select.form-control:not([size]):not([multiple]) {
+            height: calc(2.25rem + 7px);
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="row mb-4">
+            <div class="col-12 d-flex align-items-center justify-content-between">
+                <h4 class="page-title">Master Setting</h4>
+                <div class="d-flex align-items-center">
+                    @* <div class="wrapper mr-4 d-none d-sm-block">
+                            <p class="mb-0">
+                                Summary for
+                                <b class="mb-0">August 2018</b>
+                            </p>
+                        </div> *@
+                    @* <div class="wrapper">
+                            <a href="#" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Export CSV
+                            </a>
+                        </div> *@
+                </div>
+            </div>
+        </div>
+        <div id="accordionOne" class="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        Schema
+                    </a>
+                </div>
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-sm-12 col-md-12">
+                                <table id="dtSchema" class="table table-striped" style="width:100%"></table>
+                                <div id="dvOverlayOne" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divgroup" class="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseGroup"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        Report Group Setting
+                    </a>
+                </div>
+                <div id="collapseGroup" class="collapse show" aria-labelledby="headingOne" data-parent="#divgroup">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-sm-12 col-md-12">
+                                <table id="dtGroup" class="table table-striped" style="width:100%"></table>
+                                <div id="dvdivgroup" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="accordionFive" class="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseFive"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        Function Setting
+                    </a>
+                </div>
+                <div id="collapseFive" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionFive">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-sm-12 col-md-12">
+                                <table id="dtFunction" class="table table-striped" style="width:100%"></table>
+                                <div id="dvOverlayFive" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div id="accordionTwo" class="accordion">
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseTwo"
+                           aria-expanded="false" aria-controls="collapseTwo">
+                            Template Report Mapping
+                        </a>
+                    </div>
+                    <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionTwo">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-12">
+                                    <table id="dtReportMapping" class="table table-striped" style="width:100%"></table>
+                                    <div id="dvOverlayTwo" class="overlay">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="accordionThree" class="accordion">
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseThree"
+                           aria-expanded="false" aria-controls="collapseThree">
+                            Parameter List
+                        </a>
+                    </div>
+                    <div id="collapseThree" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionThree">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-12">
+                                    <table id="dtParameterMapping" class="table table-striped" style="width:100%"></table>
+                                    <div id="dvOverlayThree" class="overlay">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="accordionFour" class="accordion">
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseFour"
+                           aria-expanded="false" aria-controls="collapseFour">
+                            Columns Selection
+                        </a>
+                    </div>
+                    <div id="collapseFour" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionFour">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-12">
+                                    <table id="dtColumnMapping" class="table table-striped" style="width:100%"></table>
+                                    <div id="dvOverlayFour" class="overlay">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+    </div>
+    @*Modal Schema*@
+    <div class="modal modal-default" id="modals-schema" data-bind="foreach: schemas">
+        <div class="modal-dialog modal-md">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Schema Setting
+                        <span class="font-weight-light">Information</span>
+                        <br>
+                        <small class="text-muted">Select schema from source to display on master configuration.</small>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Source Selection</label>
+                            <select id="ddlSource" class="form-control" data-bind="options: $root.source,
+                       optionsText: 'schema_name',
+                       optionsValue: 'schema_name',
+                       event:{ change: $parent.sourceChange}">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Database</label>
+                            <input id="txt_catalog_name" type="text" class="form-control" readonly data-bind="attr:{value: catalog_name}">
+                        </div>
+                        <div class="form-group col">
+                            <label class="form-label">Owner</label>
+                            <input id="txt_schema_owner" type="text" class="form-control" readonly data-bind="attr:{value: schema_owner}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Source Display</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend" style="background-color:#e9ecef">
+                                    <span class="input-group-text" id="txt_schema_data_display" readonly></span>
+                                </div>
+                                <input id="txt_schema_display" type="text" class="form-control"> @*data-bind="attr:{value: schema_display}, event:{keyup: $parent.updateSchemaDisplay}"*@
+                            </div>
+
+                            @*<div class="input-group-prepend">
+                                <input class="input-group-text" id="txt_schema_data_display" data-bind="attr:{value: schema_display}, event:{keyup: $parent.updateSchemaDisplay}" readonly>
+                            </div>
+                            <input id="txt_schema_display" type="text" class="form-control" data-bind="attr:{value: schema_display}, event:{keyup: $parent.updateSchemaDisplay}">*@ @*data-bind="attr:{value: schema_display}, event:{keyup: $parent.updateSchemaDisplay}"*@
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="SaveSchema()">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @*Modal Report Group*@
+    <div class="modal modal-default" id="modals-group" data-bind="foreach: functions">
+        <div class="modal-dialog modal-md">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Report Group Setting
+                        <span class="font-weight-light">Information</span>
+                        <br>
+                        <small class="text-muted">Create or Edit Report Group to Soerce Display.</small>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Source Display</label>
+                            <input id="txt_schema_display_Report" type="text" class="form-control"> @*data-bind="attr:{value: schema_display}, event:{keyup: $parent.updateSchemaDisplay}"*@
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Report Group Name</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend" style="background-color:#e9ecef">
+                                    <span class="input-group-text" id="txtGroupReportdisplay" readonly></span>
+                                </div>
+                                <input id="txt_GroupReport_Report" type="text" class="form-control">                          
+                            </div>
+
+                            @*<div class="input-group-prepend">
+                                <input class="input-group-text" id="ddlGroupReportdisplay" readonly>
+                            </div>
+                            <input id="txt_GroupReport_Report" type="text" class="form-control">*@
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="SaveGroup()">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @*Modal Function*@
+    <div class="modal modal-default" id="modals-function" data-bind="foreach: functions">
+            <div class="modal-dialog modal-md">
+                <form class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Function Setting
+                            <span class="font-weight-light">Information</span>
+                            <br>
+                            <small class="text-muted">Select function from source mapping to report group.</small>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label class="form-label">Report Group</label>
+                                <input id="txt_GroupReport" type="text" class="form-control">
+                                @*<select id="ddlGroupReport" class="form-control" data-bind="options: $root.sourceGroups,
+                optionsText: 'group_name',
+                optionsValue: 'group_id',
+                event:{ change: $parent.changeGroup}">
+                     </select>*@
+                            </div>
+                        </div>
+                        <!--<div class="form-row">
+    <div class="form-group col">
+        <label class="form-label">Select Function</label>-->
+                        @*<i id="iconEdit" class="icon-note md-18" style="color:#007bff"></i>*@
+                        <!--<select id="ddlSourceFunction" class="form-control" data-bind="options: $root.sourceFunctions,
+       optionsText: 'routine_name',
+       optionsValue: 'routine_name',
+       event:{ change: $parent.changeFunction}">
+            </select>
+        </div>
+    </div>-->
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label class="form-label">Select Function </label>@*-->*@ 
+                                @*<i id="iconEdit" class="icon-note md-18" style="color:#007bff"></i>*@
+                                <div class="input-group">
+                                    <div class="input-group-prepend" style="background-color:#e9ecef">
+                                        <span class="input-group-text" id="txtSourceReportdisplay" readonly></span>
+                                    </div>
+                                    <select id="ddlSourceFunction" class="form-control" data-bind="options: $root.sourceFunctions,
+                                        optionsText: 'routine_name',
+                                        optionsValue: 'routine_name',
+                                        event:{ change: $parent.changeFunction}">
+                                     </select>
+                             </div>
+                         </div>
+                     </div>
+
+                     <!--<div class="form-row">
+                         <div class="form-group col">
+                             <label class="form-label">Report Name </label>
+                    <i id="iconEdit" class="icon-note md-18" style="color:#007bff"></i>
+                    <div class="input-group">
+                        <div class="input-group-prepend" style="background-color:#e9ecef">
+                            <span class="input-group-text" id="txtSourceReportdisplay" readonly></span>
+                        </div>
+                        <select id="ddlSourceReport" class="form-control" data-bind="options: $root.sourceReports,
+optionsText: 'report_name',
+optionsValue: 'report_id',
+event:{ change: $parent.changeReport}">
+                        </select>
+                    </div>-->
+                                @*<div class="input-group-prepend">
+<input class="input-group-text" id="ddlSourceReportdisplay" data-bind="attr:{value: report_name}, event:{keyup: $parent.changeReport}" readonly>
+</div>
+<select id="ddlSourceReport" class="form-control" data-bind="options: $root.sourceReports,
+optionsText: 'report_name',
+optionsValue: 'report_id',
+event:{ change: $parent.changeReport}">
+</select>*@
+                            <!--</div>
+                        </div>-->
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label class="form-label">Rename Function</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend" style="background-color:#e9ecef">
+                                        <span class="input-group-text" id="txtSourceRenameReportdisplay" readonly></span>
+                                    </div>
+                                    <input id="txt_RenameReport_Display" type="text" class="form-control">
+                                </div>
+
+                                @*<div class="input-group-prepend">
+                    <input class="input-group-text" id="ddlSourceRenameReportdisplay" readonly>
+                </div>
+                <input id="txt_RenameReport_Display" type="text" class="form-control">*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="SaveReport()">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
+
+
+    <div class="modal modal-default" id="modals-report">
+        <div class="modal-dialog modal-md">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Add Report
+                        @*<span class="font-weight-light">Information</span>*@
+                        <br>
+                        <small class="text-muted">Add new report to curren schema.</small>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="col-12 col-sm-12 col-md-12">
+                            <table id="dtReports" class="table table-striped" style="width:100%"></table>
+                            <div id="dvOverlayReport" class="overlay">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="form-group col">
+                                <label class="form-label">Report Name</label>
+                                <input id="txt_report_name" type="text" class="form-control">
+                            </div>*@
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="SaveAddReport()">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @*<div class="modal modal-default" id="modals-report" data-bind="foreach: reports">
+            <div class="modal-dialog modal-md">
+                <form class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Template Report Mapping
+                            <span class="font-weight-light">Information</span>
+                            <br>
+                            <small class="text-muted">Select template report mapping to display on master configuration.</small>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label class="form-label">Database</label>
+                                <input id="txt_report_catalog_name" type="text" class="form-control" readonly data-bind="attr:{value: catalog_name}">
+                            </div>
+                            <div class="form-group col">
+                                <label class="form-label">Source Display</label>
+                                <input id="txt_report_schema_display" type="text" class="form-control" readonly data-bind="attr:{value: schema_display}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label class="form-label">Source Function</label>
+                                <select id="ddlFunction" class="form-control" data-bind="options: $root.functions,
+                                    optionsText: 'routine_name',
+                                    optionsValue: 'routine_name',
+                                    event:{ change: $parent.functionChange}">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label class="form-label">Report Name</label>
+                                <select id="ddlReport" class="form-control" data-bind="options: $root.sourceReports,
+                                    optionsText: 'report_name',
+                                    optionsValue: 'report_id',
+                                    event:{ change: $parent.reportChange}">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label class="form-label">Report Description</label>
+                                <input id="txt_schema_display" type="text" class="form-control" data-bind="attr:{value: report_desc}, event:{keyup: $parent.updateReportDesc}">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                        <button type="button" id="btnSaveReportMapping" class="btn btn-primary" onclick="SaveReportMapping()">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal modal-default" id="modals-upload">
+            <div class="modal-dialog modal-md">
+                <form class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Load Template
+                            <span class="font-weight-light">Information</span>
+                            <br>
+                            <small class="text-muted">Load template for function</small>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal modal-default" id="modals-params">
+            <div class="modal-dialog modal-md">
+                <form class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Edit Parameters
+                            <span class="font-weight-light">Information</span>
+                            <br>
+                            <small class="text-muted">Edit parameters for function</small>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal modal-default" id="modals-columns">
+            <div class="modal-dialog modal-md">
+                <form class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Edit Columns
+                            <span class="font-weight-light">Information</span>
+                            <br>
+                            <small class="text-muted">Edit columns for function</small>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>*@
+    <div class="modal modal-default" id="modals-param" data-bind="foreach: params">
+        <div class="modal-dialog modal-md">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Edit Parameter
+                        <span class="font-weight-light">Information</span>
+                        <br>
+                        <small class="text-muted">Edit parameter for function</small>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Name</label>
+                            <input id="txt_parameter_name" type="text" class="form-control" disabled data-bind="attr:{value: parameter_name}">
+                        </div>
+                        <div class="form-group col">
+                            <label class="form-label">Data Type</label>
+                            <input id="txt_data_type" type="text" class="form-control" readonly data-bind="attr:{value: data_type_name}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Parameter Type</label>
+                            <select id="ddlParameterType" class="form-control" data-bind="options: $root.sourceParamTypes,
+                                optionsText: 'parameter_type_name',
+                                optionsValue: 'parameter_type_id',
+                                event:{ change: $parent.changeParamType}">
+                            </select>
+                        </div>
+                        <div class="form-group col">
+                            <div class="form-group col">
+                                <label class="form-label">Default Value</label>
+                                <input id="txt_default_value" type="text" class="form-control" data-bind="attr:{value: parameter_default_value}, event:{keyup: $parent.updateDefaultValue}">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="SaveTemplateParameterMapping()">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        var schemaModel = {
+            source: ko.observableArray([]),
+            schemas: ko.observableArray([]),
+            sourceChange: SourceSchemaChange,
+            updateSchemaDisplay: function (data, event) {
+                data.schema_display = event.currentTarget.value;
+            }
+        }
+
+        var functionModel = {
+            functions: ko.observableArray([]),
+            sourceFunctions: ko.observableArray([]),
+            //reportgroups: ko.observableArray([]),
+            //sourcereportgroups: ko.observableArray([]),
+            sourceGroups: ko.observableArray([]),
+            sourceReports: ko.observableArray([]),
+            selectedFunction: ko.observable(),
+            selectedGroups: ko.observable(),
+            selectedReport: ko.observable(),
+            //selectedreportgroup: ko.observable(),
+            changeFunction: function (data, event) {
+                data.function_name = event.currentTarget.value;
+            },
+            changeReport: function (data, event) {
+                var index = event.currentTarget.selectedIndex;
+                var value = parseInt(event.currentTarget.value);
+                
+                data.report_id = value;
+                data.report_name = event.currentTarget.options.length > 0 ? event.currentTarget.options[index].text : "";
+                //console.log(index);
+                //console.log(data);
+            },
+            changeGroup: function (data, event) {
+                var index = event.currentTarget.selectedIndex;
+                var value = parseInt(event.currentTarget.value);
+                data.group_id = value;
+                data.group_name = event.currentTarget.options.length > 0 ? event.currentTarget.options[index].text : "";
+                //console.log(index);
+                //console.log(data);
+            }
+        }
+
+        var reportModel = {
+            reports: ko.observableArray([]),
+            functions: ko.observableArray([]),
+            sourceReports: ko.observableArray([]),
+            selectedReport: ko.observable(),
+            selectedFunction: ko.observable(),
+            functionChange: SourceFunctionChange,
+            updateReportDesc: function (data, event) {
+                //console.log(data);
+                //console.log(event);
+                data.report_desc = event.currentTarget.value;
+            }
+        }
+
+        var groupModel = {
+            reports: ko.observableArray([]),
+            functions: ko.observableArray([]),
+            sourceReports: ko.observableArray([]),
+            sourceGroups: ko.observableArray([]),
+            selectedReport: ko.observable(),
+            selectedGroups: ko.observable(),
+            selectedFunction: ko.observable(),
+            functionChange: SourceFunctionChange,
+            updateReportDesc: function (data, event) {
+                //console.log(data);
+                //console.log(event);
+                data.report_desc = event.currentTarget.value;
+            }
+        }
+
+        var paramModel = {
+            params: ko.observableArray([]),
+            sourceParamTypes: ko.observableArray([]),
+            selectSourceParamType: ko.observable(),
+            changeParamType: function (data, event) {
+                //console.log(data.parameter_data_type_id);
+                console.log(event.currentTarget.selectedIndex);
+                //console.log(event.currentTarget.value);
+                //console.log(event.currentTarget.text);
+                data.parameter_data_type_id = event.currentTarget.value;
+                data.parameter_type_name = event.currentTarget.text;
+            },
+            updateDefaultValue: function (data, event) {
+                data.parameter_default_value = event.currentTarget.value;
+            }
+
+        }
+
+        ko.applyBindings(schemaModel, document.getElementById("modals-schema"));
+        ko.applyBindings(functionModel, document.getElementById("modals-function"));
+        ko.applyBindings(functionModel, document.getElementById("modals-group"));
+        //ko.applyBindings(reportModel, document.getElementById("modals-report"));
+        //ko.applyBindings(paramModel, document.getElementById("modals-param"));
+        var groupIdDisplay = 0;
+        var schemaName = "";
+        var schemaDisplay = "";
+        var tableSchema = null;
+        var tableGroup = null;
+        var tableFunction = null;
+        var tableReportMapping = null;
+        var tableParameterMapping = null;
+        var tableColumnMapping = null;
+        var tableReports = null;
+        var columnDefs = [];
+        var checkgroupId = true;
+        var schemalist = [];
+        var columns = [
+            {
+                "data": null, "name": "", "title": "Edit", "autoWidth": false, "width": 20, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    return '<a href="javascript:void(0)" class="mr-2"><i class="icon-note md-18" data-toggle="modal" data-target="#modals-schema" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>';
+                    @*\<a href="javascript:DeleteSchema(event);"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>';*@
+                }
+            },
+            { "data": "schema_name", "name": "schema_name", "title": "Name", "autoWidth": true },
+            { "data": "schema_display", "name": "schema_display", "title": "Display", "autoWidth": true },
+            { "data": "schema_owner", "name": "schema_owner", "title": "Owner.", "autoWidth": true, "orderable": false },
+            { "data": "catalog_name", "name": "catalog_name", "title": "Database", "autoWidth": true, "orderable": false },
+            //{ "data": "is_active", "name": "is_active", "title": "Active", "autoWidth": true, "orderable": false },
+            {
+                "data": null, "name": "is_active", "title": "Active", "autoWidth": true, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    
+                    if (data.is_active) {
+                        
+                        return '<img src="../Pic/switch-on.png" style="height:40px" onclick="changeActiveSchema(\'' + data.is_active + '\',\'' + data.schema_id + '\');"/>';
+                    }
+                    else {
+                        return '<img src="../Pic/switch-off.png" style="height:40px" onclick="changeActiveSchema(\'' + data.is_active + '\',\'' + data.schema_id + '\');" />';
+                    }
+                }
+            },
+            { "data": "update_by", "name": "update_name", "title": "Update by", "autoWidth": true, "orderable": false },
+           
+            {
+                "data": null, "name": "updated_date", "title": "Update date", "autoWidth": true, "orderable": false,
+                "render": function (data, type, row, meta) {
+
+                    if (data.update_date == null) {
+                        return "";
+                    }
+                    else {
+                        return data.update_date;
+                    }
+                }
+            },
+            //{ "data": "is_deleted", "name": "is_deleted", "title": "Deleted", "autoWidth": true }
+
+        ];
+
+        var gColumns = [
+            {
+                "data": null, "name": "", "title": "Edit", "autoWidth": false, "width": 20, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    return '<a href="javascript:void(0)" class="mr-2"><i class="icon-note md-18" data-toggle="modal" data-target="#modals-group" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>\
+<a href="javascript:DeleteGroup(event);"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>';
+                }
+            },
+            { "data": "group_name", "name": "function_name", "title": "Report Group Name", "autoWidth": true },
+            {
+                "data": null, "name": "is_active", "title": "Active", "autoWidth": true, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    if (data.is_active) {
+                        return '<img src="../Pic/switch-on.png" style="height:40px"  onclick="changeActiveGroup(\'' + data.is_active + '\',\'' + data.schema_id + '\',\'' + data.group_id + '\');"/>';
+                    }
+                    else {
+                        return '<img src="../Pic/switch-off.png" style="height:40px"  onclick="changeActiveGroup(\'' + data.is_active + '\',\'' + data.schema_id + '\',\'' + data.group_id + '\');"/>';
+                    }
+                }
+            },
+            { "data": "created_by", "name": "created_by", "title": "Create by", "autoWidth": true },
+            {
+                "data": null, "name": "created_date", "title": "Create date", "autoWidth": true, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    if (data == "01/01/0001 00:00:00") {
+                        return "";
+                    }
+                    else {
+                        return data.updated_date_string;
+                    }
+                }
+            },
+            //{ "data": "create_DateTime", "name": "create_DateTime", "title": "Create date.", "autoWidth": true },
+            { "data": "updated_by", "name": "updated_by", "title": "Update by", "autoWidth": true, "orderable": false },
+            {
+                "data": null, "name": "updated_date", "title": "Update date", "autoWidth": true, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    if (data == "01/01/0001 00:00:00" || data == "0001-01-01T00:00:00") {
+                        return "";
+                    }
+                    else {
+                        return data.updated_date_string;
+                    }
+                }
+            },
+            //{ "data": "update_DateTime", "name": "Update_DateTime", "title": "Update date", "autoWidth": true, "orderable": false }
+            //{ "data": "is_active", "name": "is_active", "title": "Active", "autoWidth": false, "width": 20, "orderable": false },
+        ];
+
+
+        var fColumns = [
+            {
+                "data": null, "name": "", "title": "Edit", "autoWidth": false, "width": 20, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    return '<a href="javascript:void(0)" class="mr-2"><i class="icon-note md-18" data-toggle="modal" data-target="#modals-function" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>\
+<a href="javascript:DeleteReportGroup(event);"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>';
+                }
+            },
+            { "data": "function_name", "name": "function_name", "title": "Function", "autoWidth": true },
+            //{ "data": "report_group_name", "name": "group_report", "title": "Rename Function.", "autoWidth": true },
+            { "data": "report_name", "name": "report_name", "title": "Rename Function", "autoWidth": true },
+            {
+                "data": null, "name": "is_active", "title": "Active", "autoWidth": true, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    
+                    if (data.is_active) {
+                        return '<img src="../Pic/switch-on.png" style="height:40px"  onclick="changeActiveFunction(\'' + data.is_active + '\',\'' + data.schema_id + '\',\'' + data.group_id + '\',\'' + data.function_name + '\');"/>';
+                    }
+                    else {
+                        return '<img src="../Pic/switch-off.png" style="height:40px"  onclick="changeActiveFunction(\'' + data.is_active + '\',\'' + data.schema_id + '\',\'' + data.group_id + '\',\'' + data.function_name + '\');"/>';
+                    }
+                }
+            },
+            { "data": "updated_by", "name": "update_name", "title": "Update by", "autoWidth": true, "orderable": false }, {
+                "data": "updated_date", "name": "updated_date", "title": "Update date", "autoWidth": true, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    
+                    if (data == "01/01/0001 00:00:00" || data == "0001-01-01T00:00:00") {
+                        return "";
+                    }
+                    else {
+                        return data;
+                    }
+                }
+            }
+        ];
+
+        var rColumns = [
+            //{ "data": "schema_name", "name": "schema_name", "title": "Schema", "autoWidth": true },
+            //{ "data": "schema_display", "name": "schema_display", "title": "Display", "autoWidth": true },
+            { "data": "function_name", "name": "function_name", "title": "Function", "autoWidth": true },
+            { "data": "report_name", "name": "report_name", "title": "Report.", "autoWidth": true },
+            { "data": "report_desc", "name": "report_desc", "title": "Description", "autoWidth": true },
+            { "data": "is_active", "name": "is_active", "title": "Active", "autoWidth": false, "width": 20, "orderable": false },
+            {
+                "data": null, "name": "", "autoWidth": false, "width": 160, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    return '<a href="javascript:void(0)" class="mr-2"><i class="icon-note md-18" data-toggle="modal" data-target="#modals-report" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>\
+<a href="javascript:DeleteReportMapping(event);"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>\
+<a href="javascript:void(0)" class="mr-2"><i class="mdi mdi-download md-18" data-toggle="tooltip" data-placement="top" title="Download"></i></a>\
+<a href="javascript:void(0)"><i class="mdi mdi-upload md-18" data-toggle="modal" data-target="#modals-upload" data-toggle="tooltip" data-placement="top" title="Upload"></i></a>';
+                }
+            },
+        ];
+
+        var pColumns = [
+            //{ "data": "report_desc", "name": "report_desc", "title": "Report", "autoWidth": true },
+            { "data": "parameter_name", "name": "parameter_name", "title": "Name", "autoWidth": true },
+            { "data": "data_type_name", "name": "data_type_name", "title": "Data Type ", "autoWidth": true },
+            { "data": "parameter_type_name", "name": "parameter_type_name", "title": "Parameter Type", "autoWidth": true },
+            { "data": "parameter_default_value", "name": "parameter_default_value", "title": "Default", "autoWidth": true },
+            {
+                "data": null, "name": "", "autoWidth": false, "width": 20, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    return '<a href="javascript:void(0)" class="mr-2"><i class="icon-note md-18" data-toggle="modal" data-target="#modals-param" data-toggle="tooltip" data-placement="top" title="Edit"></i></a>\
+<a href="javascript:DeleteTemplateParameterMapping(event);"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>';
+                }
+            },
+        ];
+
+        var cColumns = [
+            { "data": "column_sorting", "name": "column_sorting", "title": "Sorting", "autoWidth": false, "width": 20, "className": 'reorder' },
+            { "data": "column_name", "name": "column_name", "title": "Column Name", "autoWidth": true, "orderable": false },
+            //{ "data": "report_desc", "name": "report_desc", "title": "Report", "autoWidth": true, "orderable": false },
+            { "data": "column_data_type", "name": "column_data_type", "title": "Data Type", "autoWidth": true, "orderable": false },
+        ];
+
+        var rrColumns = [
+            //{ "data": "report_id", "name": "report_id", "title": "Id", "autoWidth": false, "width": 20, "className": 'reorder' },
+            { "data": "report_name", "name": "report_name", "title": "Name", "autoWidth": true, "orderable": true },
+            {
+                "data": null, "name": "", "autoWidth": false, "width": 20, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    return '<a href="javascript:DeleteReport(event);"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>';
+                }
+            },
+        ];
+
+        var fRequest = {
+            function_id: null,
+            schema_id: null,
+            report_id: null
+        }
+
+        var getFunctionRequest = function (data) {
+            fRequest.function_id = data.function_id;
+            fRequest.schema_id = data.schema_id;
+            fRequest.report_id = data.report_id;
+            fRequest.group_id = data.group_id;
+        }
+
+        var gRequest = {
+            function_id: null,
+            schema_id: null,
+            report_id: null
+        }
+
+        var getGroupRequest = function (data) {
+            gRequest.function_id = data.function_id;
+            gRequest.schema_id = data.schema_id;
+            gRequest.report_id = data.report_id;
+        }
+
+        var rRequest = {
+            schema_name: null,
+            p_template_report_mapping_id: null,
+            p_function_id: null,
+            p_report_id: null
+        }
+
+        var getReportRequest = function (data) {
+            rRequest.schema_name = null;
+            rRequest.p_template_report_mapping_id = null;
+            rRequest.p_function_id = null;
+            rRequest.p_report_id = null;
+        }
+
+        var pRequest = {
+            schema_name: null,
+            p_template_report_mapping_id: null,
+            p_function_id: null,
+            p_report_id: null,
+            p_parameter_id: null
+        }
+
+        var getParameterRequest = function (data) {
+            pRequest.schema_name = data.schema_name;
+            pRequest.p_template_report_mapping_id = null;
+            pRequest.p_function_id = null;
+            pRequest.p_parameter_id = null;
+        }
+
+        var cRequest = {
+            schema_name: null,
+            p_template_report_mapping_id: null,
+            p_function_id: null,
+            p_report_id: null,
+            p_column_id: null
+        }
+
+        var getColumnRequest = function (data) {
+            pRequest.schema_name = null;
+            pRequest.p_template_report_mapping_id = null;
+            pRequest.p_function_id = null;
+            pRequest.p_column_id = null;
+        }
+
+        $(document).ready(function () {
+            LoadSourceSchema();
+            LoadSchemas();
+            //LoadReportMapping(rRequest);
+            //LoadParmeterMapping(pRequest);
+            //LoadColumnMapping(cRequest);
+            //console.log("source schema");
+            //console.log(schemaModel);
+
+        });
+
+        function LoadSourceSchema() {
+            
+            var jqxhr = $.post("/Master/LoadSourceSchema")
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        schemaModel.source(result.data);
+                        //sourceModel.source(result.data);
+                        //console.log(schemaModel);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //console.log( "finished" );
+                });
+        }
+
+        function LoadSourceFunction(request) {
+            var jqxhr = $.post("/Master/LoadFunctions", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        reportModel.functions(result.data);
+                        var function_name = reportModel.selectedFunction();
+                        console.log(function_name);
+                        $("#ddlFunction").val(function_name);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //console.log( "finished" );
+                });
+        }
+
+        function LoadFunctionList(request) {
+            var jqxhr = $.post("/Master/LoadSourceFunctions", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        functionModel.sourceFunctions(result.data);
+                        var function_name = functionModel.selectedFunction();
+                        console.log(function_name);
+                        $("#ddlSourceFunction").val(function_name);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //console.log( "finished" );
+                });
+        }
+
+        function LoadFunctionReport(request = null) {
+            var jqxhr = $.post("/Master/LoadReports", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        functionModel.sourceReports(result.data);
+                        var report_id = functionModel.selectedReport();
+                        console.log(report_id);
+                        $("#ddlSourceReport").val(report_id);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //console.log( "finished" );
+                });
+        }
+
+        function LoadFunctionGroups(request = null) {
+            var jqxhr = $.post("/Master/LoadReportGroups", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        functionModel.sourceGroups(result.data);
+                        var group_id = functionModel.selectedGroups();
+                        console.log(group_id);
+                        $("#ddlGroupReport").val(group_id);
+                        //$("#ddlGroupReport_Report").val(group_id);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //console.log( "finished" );
+                });
+        }
+
+        function LoadSourceReport(request = null) {
+            var jqxhr = $.post("/Master/LoadReports", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        reportModel.sourceReports(result.data);
+                        var report_id = reportModel.selectedReport();
+                        console.log(report_id);
+                        $("#ddlReport").val(report_id);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //console.log( "finished" );
+                });
+        }
+
+        function LoadParameterType() {
+            var jqxhr = $.post("/Master/LoadParameterTypes")
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        paramModel.sourceParamTypes(result.data);
+                        var parameter_id = paramModel.selectSourceParamType();
+                        console.log(parameter_id);
+                        $("#ddlParameterType").val(parameter_id);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //console.log( "finished" );
+                });
+        }
+
+        function SourceSchemaChange(data, event) {
+            //console.log(data);
+            var selectedValue = $(event.target).val();
+            //console.log(selectedValue);
+            var items = ko.utils.arrayFilter(schemaModel.source(), function (i) {
+                return i.schema_name == selectedValue;
+            });
+            //console.log(items);
+            if (items != null && items.length > 0) {
+                var item = items[0];
+                //console.log(item);
+                $("#txt_catalog_name").val(item.catalog_name);
+                //console.log(item.catalog_name);
+                $("#txt_schema_owner").val(item.schema_owner);
+                //console.log(item.schema_owner);
+
+                //if (data.schema_id == null) {
+                data.catalog_name = item.catalog_name;
+                data.schema_name = item.schema_name;
+                data.schema_owner = item.schema_owner;
+                //}
+            }
+        }
+
+        function LoadSchemas(request = null) {
+            $('#dvOverlayOne').show();
+            //var jqxhrxx = $.post("/AutoReport/GetReportsCustomization");
+            //$('#dvOverlayFive').hide();
+            //console.log(request);
+            var jqxhr = $.post("/Master/LoadSchemas", request)
+                .done(function (result) {
+                    
+                    console.log(result);
+                    if (result.status) {
+                        schemalist = result.data;
+                        if (tableSchema == null) {
+                            tableSchema = $('#dtSchema').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    {
+                                        id: 'btnAddSchema',
+                                        text: 'Add',
+                                        className: 'btn btn-primary',
+                                        action: function (e, dt, node, config) {
+                                            schemaModel.schemas({
+                                                schema_id: null,
+                                                schema_name: "",
+                                                schema_display: "",
+                                                catalog_name: "",
+                                                schema_owner: "",
+                                                is_active: true,
+                                                is_deleted: false,
+                                                schema_order: 0,
+                                            });
+                                            $('#ddlSource').removeClass('required-ignore-multi');
+                                            $('#ddlSource').removeAttr('disabled');
+                                            $("#ddlSource").val("");
+                                            $("#modals-schema").modal({
+                                                backdrop: 'static',
+                                                keyboard: false
+                                            }
+                                            ).on('click', '#btnConfirmDelete', function (e) {
+                                                //$form.trigger('submit');
+                                                //console.log(e);
+                                            });
+                                            $("#txt_schema_data_display").hide();
+                                        }
+                                    }],
+                                "columnDefs": [],
+                                "columns": columns,
+                                "data": result.data
+                            });
+                        }
+                        else {
+                            table.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                table.row.add(result.data[idx]);
+                            });
+                            table.draw();
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+
+                    $('#dtSchema tbody').on('click', 'tr', function (e) {
+                        var data = tableSchema.row(this).data();
+                        //console.log("schema row click");
+                        //console.log(data);
+                        schemaModel.schemas(data);
+                        schemaName = data.schema_name;
+                        schemaDisplay = data.schema_display;
+                        getGroupRequest(data);
+                        //LoadFunction(fRequest);
+                        LoadGroup(gRequest);
+
+                        //getReportRequest(data);
+                        //LoadReportMapping(rRequest);
+                        $('#accordionFive').hide();
+                        tableSchema.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                    });
+
+                    $('#dtSchema tbody tr').on('click', 'i.icon-note', function (e) {
+                
+                        var data = tableSchema.row($(this).parents('tr')).data();
+                        
+                        $("#txt_schema_data_display").show();
+                        console.log("edit button");
+                        console.log(data);
+                        $('#accordionFive').hide();
+                        EditSchema(data, e);
+                        $("#txt_schema_data_display").text(data.schema_display);
+                        $('#ddlSource').attr('disabled', 'disabled');
+                    });
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayOne').hide();
+                    //$('#accordionFive').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function EditSchema(data, event) {
+            schemaModel.schemas(data);
+            console.log(data);
+            $("#ddlSource").val(data.schema_name);
+        }
+
+        function SaveSchema() {
+            var datas = schemaModel.schemas();
+            console.log(datas);
+            if (datas.schema_name == null || datas.schema_name.length == 0) {
+                toastr["error"]("Please define schema name."); return;
+            }
+            else if (datas.schema_display == null || datas.schema_display.length == 0) {
+                toastr["error"]("Please define schema display."); return;
+            }
+            else if (datas.catalog_name == null || datas.catalog_name.length == 0) {
+                toastr["error"]("Please define catalog name."); return;
+            }
+            else if (datas.schema_id == null) {
+                var isDuplicate = false;
+                tableSchema
+                    .datas()
+                    .filter(function (value, index) {
+                        console.log(value);
+                        if (value.schema_name == datas.schema_name)
+                            isDuplicate = true;
+                    });
+
+                if (isDuplicate) {
+                    //console.log(isDuplicate);
+                    toastr["error"]("Schema should not duplicate."); return;
+                }
+            }
+            data = {
+                schema_display_edit: $('#txt_schema_display').val(), schema_name: datas.schema_name, schema_id: datas.schema_id,
+                catalog_name: datas.catalog_name, schema_owner: datas.schema_owner, schema_display: datas.schema_display,
+                schema_order: datas.schema_order, is_active: datas.is_active, is_deleted: datas.is_deleted
+            };
+
+            $('#dvOverlayOne').show();
+            var jqxhr = $.post("/Master/SaveSchema", data)
+                .done(function (result) {
+                    if (result.status) {
+                        //if (data.schema_id == null) {
+                        //    tableSchema.row.add(data).draw();
+                        //    toastr["success"]("Add data successful.");
+                        //} else {
+                        //    var index = tableSchema.row('.selected').index();
+                        //    $('#dtSchema').dataTable().fnUpdate(result.data, index, undefined, false);
+                        //    toastr["success"]("Save data successful.");
+                        //}
+                        location.reload();
+                        //LoadSourceSchema();
+                        //LoadSchemas();
+                        //$('#modals-schema').modal('hide');
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayOne').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function DeleteSchema() {
+            if (confirm('Are you sure for delete this Schema?')) {
+                $('#dvOverlayOne').show();
+                var data = tableSchema.row('.selected').data();
+                console.log(data);
+                var jqxhr = $.post("/Master/DeleteSchema", data)
+                    .done(function (result) {
+                        if (result.status) {
+                            //var index = tableSchema.row('.selected').index();
+                            tableSchema.row('.selected').remove().draw();
+                            toastr["success"]("Delete data successful.");
+                        } else {
+                            toastr["error"](result.message);
+                        }
+                    })
+                    .fail(function (e) {
+                        console.log(e);
+                    })
+                    .always(function () {
+                        $('#dvOverlayOne').hide();
+                        //console.log( "finished" );
+                    });
+            } else {
+                console.log('Not Delete Schema')
+            }
+        }
+
+        function LoadGroup(request = null) {
+            //$('#dvOverlayFive').show();
+            request.p_schema_id = request.schema_id;
+            $('#dvdivgroup').show();
+            //console.log(request);
+            var jqxhr = $.post("/Master/LoadReportGroupsNew", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        if (tableGroup == null) {
+                            tableGroup = $('#dtGroup').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    {
+                                        id: 'btnAddGroup',
+                                        text: 'Add Report Gruop',
+                                        className: 'btn btn-primary',
+                                        action: function (e, dt, node, config) {
+                                            
+                                            //$('#txt_GroupReport_Report').removeClass('required-ignore-multi');
+                                            //$('#txt_GroupReport_Report').removeAttr('disabled');
+                                            $('#txt_GroupReport_Report').val('');
+                                            var data = schemaModel.schemas();
+                                            checkgroupId = false;
+                                            functionModel.functions({
+                                                function_id: null,
+                                                function_name: "",
+                                                schema_id: data.schema_id,
+                                                schema_name: data.schema_name,
+                                                report_id: null,
+                                                report_name: "",
+                                                group_id: null,
+                                                group_name: "",
+                                                selectedFunction: null,
+                                                selectedGroups: null,
+                                                selectedReport: null,
+                                                selectedGroups: null,
+                                                is_active: true
+                                            });
+
+                                            functionModel.sourceFunctions([]);
+                                            functionModel.selectedFunction(null);
+                                            functionModel.sourceGroups([]);
+                                            functionModel.selectedGroups(null);
+                                            functionModel.sourceReports([]);
+                                            functionModel.selectedReport(null);
+                                            functionModel.sourceGroups([]);
+                                            functionModel.selectedGroups(null);
+
+                                            //var fReq = {
+                                            //    schema_name: data.schema_name
+                                            //}
+
+                                            //var rReg = {
+                                            //    schema_id: data.schema_id
+                                            //}
+                                            var gReg = {
+                                                p_schema_id: data.schema_id
+                                            }
+                                            //$("#iconEdit").hide();
+                                            $("#txtGroupReportdisplay").hide();
+                                            //$('#txt_GroupReport_Report').val(data.group_name);
+                                            //LoadFunctionList(fReq);
+                                            //LoadFunctionReport(rReg);
+                                            LoadFunctionGroups(gReg);
+                                            //$("#ddlSourceReport").val("");
+
+                                            $('#txt_schema_display_Report').val(schemaDisplay);
+                                            $('#txt_schema_display_Report').attr('disabled', 'disabled');
+                                            $("#modals-group").modal({
+                                                backdrop: 'static',
+                                                keyboard: false
+                                            }
+                                            )
+                                        }
+                                    }
+                                ],
+                                "columnDefs": [],
+                                "columns": gColumns,
+                                "data": result.data
+                            });
+                        }
+                        else {
+                            tableGroup.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableGroup.row.add(result.data[idx]);
+                            });
+                            tableGroup.draw();
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+
+                    $('#dtGroup tbody').on('click', 'tr', function (e) {
+                        var data = tableGroup.row(this).data();
+                        //console.log("schema row click");
+                        //console.log(data);
+                        schemaModel.schemas(data);
+
+                        getFunctionRequest(data);
+                        LoadFunction(fRequest);
+                        //LoadGroup(gRequest);
+
+                        getReportRequest(data);
+                        LoadReportMapping(rRequest);
+                        groupIdDisplay = data.group_id;
+                        //alert(groupIdDisplay);
+                        $('#accordionFive').show();
+                        tableGroup.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                    });
+
+
+                    $('#dtGroup tbody tr').on('click', 'i.icon-note', function (e) {
+                        var data = tableGroup.row($(this).parents('tr')).data();
+                        checkgroupId = true;
+                        console.log("edit button");
+                        console.log(data);
+                       
+                        functionModel.functions(data);
+
+                        //var fReq = {
+                        //    schema_name: data.schema_name
+                        //}
+
+                        //var rReg = {
+                        //    schema_id: data.schema_id
+                        //}
+
+                        var gReg = {
+                            p_schema_id: data.schema_id
+                        }
+                        //LoadFunctionList(fReq);
+                        //LoadFunctionReport(rReg);
+                        LoadFunctionGroups(gReg);
+
+                        //$('#txt_GroupReport_Report').val(data.group_name);
+                        $('#txt_schema_display_Report').val(schemaDisplay);
+                        $('#txt_schema_display_Report').attr('disabled', 'disabled');
+                      
+                        $("#txtGroupReportdisplay").show();
+                        groupIdDisplay= data.group_id;
+                        //alert(groupIdDisplay);
+                        //$("#ddlGroupReport_Report").val(data.group_id).change();
+                        $('#accordionFive').show();
+                        EditGroup(data, e);
+                        $("#txtGroupReportdisplay").text(data.group_name);
+  
+                    });
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayFive').hide();
+                    $('#dvdivgroup').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function EditGroup(data, event) {
+            functionModel.functions(data);
+            console.log(data);
+            functionModel.selectedGroups(data.group_id);
+        }
+
+        function SaveGroup(data, event) {
+            var datas = schemaModel.schemas();
+            //if ($('#txt_schema_display_Report').val() == '') {
+            //    toastr["error"]("Please define Source Display."); return;
+            //}
+            if (checkgroupId == false) {
+                datas.group_id = null;
+            }
+            if ($('#txt_GroupReport_Report').val() == '') {
+                toastr["error"]("Please define report group."); return;
+            }
+
+            var url = "/Master/SaveGroup";
+            if ($('#txt_schema_display_Report').prop('disabled'))
+                url = "/Master/SaveGroup";
+
+            var data = {
+                schema_id: datas.schema_id, group_name: $('#txt_GroupReport_Report').val(), group_id: datas.group_id,
+                is_active: datas.is_active, created_by: datas.created_by, created_date: datas.created_date,
+                updated_by: datas.updated_by, updated_date: datas.updated_date
+            };
+
+            $('#dvdivgroup').show();
+            var jqxhr = $.post(url, data)
+                .done(function (result) {
+                    if (result.status) {
+                        LoadGroup(gRequest);
+                        //if (data.function_id == null) {
+                        //    tableGroup.row.add(data).draw();
+                        //    toastr["success"]("Add data successful.");
+                        //} else {
+                        //    var index = tableGroup.row('.selected').index();
+                        //    $('#dtGroup').dataTable().fnUpdate(result.data, index, undefined, false);
+                        //    toastr["success"]("Save data successful.");
+                        //}
+                        $('#modals-group').modal('hide');
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvdivgroup').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function DeleteGroup() {
+            if (confirm('Are you sure for delete this group?')) {
+                $('#dvdivgroup').show();
+                //var data = tableGroup.row('.selected').data();
+                var datas = schemaModel.schemas();
+                var data = {
+                    schema_id: datas.schema_id, group_id: datas.group_id
+                };
+
+                //console.log(data);
+                var jqxhr = $.post("/Master/DeleteGroup", data)
+                    .done(function (result) {
+                        if (result.status) {
+                            //var index = tableSchema.row('.selected').index();
+                            //tableFunction.row('.selected').remove().draw();                            
+                            LoadGroup(gRequest);
+                            toastr["success"]("Delete data successful.");
+                        } else {
+                            toastr["error"](result.message);
+                        }
+                    })
+                    .fail(function (e) {
+                        console.log(e);
+                    })
+                    .always(function () {
+                        $('#dvdivgroup').hide();
+                        //console.log( "finished" );
+                    });
+            } else {
+
+            }
+        }
+        var checkUpdate = false;
+        var reportid_old = 0;
+        var functionname_old = "";
+        function LoadFunction(request = null) {
+            //$('#dvOverlayFive').show();
+            $('#dvdivgroup').show();
+            //console.log(request);
+   
+            request.report_id = null;
+            var jqxhr = $.post("/Master/LoadGetGroupReports", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        if (tableFunction == null) {
+                            tableFunction = $('#dtFunction').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    {
+                                        id: 'btnAddFunction',
+                                        text: 'Add Function',
+                                        className: 'btn btn-primary',
+                                        action: function (e, dt, node, config) {
+                                            //$('#ddlGroupReport').removeClass('required-ignore-multi');
+                                            //$('#ddlGroupReport').removeAttr('disabled');
+                                            //$('#ddlGroupReport').val("").change();;
+                                            $("#txt_RenameReport_Display").val("");
+                                            checkUpdate = true;
+                                            var data = schemaModel.schemas();
+
+                                            functionModel.functions({
+                                                function_id: null,
+                                                function_name: "",
+                                                schema_id: data.schema_id,
+                                                schema_name: data.schema_name,
+                                                report_id: null,
+                                                report_name: "",
+                                                group_id: null,
+                                                group_name: "",
+                                                selectedFunction: null,
+                                                selectedReport: null,
+                                                selectedGroups: null,
+                                                is_active: true
+                                            });
+
+                                            functionModel.sourceFunctions([]);
+                                            functionModel.selectedFunction(null);
+                                            functionModel.sourceReports([]);
+                                            functionModel.selectedReport(null);
+                                            functionModel.sourceGroups([]);
+                                            functionModel.selectedGroups(null);
+                                            var fReq = {
+                                                schema_name: schemaName
+                                            }
+
+                                            var rReg = {
+                                                schema_id: data.schema_id
+                                            }
+
+                                            var gReg = {
+                                                schema_id: data.schema_id
+                                            }
+                                            //$("#iconEdit").hide();
+                                            $("#txtSourceReportdisplay").hide();
+                                            $("#txtSourceRenameReportdisplay").hide();
+                                            //$("#ddlSourceReport").show();
+
+                                            LoadFunctionList(fReq);
+                                            LoadFunctionReport(rReg);
+                                            LoadFunctionGroups(gReg);
+                                            if (data.group_name == undefined) {
+                                                toastr["error"]("Please Choose Report Group"); return;
+                                            }
+
+                                            $('#iconEdit').on('click', function (e) {
+                                                $("#modals-function").modal("hide");
+                                                var data = schemaModel.schemas();
+                                                var request = {
+                                                    schema_id: data.schema_id
+                                                }
+
+                                                $("#modals-report").modal({
+                                                    backdrop: 'static',
+                                                    keyboard: false
+                                                });
+
+                                                LoadReports(request);
+                                            });
+
+                                            $('#txt_GroupReport').val(data.group_name);
+                                            $('#txt_GroupReport').attr('disabled', 'disabled');
+                                            //$("#ddlSourceFunction").val("");
+                                            //$("#ddlSourceReport").val("");
+                                            $("#modals-function").modal({
+                                                backdrop: 'static',
+                                                keyboard: false
+                                            }
+                                            )
+                                        }
+                                    }
+                                    //,
+                                    //{
+                                    //    id: 'btnEditReports',
+                                    //    text: 'Edit Reports',
+                                    //    className: 'btn btn-primary',
+                                    //    action: function (e, dt, node, config) {
+                                    //        var data = schemaModel.schemas();
+
+                                    //        functionModel.functions({
+                                    //            function_id: null,
+                                    //            function_name: "",
+                                    //            schema_id: data.schema_id,
+                                    //            schema_name: data.schema_name,
+                                    //            report_id: null,
+                                    //            report_name: "",
+                                    //            group_id: null,
+                                    //            group_name: "",
+                                    //            selectedFunction: null,
+                                    //            selectedReport: null,
+                                    //            selectedGroups: null,
+                                    //            is_active: true
+                                    //        });
+
+                                    //        functionModel.sourceFunctions([]);
+                                    //        functionModel.selectedFunction(null);
+                                    //        functionModel.sourceReports([]);
+                                    //        functionModel.selectedReport(null);
+                                    //        functionModel.sourceGroups([]);
+                                    //        functionModel.selectedGroups(null);
+
+                                    //        var fReq = {
+                                    //            schema_name: data.schema_name
+                                    //        }
+
+                                    //        var rReg = {
+                                    //            schema_id: data.schema_id
+                                    //        }
+
+                                    //        var gReg = {
+                                    //            schema_id: data.schema_id
+                                    //        }
+                                    //        $("#iconEdit").show();
+
+                                    //        LoadFunctionList(fReq);
+                                    //        LoadFunctionReport(rReg);
+                                    //        LoadFunctionGroups(gReg);
+                                    //        //$("#ddlSourceFunction").val("");
+                                    //        //$("#ddlSourceReport").val("");
+                                    //        $("#modals-function").modal({
+                                    //            backdrop: 'static',
+                                    //            keyboard: false
+                                    //        }
+                                    //        )
+                                    //        //var data = schemaModel.schemas();
+                                    //        //var request = {
+                                    //        //    schema_id: data.schema_id
+                                    //        //}
+
+                                    //        //$("#modals-report").modal({
+                                    //        //    backdrop: 'static',
+                                    //        //    keyboard: false
+                                    //        //});
+
+                                    //        //LoadReports(request);
+
+                                    //        $('#iconEdit').on('click', function (e) {
+                                    //            $("#modals-function").modal("hide");
+                                    //            var data = schemaModel.schemas();
+                                    //            var request = {
+                                    //                schema_id: data.schema_id
+                                    //            }
+
+                                    //            $("#modals-report").modal({
+                                    //                backdrop: 'static',
+                                    //                keyboard: false
+                                    //            });
+
+                                    //            LoadReports(request);
+                                    //        });
+                                    //    }
+                                    //}
+                                ],
+                                "columnDefs": [],
+                                "columns": fColumns,
+                                "data": result.data
+                            });
+                        }
+                        else {
+                            tableFunction.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableFunction.row.add(result.data[idx]);
+                            });
+                            tableFunction.draw();
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+
+
+                    $('#dtFunction tbody').on('click', 'tr', function (e) {
+                        var data = tableFunction.row(this).data();
+                        //console.log("schema row click");
+                        //console.log(data);
+
+                        tableFunction.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                        
+                    });
+
+                    $('#dtFunction tbody tr').on('click', 'i.icon-note', function (e) {
+                        var data = tableFunction.row($(this).parents('tr')).data();
+                        
+                        console.log("edit button");
+                        console.log(data);
+
+                        functionModel.functions(data);
+                        checkUpdate = false;
+                        var fReq = {
+                            schema_name: data.schema_name
+                        }
+
+                        var rReg = {
+                            schema_id: data.schema_id
+                        }
+
+                        var gReg = {
+                            schema_id: data.schema_id
+                        }
+
+                        LoadFunctionList(fReq);
+                        LoadFunctionReport(rReg);
+                        LoadFunctionGroups(gReg);
+                        var datas = schemaModel.schemas();
+                        $("#txtSourceRenameReportdisplay").show();
+
+
+                        EditFunction(data, e);
+                        $('#txt_GroupReport').val(datas.group_name);
+                        $('#txt_GroupReport').attr('disabled', 'disabled');
+                        $('#ddlGroupReport').attr('disabled', 'disabled');
+                        $("#txtSourceReportdisplay").text(data.function_name);
+                        $("#txtSourceReportdisplay").show();
+                        $("#txtSourceRenameReportdisplay").text(data.report_name);
+                        $("#txt_RenameReport_Display").val(data.report_name);
+                        
+                        reportid_old = data.report_id;
+                        functionname_old = data.function_name;
+                        $('#iconEdit').on('click', function (e) {
+                            $("#modals-function").modal("hide");
+                            var data = schemaModel.schemas();
+                            var request = {
+                                schema_id: data.schema_id
+                            }
+
+                            $("#modals-report").modal({
+                                backdrop: 'static',
+                                keyboard: false
+                            });
+                            
+
+                            LoadReports(request);
+                        });
+                    });
+
+                    $('#dtFunction tbody tr').on('click', 'i.icon-trash', function (e) {
+                        var datax = tableFunction.row($(this).parents('tr')).data();
+
+                        if (confirm('Are you sure for delete this group?')) {
+                            $('#dvdivgroup').show();
+                            //var data = tableGroup.row('.selected').data();
+                            var datas = schemaModel.schemas();
+                            //var datax = tableFunction.row($(this).parents('tr')).data();
+                        
+                            var data = {
+                                group_id: groupIdDisplay, function_name: datax.function_name, schema_id: datas.schema_id, report_name: datax.report_name, function_name_old: functionname_old
+                            };
+
+                            //console.log(data);
+                            var jqxhr = $.post("/Master/DeleteReportGroup", data)
+                                .done(function (result) {
+                                    if (result.status) {
+                                        //var index = tableSchema.row('.selected').index();
+                                        //tableFunction.row('.selected').remove().draw();                            
+                                        LoadFunction(fRequest);
+                                        toastr["success"]("Delete data successful.");
+                                    } else {
+                                        toastr["error"](result.message);
+                                    }
+                                })
+                                .fail(function (e) {
+                                    console.log(e);
+                                })
+                                .always(function () {
+                                    $('#dvdivgroup').hide();
+                                    //console.log( "finished" );
+                                });
+                        } else {
+
+                        }                      
+                    });
+
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayFive').hide();
+                    $('#dvdivgroup').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function EditFunction(data, event) {
+            functionModel.functions(data);
+            console.log(data);
+            functionModel.selectedFunction(data.function_name);
+            functionModel.selectedReport(data.report_id);
+            functionModel.selectedGroups(data.report_group_id);
+        }
+
+        function SaveReport(data, event) {
+            //var datas = functionModel.functions();
+            //console.log(data);
+            //if (data.schema_id == null) {
+            //    toastr["error"]("Please define schema."); return;
+            //}
+            //else if (data.function_name == null || data.function_name.length == 0) {
+            //    toastr["error"]("Please define function name."); return;
+            //}
+            //else if (data.report_id == null || data.report_id.length == 0) {
+            //    toastr["error"]("Please define report."); return;
+            //}
+            //else if (data.group_id == null || data.group_id.length == 0) {
+            //    toastr["error"]("Please define group."); return;
+            //}
+            //else if (data.function_id == null) {
+            //    var isDuplicate = false;
+            //    tableFunction
+            //        .data()
+            //        .filter(function (value, index) {
+            //            console.log(value);
+            //            if (value.function_name == data.function_name)
+            //                isDuplicate = true;
+            //        });
+
+            //    if (isDuplicate) {
+            //        //console.log(isDuplicate);
+            //        toastr["error"]("Function should not duplicate."); return;
+            //    }
+            //}
+
+            if ($('#ddlSourceFunction').val() == '') {
+                toastr["error"]("Please define Function."); return;
+            }
+
+            if ($('#ddlSourceReport').val() == '') {
+                toastr["error"]("Please define report."); return;
+            }
+
+            var datas = schemaModel.schemas();
+
+            var data = {
+                group_id: groupIdDisplay, report_name: $("#txt_RenameReport_Display").val(),
+                schema_id: datas.schema_id, checkupdate: checkUpdate,
+                function_name: $('#ddlSourceFunction').val(),
+                function_name_old: functionname_old
+            };
+
+            $('#dvOverlayFive').show();
+            var jqxhr = $.post("/Master/SaveReport", data)
+                .done(function (result) {
+                    if (result.status) {
+                        LoadFunction(fRequest);
+                        //if (data.function_id == null) {
+                        //    tableFunction.row.add(data).draw();
+                        //    toastr["success"]("Add data successful.");
+                        //} else {
+                        //    var index = tableFunction.row('.selected').index();
+                        //    $('#dtFunction').dataTable().fnUpdate(result.data, index, undefined, false);
+                        //    toastr["success"]("Save data successful.");
+                        //}
+                        $('#modals-function').modal('hide');
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayFive').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        //function DeleteReportGroup() {
+        //    if (confirm('Are you sure for delete this group?')) {
+        //        $('#dvdivgroup').show();
+        //        //var data = tableGroup.row('.selected').data();
+        //        var datas = schemaModel.schemas();
+        //        var datax = tableFunction.row($(this).parents('tr')).data();
+        //        var data = {
+        //            group_id: groupIdDisplay, report_id: datax.report_id, schema_id: datas.schema_id, report_name: datax.report_name2
+        //        };
+
+        //        //console.log(data);
+        //        var jqxhr = $.post("/Master/DeleteReportGroup", data)
+        //            .done(function (result) {
+        //                if (result.status) {
+        //                    //var index = tableSchema.row('.selected').index();
+        //                    //tableFunction.row('.selected').remove().draw();                            
+        //                    LoadFunction(fRequest);
+        //                    toastr["success"]("Delete data successful.");
+        //                } else {
+        //                    toastr["error"](result.message);
+        //                }
+        //            })
+        //            .fail(function (e) {
+        //                console.log(e);
+        //            })
+        //            .always(function () {
+        //                $('#dvdivgroup').hide();
+        //                //console.log( "finished" );
+        //            });
+        //    } else {
+
+        //    }
+        //}
+
+        function DeleteFunction() {
+            if (confirm('Are you sure for delete this function?')) {
+                $('#dvOverlayFive').show();
+                var data = tableFunction.row('.selected').data();
+                console.log(data);
+                var jqxhr = $.post("/Master/DeleteFunction", data)
+                    .done(function (result) {
+                        if (result.status) {
+                            //var index = tableSchema.row('.selected').index();
+                            tableFunction.row('.selected').remove().draw();
+                            toastr["success"]("Delete data successful.");
+                        } else {
+                            toastr["error"](result.message);
+                        }
+                    })
+                    .fail(function (e) {
+                        console.log(e);
+                    })
+                    .always(function () {
+                        $('#dvOverlayFive').hide();
+                        //console.log( "finished" );
+                    });
+            } else {
+
+            }
+        }
+
+        function LoadReportMapping(request = null) {
+            $('#dvOverlayTwo').show();
+            console.log(request);
+            var jqxhr = $.post("/Master/LoadTemplateReportMapping", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        if (tableReportMapping == null) {
+                            tableReportMapping = $('#dtReportMapping').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    {
+                                        id: 'btnAddReport',
+                                        text: 'Add',
+                                        className: 'btn btn-primary',
+                                        action: function (e, dt, node, config) {
+                                            var schema = schemaModel.schemas();
+                                            if (schema.length == 0 || schema.schema_id == null) {
+                                                var data = tableSchema.row(tableSchema.rows('.selected')).data();
+                                                console.log(data);
+                                                schemaModel.schemas(data);
+                                            }
+                                            schema = schemaModel.schemas();
+                                            console.log(schema);
+
+                                            var request = {
+                                                schema_name: schema.schema_name
+                                            }
+                                            LoadSourceFunction(request);
+
+                                            LoadSourceReport();
+                                            //LoadSourceGroups();
+
+                                            var report = reportModel.reports({
+                                                template_report_mapping_id: null,
+                                                schema_id: schema.schema_id,
+                                                schema_name: schema.schema_name,
+                                                schema_display: schema.schema_display,
+                                                catalog_name: schema.catalog_name,
+                                                schema_owner: schema.schema_owner,
+                                                function_id: null,
+                                                function_name: "",
+                                                report_id: null,
+                                                report_name: "",
+                                                report_desc: "",
+                                                is_active: true
+                                            });
+
+                                            $("#modals-report").modal({
+                                                backdrop: 'static',
+                                                keyboard: false
+                                            });
+                                            //).on('click', '#btnSaveReportMapping', function (e) {
+                                            //    var data = reportModel.reports();
+                                            //    console.log(data);
+                                            //    SaveReportMapping(data);
+                                            //});
+                                        }
+                                    }],
+                                "columnDefs": [],
+                                "columns": rColumns,
+                                "data": result.data,
+                                "order": [[0, 'asc'], [1, 'asc'], [2, 'asc']]
+                            });
+                        }
+                        else {
+                            tableReportMapping.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableReportMapping.row.add(result.data[idx]);
+                            });
+                            tableReportMapping.draw();
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+
+                    $('#dtReportMapping tbody').on('click', 'tr', function (e) {
+                        var data = tableReportMapping.row(this).data();
+                        //console.log("report row click");
+                        console.log(data);
+
+                        pRequest.schema_name = data.schema_name;
+                        pRequest.report_id = data.report_id;
+                        pRequest.p_function_id = data.function_id;
+                        pRequest.p_template_report_mapping_id = data.template_report_mapping_id;
+                        LoadParameterMapping(pRequest);
+
+                        cRequest.schema_name = data.schema_name;
+                        cRequest.report_id = data.report_id;
+                        cRequest.p_function_id = data.function_id;
+                        cRequest.p_template_report_mapping_id = data.template_report_mapping_id;
+                        LoadColumnMapping(cRequest);
+
+                        tableReportMapping.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                    });
+
+                    $('#dtReportMapping tbody tr a').on('click', 'i.icon-note', function (e) {
+                        var data = tableReportMapping.row($(this).parents('tr')).data();
+                        EditReportMapping(data, e);
+                    });
+
+                    $('#dtReportMapping tbody tr a').on('click', 'i.mdi.mdi-view-array', function (e) {
+                        var data = tableReportMapping.row($(this).parents('tr')).data();
+                    });
+
+                    $('#dtReportMapping tbody tr a').on('click', 'i.mdi.mdi-view-column', function (e) {
+                        var data = tableReportMapping.row($(this).parents('tr')).data();
+                    });
+
+                    $('#dtReportMapping tbody tr a').on('click', 'i.mdi.mdi-upload', function (e) {
+                        var data = tableReportMapping.row($(this).parents('tr')).data();
+                    });
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayTwo').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function SourceFunctionChange(data, event) {
+            //console.log(data);
+            var selectedValue = $(event.target).val();
+            //console.log(selectedValue);
+            var items = ko.utils.arrayFilter(reportModel.reports(), function (i) {
+                return i.schema_name == selectedValue;
+            });
+            console.log(items);
+            if (items != null && items.length > 0) {
+                var item = items[0];
+                console.log(item);
+                $("#txt_report_catalog_name").val(item.catalog_name);
+                console.log(item.catalog_name);
+                $("#txt_report_schema_owner").val(item.schema_owner);
+                console.log(item.schema_owner);
+            }
+        }
+
+        function SaveReportMapping() {
+            $('#dvOverlayTwo').show();
+            var data = reportModel.reports();
+            console.log(data);
+            var jqxhr = $.post("/Master/SaveTemplateReportMapping", data)
+                .done(function (result) {
+                    if (result.status) {
+                        //var data = table.row(5).data();
+                        //temp[0] = 'Tom';
+                        //$('#table1').dataTable().fnUpdate(temp, 5, undefined, false);
+                        var index = tableReportMapping.row('.selected').index();
+                        console.log(index);
+                        //var data = tableSchema.row(tableSchema.rows('.selected')).data();
+                        $('#dtReportMapping').dataTable().fnUpdate(result.data, index, undefined, false);
+
+                        pRequest.schema_name = data.schema_name;
+                        pRequest.report_id = data.report_id;
+                        pRequest.p_function_id = data.function_id;
+                        pRequest.p_template_report_mapping_id = data.template_report_mapping_id;
+                        LoadParameterMapping(pRequest);
+
+                        cRequest.schema_name = data.schema_name;
+                        cRequest.report_id = data.report_id;
+                        cRequest.p_function_id = data.function_id;
+                        cRequest.p_template_report_mapping_id = data.template_report_mapping_id;
+                        LoadColumnMapping(cRequest);
+
+                        toastr["success"]("Save data successful.");
+                        $('#modals-report').modal('hide');
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayTwo').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function EditReportMapping(data, event) {
+            reportModel.reports(data);
+            reportModel.selectedFunction(data.function_name);
+            reportModel.selectedReport(data.report_id);
+            console.log("call edit report mapping");
+            console.log(data.schema_name);
+            console.log(data.function_name);
+            var request = {
+                schema_name: data.schema_name
+            }
+            LoadSourceFunction(request);
+            LoadSourceReport();
+            //LoadSourceGroups();
+        }
+
+        function LoadParameterMapping(request = null) {
+            $('#dvOverlayThree').show();
+            console.log(request);
+            var jqxhr = $.post("/Master/LoadTemplateParameterMapping", request)
+                .done(function (result) {
+                    //console.log(result);
+                    if (result.status) {
+                        if (tableParameterMapping == null) {
+                            tableParameterMapping = $('#dtParameterMapping').DataTable({
+                                "columnDefs": [],
+                                "columns": pColumns,
+                                "data": result.data
+                            });
+                        }
+                        else {
+                            tableParameterMapping.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableParameterMapping.row.add(result.data[idx]);
+                            });
+                            tableParameterMapping.draw();
+                        }
+
+                        $('#dtParameterMapping tbody').on('click', 'tr', function (e) {
+                            //var data = tableParameterMapping.row(this).data();
+                            //console.log(data);
+                            //paramModel.params(data);
+                            //paramModel.selectSourceParamType(data.parameter_type_id);
+                            //LoadParameterType();
+
+                            tableParameterMapping.rows('.selected').nodes().to$().removeClass('selected');
+                            $(this).toggleClass('selected');
+                        });
+
+                        $('#dtParameterMapping tbody tr').on('click', 'i.icon-note', function (e) {
+                            var data = tableParameterMapping.row($(this).parents('tr')).data();
+                            console.log(data);
+                            paramModel.params(data);
+                            paramModel.selectSourceParamType(data.parameter_data_type_id);
+                            LoadParameterType();
+                        });
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayThree').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function SaveTemplateParameterMapping() {
+            $('#dvOverlayThree').show();
+            //var data = tableParameterMapping.row('').data();
+            var header = schemaModel.schema();
+            var data = paramModel.params();
+            var list = [data];
+            //$.each(data, function (index, item) {
+            //    list.push(item);
+            //});
+
+            var request = {
+                header: header,
+                list: list
+            };
+
+            console.log(list);
+            $.ajax({
+                url: "/Master/SaveTemplateParameterMapping",
+                type: 'POST',
+                data: request,//JSON.stringify(list),
+                dataType: "json",
+                traditional: true,
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    //console.log(result);
+                    if (result.status) {
+                        console.log(result);
+                        var index = tableParameterMapping.row('.selected').index();
+                        console.log(index);
+                        //var data = tableSchema.row(tableSchema.rows('.selected')).data();
+                        if (result.data.length > 0)
+                            $('#dtParameterMapping').dataTable().fnUpdate(result.data[0], index, undefined, false);
+                    }
+                    else
+                        toastr["error"](result.message);
+                    $('#dvOverlayThree').hide();
+                },
+                error: function (error) {
+                    console.log(error);
+                    $('#dvOverlayThree').hide();
+                }
+            });
+
+            $('#modals-param').modal('hide');
+        }
+
+        function DeleteTemplateParameterMapping() {
+            $('#dvOverlayThree').show();
+            var data = tableParameterMapping.row('.selected').data();
+            console.log(data);
+            var jqxhr = $.post("/Master/DeleteTemplateParameterMapping", data)
+                .done(function (result) {
+                    if (result.status) {
+                        //var index = tableSchema.row('.selected').index();
+                        tableParameterMapping.row('.selected').remove().draw();
+                        toastr["success"]("Delete data successful.");
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayThree').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function LoadColumnMapping(request = null) {
+            $('#dvOverlayFour').show();
+            //console.log(request);
+            var jqxhr = $.post("/Master/LoadTemplateColumnMapping", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        if (tableColumnMapping == null) {
+                            tableColumnMapping = $('#dtColumnMapping').DataTable({
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    {
+                                        id: 'btnSaveColumns',
+                                        text: 'Save Columns',
+                                        className: 'btn btn-primary',
+                                        action: function (e, dt, node, config) {
+                                            //var data = tableColumnMapping.rows().data();
+                                            //console.log(data);
+                                            SaveTemplateColumnMapping();
+                                        }
+                                    }],
+                                "columnDefs": [],
+                                "columns": cColumns,
+                                "data": result.data,
+                                "pageLength": 100,
+                                "rowReorder": {
+                                    selector: 'tr',
+                                    dataSrc: 'column_sorting',
+                                    //editor: editor
+                                },
+                                "colReorder": true,
+                                "select": true,
+                            });
+                        }
+                        else {
+                            tableColumnMapping.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableColumnMapping.row.add(result.data[idx]);
+                            });
+                            tableColumnMapping.draw();
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayFour').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function SaveTemplateColumnMapping() {
+            $('#dvOverlayFour').show();
+            var data = tableColumnMapping.rows().data();
+            var list = [];
+            $.each(data, function (index, item) {
+                list.push(item);
+            });
+
+            console.log(list);
+            $.ajax({
+                url: "/Master/SaveTemplateColumnMapping",
+                type: 'POST',
+                data: JSON.stringify(list),
+                dataType: "json",
+                traditional: true,
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    //console.log(result);
+                    if (result.status)
+                        console.log(result);
+                    else
+                        toastr["error"](result.message);
+                    $('#dvOverlayFour').hide();
+                },
+                error: function (error) {
+                    console.log(error);
+                    $('#dvOverlayFour').hide();
+                }
+            });
+        }
+
+        function LoadReports(request = null) {
+            $('#dvOverlayReport').show();
+            //console.log(request);
+            var jqxhr = $.post("/Master/LoadReports", request)
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        if (tableReports == null) {
+                            tableReports = $('#dtReports').DataTable({
+                                "dom": '<"toolbar float-left">frtip',
+                                "columnDefs": [],
+                                "columns": rrColumns,
+                                "data": result.data
+                            });
+
+                            $("div.toolbar").html('<div class="form-group"> \
+                                                    <input type="text" class="form-control" id="txt_report_name"> \
+                                                    <button type="button" id="btnAddReport" class="btn-sm btn-primary ml-2" onClick="AddReport()">Add</button> \
+                                                </div>');
+                        }
+                        else {
+                            tableReports.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableReports.row.add(result.data[idx]);
+                            });
+                            tableReports.draw();
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+
+                    $('#dtReports tbody').on('click', 'tr', function (e) {
+                        var data = tableReports.row(this).data();
+                        //console.log("schema row click");
+                        //console.log(data);
+
+                        tableReports.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                    });
+
+                    $('#dtReports tbody tr').on('click', 'i.icon-note', function (e) {
+                        var data = tableReports.row($(this).parents('tr')).data();
+                        console.log("edit button");
+                        console.log(data);
+                    });
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayReport').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function DeleteReport() {
+            $('#dvOverlayReport').show();
+            var data = tableReports.row('.selected').data();
+            console.log(data);
+            var jqxhr = $.post("/Master/DeleteReports", data)
+                .done(function (result) {
+                    if (result.status) {
+                        tableReports.row('.selected').remove().draw();
+                        toastr["success"]("Delete report successful.");
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayReport').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function AddReport() {
+            //$("#txt_report_name").val("");
+            var report_name = $("#txt_report_name").val();
+            if (report_name == null || report_name.trim().length == 0) {
+                toastr["error"]("Please define report name.");
+                return;
+            }
+
+            var data = schemaModel.schemas();
+
+            var items = [];
+            items.push({
+                schema_id: data.schema_id,
+                report_name: report_name,
+                is_active: true
+            });
+
+            var req = {
+                request: items
+            }
+
+            console.log(req);
+            $('#dvOverlayReport').show();
+            var jqxhr = $.post("/Master/AddReports", req)
+                .done(function (result) {
+                    if (result.status) {
+                        if (tableReports != null) {
+                            tableReports.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableReports.row.add(result.data[idx]);
+                                $("#txt_report_name").val("");
+                            });
+                            tableReports.draw();
+                        }
+                        toastr["success"]("Add report successful.");
+
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayReport').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        
+        //Update Is Active Schema
+        function changeActiveSchema(is_active, schema_id) {
+            
+            var req = {
+                schema_id: schema_id,
+                check_active: "SM",
+                is_active: false
+            };
+
+            if (is_active == "true")
+                req.is_active = false;
+            else
+                req.is_active = true;
+            
+            $.post("/Master/UpdateReportActive", req)
+                .done(function (result) {
+                    
+                    var s = schemalist.find(element => element.schema_id == schema_id);
+                    s.is_active = req.is_active;
+                    tableSchema.clear().draw();
+                    tableSchema.rows.add(schemalist); // Add new data
+                    tableSchema.columns.adjust().draw(); // Redraw the DataTable
+                    $('#dtSchema tbody').on('click', 'tr', function (e) {
+                        var data = tableSchema.row(this).data();
+                        //console.log("schema row click");
+                        //console.log(data);
+                        schemaModel.schemas(data);
+                        schemaName = data.schema_name;
+                        schemaDisplay = data.schema_display;
+                        getGroupRequest(data);
+                        //LoadFunction(fRequest);
+                        LoadGroup(gRequest);
+
+                        //getReportRequest(data);
+                        //LoadReportMapping(rRequest);
+                        $('#accordionFive').hide();
+                        tableSchema.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                    });
+
+                    $('#dtSchema tbody tr').on('click', 'i.icon-note', function (e) {
+
+                        var data = tableSchema.row($(this).parents('tr')).data();
+                        
+                        $("#txt_schema_data_display").show();
+                        console.log("edit button");
+                        console.log(data);
+                        $('#accordionFive').hide();
+                        EditSchema(data, e);
+                        $("#txt_schema_data_display").text(data.schema_display);
+                        $('#ddlSource').attr('disabled', 'disabled');
+                    });
+
+                   // location.reload();
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+
+                });
+        }
+        //Update Is Active Group
+        function changeActiveGroup(is_active, schema_id, group_id) {
+            var req = {
+                schema_id: schema_id,
+                group_id: group_id,
+                check_active: "GR",
+                is_active: false
+            };
+
+            if (is_active == "true")
+                req.is_active = false;
+            else
+                req.is_active = true;
+
+            $.post("/Master/UpdateReportActive", req)
+                .done(function (result) {
+                    LoadGroup(gRequest);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+
+                });
+        }
+          //Update Is Active Function
+        function changeActiveFunction(is_active, schema_id, group_id, function_name) {
+            var req = {
+                schema_id: schema_id,
+                group_id: group_id,
+                function_name: function_name,
+                check_active: "FN",
+                is_active: false
+            };
+
+            if (is_active == "true")
+                req.is_active = false;
+            else
+                req.is_active = true;
+
+            $.post("/Master/UpdateReportActive", req)
+                .done(function (result) {
+                    //getGroupRequest(req);
+                    LoadFunction(req);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+
+                });
+        }
+
+    </script>
+</body>
+</html>

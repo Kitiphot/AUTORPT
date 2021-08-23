@@ -1,0 +1,643 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    ViewBag.Title = "Daily monitor (round)";
+}
+
+@section Styles{
+    <style>
+        #view_report_table th, td {
+            border-left: 1px solid;
+            border-right: 1px solid;
+            
+        }
+
+
+        #view_report_table thead th {
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        table[aria-describedby="view_report_table_info"] thead th {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+        .dataTables_wrapper .dataTable th{
+            margin-bottom :0px !important;
+        }
+        .dataTables_wrapper .dataTable td {
+            margin-top: 0px !important;
+            padding-top: 0px !important;
+            padding-bottom: 0px !important;
+        }
+
+        .dataTables_wrapper .dataTable .percent {
+            padding: 0px !important;
+        }
+
+        .bg-white {
+            background-color:beige
+        }
+    </style>
+}
+
+@section Scripts{
+
+    <script src="~/assets/js/SKIC.js"></script>
+    <script src="~/assets/vendor/data-table/js/dataTables.fixedColumns.min.js"></script>
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        $(document).ready(function () {
+            loadCriteria02().then(Search);
+        });
+
+        function Search() {
+            //var timerStart = Date.now();
+            DrawTableDetail();
+            //alert('loading ' + (Date.now() - timerStart) / 1000 + ' s');
+        }
+
+        function DrawTableDetail() {
+            var loading = $('#table-loading-progress');
+            loading.show();
+
+            var startDate = $('#daterange-99').data('daterangepicker').startDate._d;
+            var endDate = $('#daterange-99').data('daterangepicker').endDate._d;
+
+            var table = $("#view_report_table").DataTable().destroy();
+            table = $("#view_report_table").DataTable({
+                "ajax": {
+                    url: '@Url.Action("RPTPKG001_DailyMonitorReport", "Report")',
+                    type: 'POST',
+                    dataType: 'Json',
+                    data: getCriteriaParam02()
+                },
+                scrollX: true,
+                responsive: true,
+                dom: 'lT<"html5buttons"B>gtip',
+                pageLength: 10,
+                buttons: [
+                    'copy',
+                    //'excel'
+                    {
+                        extend: 'excel',
+                        filename: 'Daily monitor ' + $('#daterange-99').html(),
+                        title: null, // not add title on first row
+                        exportOptions: {
+                            //columns: "thead th:not(.noExport)"
+                            columns: ':visible'
+                        },
+                        customize: function (xlsx) {
+                            var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                            var rows = $('row', sheet);
+                            // shift down all rows
+                            //< row r="1"><c r="A1">....
+                            rows.each(function () {
+                                var attr = $(this).attr('r');
+                                var ind = parseInt(attr);
+                                ind = ind + 1;
+                                $(this).attr("r", ind);
+                            });
+
+                            $('row c ', sheet).each(function () {
+                                var attr = $(this).attr('r');
+                                var pre = attr.substring(0, 1);
+                                var ind = parseInt(attr.substring(1, attr.length));
+                                ind = ind + 1;
+                                $(this).attr("r", pre + ind);
+                            });
+
+                            function Addrow(index, data) {
+                                msg = '<row r="' + index + '">'
+                                for (i = 0; i < data.length; i++) {
+                                    var col = data[i].col;
+                                    var value = data[i].val;
+                                    //s = '2': bold text
+                                    msg += '<c t="inlineStr" r="' + col + index + '" s="2">';
+                                    msg += '<is>';
+                                    msg += '<t>' + value + '</t>';
+                                    msg += '</is>';
+                                    msg += '</c>';
+                                }
+                                msg += '</row>';
+                                return msg;
+                            }
+
+                            var i = 0;
+                            var header = [];
+                            var mergeCells = $('mergeCells', sheet);
+
+                            for (var d = new Date(startDate); d < endDate; d.setDate(d.getDate() + 1)) {
+                                var colStartMerge = getExcelColName(3 + i * 5);
+                                var colEndMerge = getExcelColName(3 + i * 5 + 4);
+                                var dateText = moment(d).format('DD MMM');
+                                header.push({ col: colStartMerge, val: dateText });
+
+                                mergeCells[0].appendChild(_createNode(sheet, 'mergeCell', {
+                                    attr: {
+                                        ref: colStartMerge + '1:' + colEndMerge + '1'
+                                    }
+                                }));
+
+                                mergeCells.attr('count', mergeCells.attr('count') + 1);
+                                i++;
+                            }
+
+                            //insert
+                            //var r1 = Addrow(1, [{ col: 'D', val: '26 Aug' }]);
+                            var r1 = Addrow(1, header);
+                            sheet.childNodes[0].childNodes[1].innerHTML = r1 + sheet.childNodes[0].childNodes[1].innerHTML;
+
+                            
+                            function _createNode(doc, nodeName, opts) {
+                                var tempNode = doc.createElement(nodeName);
+
+                                if (opts) {
+                                    if (opts.attr) {
+                                        $(tempNode).attr(opts.attr);
+                                    }
+
+                                    if (opts.children) {
+                                        $.each(opts.children, function (key, value) {
+                                            tempNode.appendChild(value);
+                                        });
+                                    }
+
+                                    if (opts.text !== null && opts.text !== undefined) {
+                                        tempNode.appendChild(doc.createTextNode(opts.text));
+                                    }
+                                }
+
+                                return tempNode;
+                            }
+
+                            function getExcelColName(index) {
+                                if (index < 26) {
+                                    return String.fromCharCode('A'.charCodeAt(0) + index);
+                                } else {
+                                    return String.fromCharCode('A'.charCodeAt(0) + index / 26 - 1) + String.fromCharCode('A'.charCodeAt(0) + index % 26);
+                                }
+                            }
+                        }
+                    }
+                ],
+                fixedColumns: {
+                    leftColumns: 3
+                },
+                //ordering: false,
+                order: [],
+                autoWidth: false,
+                columnDefs: [
+                    {
+                        targets: [0, 1, 2],
+                        className: 'bg-white' // for plugin fixed-column
+                    },
+                    {
+                        targets: [0, 1],
+                        className: 'dt-body-center'
+                    },
+                    {
+                        targets: '_all',
+                        className: 'dt-body-right',
+                        orderable: false,
+                        width: '100px'
+                    },
+                ],
+                columns: [
+                    { data: 'fleet', width: '120px' },
+                    { data: 'truck_type', width: '180px' },
+                    { data: 'truck_commit', width: '120px' },
+                    { data: 'yesterday_pending_day1' },
+                    { data: 'order_count_day1' },
+                    { data: 'truck_wait_day1' },
+                    { data: 'order_wait_day1' },
+                    { data: 'book_count_day1' },
+                    { data: 'yesterday_pending_day2' },
+                    { data: 'order_count_day2' },
+                    { data: 'truck_wait_day2' },
+                    { data: 'order_wait_day2' },
+                    { data: 'book_count_day2' },
+                    { data: 'yesterday_pending_day3' },
+                    { data: 'order_count_day3' },
+                    { data: 'truck_wait_day3' },
+                    { data: 'order_wait_day3' },
+                    { data: 'book_count_day3' },
+                    { data: 'yesterday_pending_day4' },
+                    { data: 'order_count_day4' },
+                    { data: 'truck_wait_day4' },
+                    { data: 'order_wait_day4' },
+                    { data: 'book_count_day4' },
+                    { data: 'yesterday_pending_day5' },
+                    { data: 'order_count_day5' },
+                    { data: 'truck_wait_day5' },
+                    { data: 'order_wait_day5' },
+                    { data: 'book_count_day5' },
+                    { data: 'yesterday_pending_day6' },
+                    { data: 'order_count_day6' },
+                    { data: 'truck_wait_day6' },
+                    { data: 'order_wait_day6' },
+                    { data: 'book_count_day6' },
+                    { data: 'yesterday_pending_day7' },
+                    { data: 'order_count_day7' },
+                    { data: 'truck_wait_day7' },
+                    { data: 'order_wait_day7' },
+                    { data: 'book_count_day7' },
+                    { data: 'yesterday_pending_day8' },
+                    { data: 'order_count_day8' },
+                    { data: 'truck_wait_day8' },
+                    { data: 'order_wait_day8' },
+                    { data: 'book_count_day8' },
+                    { data: 'yesterday_pending_day9' },
+                    { data: 'order_count_day9' },
+                    { data: 'truck_wait_day9' },
+                    { data: 'order_wait_day9' },
+                    { data: 'book_count_day9' },
+                    { data: 'yesterday_pending_day10' },
+                    { data: 'order_count_day10' },
+                    { data: 'truck_wait_day10' },
+                    { data: 'order_wait_day10' },
+                    { data: 'book_count_day10' },
+                    { data: 'yesterday_pending_day11' },
+                    { data: 'order_count_day11' },
+                    { data: 'truck_wait_day11' },
+                    { data: 'order_wait_day11' },
+                    { data: 'book_count_day11' },
+                    { data: 'yesterday_pending_day12' },
+                    { data: 'order_count_day12' },
+                    { data: 'truck_wait_day12' },
+                    { data: 'order_wait_day12' },
+                    { data: 'book_count_day12' },
+                    { data: 'yesterday_pending_day13' },
+                    { data: 'order_count_day13' },
+                    { data: 'truck_wait_day13' },
+                    { data: 'order_wait_day13' },
+                    { data: 'book_count_day13' },
+                    { data: 'yesterday_pending_day14' },
+                    { data: 'order_count_day14' },
+                    { data: 'truck_wait_day14' },
+                    { data: 'order_wait_day14' },
+                    { data: 'book_count_day14' },
+                    { data: 'yesterday_pending_day15' },
+                    { data: 'order_count_day15' },
+                    { data: 'truck_wait_day15' },
+                    { data: 'order_wait_day15' },
+                    { data: 'book_count_day15' },
+                    { data: 'yesterday_pending_day16' },
+                    { data: 'order_count_day16' },
+                    { data: 'truck_wait_day16' },
+                    { data: 'order_wait_day16' },
+                    { data: 'book_count_day16' },
+                    { data: 'yesterday_pending_day17' },
+                    { data: 'order_count_day17' },
+                    { data: 'truck_wait_day17' },
+                    { data: 'order_wait_day17' },
+                    { data: 'book_count_day17' },
+                    { data: 'yesterday_pending_day18' },
+                    { data: 'order_count_day18' },
+                    { data: 'truck_wait_day18' },
+                    { data: 'order_wait_day18' },
+                    { data: 'book_count_day18' },
+                    { data: 'yesterday_pending_day19' },
+                    { data: 'order_count_day19' },
+                    { data: 'truck_wait_day19' },
+                    { data: 'order_wait_day19' },
+                    { data: 'book_count_day19' },
+                    { data: 'yesterday_pending_day20' },
+                    { data: 'order_count_day20' },
+                    { data: 'truck_wait_day20' },
+                    { data: 'order_wait_day20' },
+                    { data: 'book_count_day20' },
+                    { data: 'yesterday_pending_day21' },
+                    { data: 'order_count_day21' },
+                    { data: 'truck_wait_day21' },
+                    { data: 'order_wait_day21' },
+                    { data: 'book_count_day21' },
+                    { data: 'yesterday_pending_day22' },
+                    { data: 'order_count_day22' },
+                    { data: 'truck_wait_day22' },
+                    { data: 'order_wait_day22' },
+                    { data: 'book_count_day22' },
+                    { data: 'yesterday_pending_day23' },
+                    { data: 'order_count_day23' },
+                    { data: 'truck_wait_day23' },
+                    { data: 'order_wait_day23' },
+                    { data: 'book_count_day23' },
+                    { data: 'yesterday_pending_day24' },
+                    { data: 'order_count_day24' },
+                    { data: 'truck_wait_day24' },
+                    { data: 'order_wait_day24' },
+                    { data: 'book_count_day24' },
+                    { data: 'yesterday_pending_day25' },
+                    { data: 'order_count_day25' },
+                    { data: 'truck_wait_day25' },
+                    { data: 'order_wait_day25' },
+                    { data: 'book_count_day25' },
+                    { data: 'yesterday_pending_day26' },
+                    { data: 'order_count_day26' },
+                    { data: 'truck_wait_day26' },
+                    { data: 'order_wait_day26' },
+                    { data: 'book_count_day26' },
+                    { data: 'yesterday_pending_day27' },
+                    { data: 'order_count_day27' },
+                    { data: 'truck_wait_day27' },
+                    { data: 'order_wait_day27' },
+                    { data: 'book_count_day27' },
+                    { data: 'yesterday_pending_day28' },
+                    { data: 'order_count_day28' },
+                    { data: 'truck_wait_day28' },
+                    { data: 'order_wait_day28' },
+                    { data: 'book_count_day28' },
+                    { data: 'yesterday_pending_day29' },
+                    { data: 'order_count_day29' },
+                    { data: 'truck_wait_day29' },
+                    { data: 'order_wait_day29' },
+                    { data: 'book_count_day29' },
+                    { data: 'yesterday_pending_day30' },
+                    { data: 'order_count_day30' },
+                    { data: 'truck_wait_day30' },
+                    { data: 'order_wait_day30' },
+                    { data: 'book_count_day30' },
+                    { data: 'yesterday_pending_day31' },
+                    { data: 'order_count_day31' },
+                    { data: 'truck_wait_day31' },
+                    { data: 'order_wait_day31' },
+                    { data: 'book_count_day31' },
+                ],
+                "paging": false,
+                "info": false,
+                "initComplete": function (settings, json) {
+                    MergeGridCells($('#view_report_table'), [1]);
+
+                    var i = 1;
+                    for (var d = new Date(startDate); d < endDate; d.setDate(d.getDate() + 1)) {
+                        $('#header' + i).text(moment(d).format('DD MMM'));
+                        //$('#header' + i).addClass('noExport')
+                        i++;
+                    }
+
+                    // Discard the time and time-zone information.
+
+                    const utc1 = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+                    const utc2 = Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+                    var dayCount = Math.ceil((utc2 - utc1) / (1000 * 60 * 60 * 24)) + 1;
+
+                    // 31 is max predefined column
+                    for (var i = dayCount; i < 31; i++) {
+                        table.column(3 + 5 * i + 0).visible(false, false);
+                        table.column(3 + 5 * i + 1).visible(false, false);
+                        table.column(3 + 5 * i + 2).visible(false, false);
+                        table.column(3 + 5 * i + 3).visible(false, false);
+                        table.column(3 + 5 * i + 4).visible(false, false);
+                    }
+
+                    table.columns.adjust().draw(false); // adjust column sizing and redraw
+                }
+            });
+
+            //$('#table-loading-progress').hide();
+            loading.hide();
+        }
+
+    </script>
+}
+
+<!-- Content Start -->
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h4 class="card-title">Daily monitor (round)</h4>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_SKIC_Criteria_02");
+    }
+    <div class="row" id="ShipmentStatusDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div id="table-loading-progress" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title" id="ShipmentStatusDetailText"></h4>
+                    @*<div class="table-responsive">
+            <div class="dataTables_wrapper">*@
+                    <table class="table" id="view_report_table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" width="120px">Fleet</th>
+                                <th rowspan="2" width="180px">Truck Type</th>
+                                <th rowspan="2" width="120px">Commit</th>
+                                <th colspan="5" id="header1">วันที่ 1</th>
+                                <th colspan="5" id="header2">วันที่ 2</th>
+                                <th colspan="5" id="header3">วันที่ 3</th>
+                                <th colspan="5" id="header4">วันที่ 4</th>
+                                <th colspan="5" id="header5">วันที่ 5</th>
+                                <th colspan="5" id="header6">วันที่ 6"</th>
+                                <th colspan="5" id="header7">วันที่ 7"</th>
+                                <th colspan="5" id="header8">วันที่ 8"</th>
+                                <th colspan="5" id="header9">วันที่ 9"</th>
+                                <th colspan="5" id="header10">วันที่ 10"</th>
+                                <th colspan="5" id="header11">วันที่ 11"</th>
+                                <th colspan="5" id="header12">วันที่ 12"</th>
+                                <th colspan="5" id="header13">วันที่ 13"</th>
+                                <th colspan="5" id="header14">วันที่ 14"</th>
+                                <th colspan="5" id="header15">วันที่ 15"</th>
+                                <th colspan="5" id="header16">วันที่ 16"</th>
+                                <th colspan="5" id="header17">วันที่ 17"</th>
+                                <th colspan="5" id="header18">วันที่ 18"</th>
+                                <th colspan="5" id="header19">วันที่ 19"</th>
+                                <th colspan="5" id="header20">วันที่ 20"</th>
+                                <th colspan="5" id="header21">วันที่ 21"</th>
+                                <th colspan="5" id="header22">วันที่ 22"</th>
+                                <th colspan="5" id="header23">วันที่ 23"</th>
+                                <th colspan="5" id="header24">วันที่ 24"</th>
+                                <th colspan="5" id="header25">วันที่ 25"</th>
+                                <th colspan="5" id="header26">วันที่ 26"</th>
+                                <th colspan="5" id="header27">วันที่ 27"</th>
+                                <th colspan="5" id="header28">วันที่ 28"</th>
+                                <th colspan="5" id="header29">วันที่ 29"</th>
+                                <th colspan="5" id="header30">วันที่ 30"</th>
+                                <th colspan="5" id="header31">วันที่ 31"</th>
+                            </tr>
+                            <tr>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                                <th>Pending Order</th>
+                                <th>Order วันนี้</th>
+                                <th>รถเหลือ</th>
+                                <th>รถขาด</th>
+                                <th>กำลังรถ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    @*</div>
+            </div>*@
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

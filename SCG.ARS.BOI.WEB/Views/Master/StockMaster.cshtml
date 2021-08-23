@@ -1,0 +1,683 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .nopadding {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    #dtStockUpload th {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    #dtStock th {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .dataTables_wrapper .dataTable thead th {
+        padding: 5px 30px;
+    }
+
+    table[aria-describedby="TodayReceiving_Table_info"] thead th {
+        border: 1px solid #eee;
+        text-align: center;
+    }
+
+    .dataTables_wrapper .dataTable {
+        margin: 0 !important;
+    }
+    #uploadFile{
+        display: none;
+    }
+</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Master</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="row mb-4">
+            <div class="col-12 d-flex align-items-center justify-content-between">
+                <h4 class="page-title">Plan</h4>
+                <div class="d-flex align-items-center">
+                </div>
+            </div>
+        </div>
+        <div id="accordionOne" class="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseOne"
+                       aria-expanded="false" aria-controls="collapseOne">
+                        <h4 class="card-title">Stock Import</h4>
+                    </a>
+                </div>
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-3 col-sm-3 col-md-3 mt-2 mb-4">
+                                <label for="cboWarehouse">Warehouse Type</label>
+                                <div class="col-sm-12">
+                                    @Html.DropDownListFor(m => m.Warehouse, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboWarehouse", @name = "Warehouse[]", @style = "width: 100%" })
+                                </div>
+                            </div>
+
+                            <div class="col-5 col-sm-5 col-md-5 mt-2 mb-4">
+                                <label for="uploadFile">Upload file</label>
+                                <div>
+                                    <button id="fake-file-btn" class="btn btn-primary">Choose File</button>
+                                    <a id="fake-file-name">No file chosen</a>
+                                    <input type="file" action="/upload" id="uploadFile" name="myFile" enctype="multipart/form-data"  />
+                                </div>
+                            </div>
+
+                            <div class="col-2 col-sm-2 col-md-2 mt-2 mb-4 nopadding">
+                                <label for="Clear"></label>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <button type="button" class="btn btn-warning" onclick="ClearData()">Clear</button>
+                                    </div>
+                                    <div class="col-1">
+                                        <iframe id="download_iframe" style="display:none;"></iframe>
+                                        <button type="button" class="btn btn-info" onclick="DownloadTemplate()">Download Template</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-12 col-md-12 sectionUpload" id="tableUpload">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h4 class="card-title">Upload Preview</h4>
+                                        <table id="dtStockUpload" class="table table-striped" style="width:100%"></table>
+                                        <div id="dvOverlayUpload" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-12 col-md-12 mt-3 mb-5 sectionUpload" id="tableUpload">
+                                <button type="button" class="btn btn-primary btn-md mb-1 float-right" onclick="savePlan()">
+                                    <i class="mdi mdi-upload md-16 ml-1"></i>
+                                    <span class="align-middle">Upload Plan</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="accordionTwo" class="accordion">
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseTwo"
+                       aria-expanded="false" aria-controls="collapseTwo">
+                        <h4 class="card-title">Stock Plan</h4>
+                    </a>
+                </div>
+                <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionTwo">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-sm-12 col-md-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <table id="dtStock" class="table table-striped" style="width:100%"></table>
+                                        <div id="dvOverlayOne" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal-default" id="modals-stock" data-bind="foreach: selected_stock">
+        <div class="modal-dialog modal-md">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Stock Master
+                        <span class="font-weight-light">Information</span>
+                        <br>
+                        <small class="text-muted">Select stock master to display on stock report.</small>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Warehouse Type</label>
+                            <select id="ddl_dcType" class="form-control" data-bind="options: $root.dc_type,
+                                   optionsText: 'dc_type',
+                                   optionsValue: 'dc_type',
+                                   event:{ change: $parent.dcChange},
+                                   value : dc_type">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Customer</label>
+                            <select id="ddl_customer" class="form-control" data-bind="options: $root.customer,
+                                   optionsText: 'customer_name',
+                                   optionsValue: 'customer_id',
+                                    value: customer_id ">
+                            </select>
+                        </div>
+                        <div class="form-group col">
+                            <label class="form-label">Storage Type</label>
+                            <select id="ddl_storageType" class="form-control" data-bind="options: $root.storage_type,
+                                   optionsText: 'storage_type_name',
+                                   optionsValue: 'storage_type_id',
+                                   value : storage_type_id">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Location Area (m<sup>3</sup>)</label>
+                            <input id="txt_locationArea" type="text" class="form-control" data-bind="value: location_area, textInput: location_plan">
+                        </div>
+                        <div class="form-group col">
+                            <label class="form-label">Location Charge/Month</label>
+                            <input id="txt_locationCharge" type="text" class="form-control" data-bind="value: location_charge, textInput: location_plan">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label class="form-label">Location Plan</label>
+                            <input id="txt_locationPlan" type="text" class="form-control" data-bind="value: location_plan, textInput: location_plan">
+                        </div>
+                        <div class="form-group col">
+                            <label class="form-label">Effective Date</label>
+                            <input id="dtPicker" class="form-control col-sm-12" data-bind="value: effective_date, textInput: effective_date">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="SaveStock()">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+
+
+        function init_datepicker() {
+            $('#dtPicker').datepicker({
+                format: "dd/mm/yyyy",
+                autoclose: true
+            });
+
+            var date = new Date();
+
+            $('#dtPicker').datepicker('setDate', date);
+            var getDate = $('#dtPicker').datepicker('getDate');
+        }
+        var stockModel = {
+            dc_type: ko.observableArray([]),
+            customer: ko.observableArray([]),
+            storage_type: ko.observableArray([]),
+            stock: ko.observableArray([]),
+            selected_stock: ko.observableArray([]),
+            dcChange: dcTypeChange
+            @*updateSchemaDisplay: function (data, event) {
+                data.updateSchemaDisplay = event.currentTarget.value;
+            }*@
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+
+        $("#ddl_dcType").val();
+        ko.applyBindings(stockModel, document.getElementById("modals-stock"));
+
+        var tableStock = null;
+        var flag_err = false;
+        var tableStockUpload = null;
+        var formData = new FormData();
+        var columnDefs = [];
+        var columns = [
+            { "data": "dc_type", "name": "dc_type", "title": "Warehouse Type", "autoWidth": true, "orderable": true },
+            { "data": "customer_name", "name": "customer_name", "title": "Customer", "autoWidth": true, "orderable": true },
+            { "data": "storage_type_name", "name": "storage_type", "title": "Storage Type", "autoWidth": true },
+            { "data": "location_area_m3", "name": "storage_area", "title": "Storage Area (m" + "3".sup()+")", "autoWidth": true },
+            { "data": "location_charge", "name": "storage_charge", "title": "Storage Charge/Month", "autoWidth": true, "orderable": true },
+            { "data": "location_plan", "name": "storage_plan", "title": "Storage Plan", "autoWidth": true, "orderable": true },
+            {
+                "data": "effective_date", "name": "effective_date", "title": "Effective Date", "autoWidth": true, "orderable": true,
+                "render": function (data, type, row, meta) {
+                    return data == null ? "" : moment(new Date(data)).format("DD/MM/YYYY");
+                }
+            },
+            {
+                "data": null, "name": "", "autoWidth": false, "width": 20, "orderable": false,
+                "render": function (data, type, row, meta) {
+                    return '<a href="javascript:DeleteStock(' + row.stockmaster_id + ',' + row.id + ');"><i class="icon-trash md-18" data-toggle="tooltip" data-placement="top" title="Remove"></i></a>';
+                }
+            }
+        ];
+        var columns_current = [
+            { "data": "dc_type", "name": "dc_type", "title": "Warehouse Type", "autoWidth": true, "orderable": true },
+            { "data": "customer_id", "name": "customer_id", "title": "Customer ID", "autoWidth": true, "orderable": true },
+            { "data": "customer_name", "name": "customer_name", "title": "Customer Name", "autoWidth": true, "orderable": true },
+            { "data": "storage_type_id", "name": "storage_type_id", "title": "Storage Type", "autoWidth": true },
+            { "data": "storage_type_name", "name": "storage_type_name", "title": "Storage Type Name", "autoWidth": true },
+            { "data": "location_area", "name": "location_area", "title": "Storage Area (m" + "3".sup() + ")", "autoWidth": true },
+            { "data": "location_charge", "name": "location_charge", "title": "Storage Charge/Month", "autoWidth": true, "orderable": true },
+            { "data": "location_plan", "name": "location_plan", "title": "Storage Plan", "autoWidth": true, "orderable": true },
+            {
+                "data": "effective_date", "name": "effective_date", "title": "Effective Date", "autoWidth": true, "orderable": true,
+                "render": function (data, type, row, meta) {
+                    return data == null ? "" : moment(new Date(data)).format("DD/MM/YYYY");
+                }
+            },
+            { "data": "err_msg", "name": "err_msg", "title": "Error Message", "autoWidth": true, "orderable": true }
+        ];
+        var dataUpload = null;
+        var request = {
+            p_warehouse: null
+        }
+
+        $(document).ready(function () {
+            GetWarehouseType();
+            LoadDCType();
+            request.p_warehouse = $("#ddl_dcType").val();
+            LoadStockMaster();
+            init_datepicker();
+            $('.sectionUpload').hide();
+            $('#cboWarehouse').on("change", function (element, checked) {
+                $('#uploadFile').val("");
+                $('#fake-file-name').text('No file chosen');
+                $('.sectionUpload').hide();
+                $('#cboWarehouse').next().find('.select2-selection--single').css('border', '1px solid rgb(170, 170, 170)')
+                $('#cboWarehouse').next().find('.select2-selection--single').css('box-shadow', 'none')
+            });
+
+            var fakeButton = document.getElementById('fake-file-btn');
+            var fileButton = document.getElementById('uploadFile');
+            fakeButton.addEventListener('click', function (e) {
+                var clickEvent = new MouseEvent('click', { bubbles: true });
+                fileButton.dispatchEvent(clickEvent);
+            });
+            $('#uploadFile').on('change', function () {
+                if ($('#uploadFile').val() != "") {
+                    var input = $(this)[0];
+                    var files = input.files;
+                    var fakeName = $('#uploadFile')[0].files[0].name;
+                    if (fakeName.length > 30) {
+                        fakeName = fakeName.substr(0, 29) + '...';
+                        $('#fake-file-name').text(fakeName);
+                    } else {
+                        $('#fake-file-name').text(fakeName);
+                    }
+                    
+                    
+                    var warehouse = $('#cboWarehouse').val();
+                    if (warehouse == null) {
+                        //$('#cboWarehouse').css('border-color,red');
+                        $('#cboWarehouse').next().find('.select2-selection--single').css('border', '1px rgba(255, 30, 30, 1)')
+                        $('#cboWarehouse').next().find('.select2-selection--single').css('box-shadow', '0px 0px 4px 0px rgba(255,40,40,1)')
+
+                    }
+                    if (files.length > 0) {
+                        formData.append("file", files[0]);
+                        formData.delete('warehouseType');
+                        formData.append('warehouseType', warehouse);
+                    }
+                    $('.sectionUpload').show();
+                    $('#dvOverlayUpload').show();
+                    $.ajax(
+                        {
+                            url: "/Master/UploadFile",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            type: "POST",
+                            success: function (result) {
+                                flag_err = result.flag_err;
+                                console.log('Flag Error! is ' + flag_err);
+                                dataUpload = result.data;
+                                if (result.status) {
+                                    if (tableStockUpload == null) {
+                                        tableStockUpload = $('#dtStockUpload').DataTable({
+                                            "paging": true,
+                                            "columnDefs": [],
+                                            "columns": columns_current,
+                                            "data": result.data,
+                                            "scrollX": true,
+                                            "pageLength": 10,
+                                        });
+                                    }
+                                    else {
+                                        tableStockUpload.clear();
+                                        $.each(result.data, function (idx, obj) {
+                                            tableStockUpload.row.add(result.data[idx]);
+                                        });
+                                        tableStockUpload.draw();
+                                    }
+                                } else {
+                                    toastr["error"](result.message);
+                                }
+                                $('#dvOverlayUpload').hide();
+                            },
+                            always: function (data) {
+                                $('#dvOverlayUpload').hide();
+                            }
+                        }
+                    );
+                }
+                else {
+                    $('.sectionUpload').hide();
+                    toastr["error"]('Please Upload file');
+                }
+            });
+        });
+
+        function DownloadTemplate() {
+            document.getElementById('download_iframe').src = "/Templates/StockMaster/WebReportWH.xlsx";
+        }
+
+        function ClearData() {
+            $('.sectionUpload').hide();
+            $('#uploadFile').val("");
+            $('#cboWarehouse').val(null).trigger('change');
+            $('.sectionUpload').hide();
+            $('#cboWarehouse').next().find('.select2-selection--single').css('border', '1px solid rgb(170, 170, 170)')
+            $('#cboWarehouse').next().find('.select2-selection--single').css('box-shadow', 'none')
+            $('#fake-file-name').text('No file chosen');
+        }
+
+        function savePlan() {
+            if (!flag_err) {
+                var jqxhr = $.post("/Master/saveUpload", { list: dataUpload })
+                    .done(function (result) {
+                        if (result.status) {
+                            LoadStockMaster();
+                            toastr["success"](result.message);
+                            $('.sectionUpload').hide();
+                            $('#uploadFile').val("");
+                            $('#cboWarehouse').val(null).trigger('change');
+                        }
+                    })
+                    .fail(function (e) {
+                        toastr["error"](result.message);
+                        console.log(e);
+                    })
+                    .always(function () {
+                    });
+            }
+            else {
+                toastr["error"]("Can't Upload this file please fix format and Upload again!");
+            }
+
+
+            @*$.ajax({
+                url: '@Url.Action("RPTCDC003_TodayDispatchingChart", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+            });*@
+        }
+
+
+        function LoadDCType() {
+            var jqxhr = $.post("/Master/LoadDCType")
+                .done(function (result) {
+                    console.log(result);
+                    if (result.status) {
+                        console.log(result.data);
+                        stockModel.dc_type(result.data);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                });
+        }
+
+        function GetWarehouseType() {
+            var jqxhr = $.post("/ILB/GetWarehouseType")
+                .done(function (result) {
+
+                    $('#cboWarehouse').empty();
+                    if (result.status) {
+                        $.each(result.data, function (index, item) {
+                            $('#cboWarehouse').append($('<option>').text(item.dataDisplay).attr('value', item.dataValue_Key));
+                        });
+
+                        $('#cboWarehouse').select2({
+                            enableFiltering: true,
+                            placeholder: "Please Select Warehouse Type",
+                            allowClear: true
+                        });
+                        $('#cboWarehouse').val(null).trigger('change');
+
+
+                    } else {
+                        toastr["error"](result.message);
+                    }
+
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+            return jqxhr;
+        }
+
+        function LoadCustomer(request, data) {
+            var jqxhr = $.post("/Master/LoadCustomer", request)
+                .done(function (result) {
+                    if (result.status) {
+                        stockModel.customer(result.data);
+                        if (data != null)
+                            $("#ddl_customer").val(data.customer_id);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                });
+        }
+
+        function LoadStorageType(request, data) {
+            var jqxhr = $.post("/Master/LoadStorageType", request)
+                .done(function (result) {
+                    if (result.status) {
+                        stockModel.storage_type(result.data);
+                        if (data != null)
+                            $("#ddl_storageType").val(data.storage_type_id);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                });
+        }
+
+        function dcTypeChange(data, event) {
+            var selectedValue = $(event.target).val();
+            var items = ko.utils.arrayFilter(stockModel.dc_type(), function (i) {
+                return i.dc_type == selectedValue;
+            });
+            if (items != null && items.length > 0) {
+                var item = items[0];
+                request.p_warehouse = item.dc_type;
+                LoadCustomer(request, null);
+                LoadStorageType(request, null);
+            }
+        }
+
+        function LoadStockMaster(request = null) {
+            $('#dvOverlayOne').show();
+            var jqxhr = $.post("/Master/LoadStockMaster", request)
+                .done(function (result) {
+                    console.log('LoadStockMaster');
+                    console.log(result);
+                    if (result.status) {
+                        console.log('table stock > '+tableStock)
+                        if (tableStock == null) {
+                            tableStock = $('#dtStock').DataTable({
+                                "columnDefs": [],
+                                "columns": columns,
+                                "data": result.data,
+                                "scrollX": true
+                            });
+                        }
+                        else {
+                            tableStock.clear();
+                            $.each(result.data, function (idx, obj) {
+                                //console.log(result.data);
+                                tableStock.row.add(result.data[idx]);
+                            });
+                            tableStock.draw();
+                        }
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                        $('#dtStock tbody').on('click', 'tr', function (e) {
+                            var data = tableStock.row(this).data();
+                            stockModel.selected_stock(data);
+                            tableStock.rows('.selected').nodes().to$().removeClass('selected');
+                            $(this).toggleClass('selected');
+                        });
+
+                        $('#dtStock tbody tr').on('click', 'i.icon-note', function (e) {
+                            var data = tableStock.row($(this).parents('tr')).data();
+                            request.p_warehouse = data.dc_type;
+                            LoadCustomer(request, data);
+                            LoadStorageType(request, data);
+                            EditStock(data, e);
+                        });
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayOne').hide();
+                });
+        }
+
+        function EditStock(data, event) {
+            stockModel.selected_stock(data);
+            $("#ddl_dcType").val(data.dc_type);
+            init_datepicker();
+            var effective_date = new Date(data.effective_date);
+            $('#dtPicker').datepicker('setDate', effective_date);
+            $("#ddl_dcType").prop('disabled', true);
+            $("#ddl_customer").prop('disabled', true);
+            $("#ddl_storageType").prop('disabled', true);
+        }
+
+        function SaveStock() {
+            var data = stockModel.selected_stock();
+            //console.log(data);
+            if (data.dc_type == null || data.dc_type.length == 0) {
+                toastr["error"]("Please select DC Type"); return;
+            }
+            else if (data.customer_id == null || data.customer_id.length == 0) {
+                toastr["error"]("Please select customer"); return;
+            }
+            else if (data.storage_type_id == null || data.storage_type_id.length == 0) {
+                toastr["error"]("Please select storage type."); return;
+            }
+            //else if (data.effective_date == null || data.effective_date < Date.now) {
+            //    toastr["error"]("Please select effective after today"); return;
+            //}
+            else if (data.stockmaster_id == null) {
+                var isDuplicate = false;
+                tableStock
+                    .data()
+                    .filter(function (value, index) {
+                        console.log(value);
+                        if (value.dc_type == data.dc_type && value.customer_id == data.customer_id && value.storage_type_id == data.storage_type_id && value.effective_date == data.effective_date)
+                            isDuplicate = true;
+                    });
+
+                if (isDuplicate) {
+                    toastr["error"]("Stock Master should not duplicate."); return;
+                }
+            }
+
+            $('#dvOverlayOne').show();
+            var jqxhr = $.post("/Master/SaveStock", data)
+                .done(function (result) {
+                    if (result.status) {
+                        if (data.stockmaster_id == null) {
+                            tableSchema.row.add(data).draw();
+                            toastr["success"]("Add data successful.");
+                        } else {
+                            var index = tableStock.row('.selected').index();
+                            $('#dtStock').dataTable().fnUpdate(result.data, index, undefined, false);
+                            toastr["success"]("Save data successful.");
+                        }
+                        $('#modals-stock').modal('hide');
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvOverlayOne').hide();
+                });
+        }
+
+        function DeleteStock(id, rowId) {
+            if (confirm('Are you sure for delete this stock?')) {
+                $('#dvOverlayOne').show();
+                console.log('DeleteStock');
+                var jqxhr = $.post("/Master/DeleteStock", { id: id })
+                    .done(function (result) {
+                        if (result.status) {
+                            tableStock.row(rowId).remove().draw();
+                            toastr["success"]("Delete data successful.");
+                        } else {
+                            toastr["error"](result.message);
+                        }
+                    })
+                    .fail(function (e) {
+                    console.log(e);
+                    })
+                    .always(function () {
+                        $('#dvOverlayOne').hide();
+                    });
+            } else {
+                console.log('not delete');
+            }
+        }
+
+
+    </script>
+</body>
+</html>

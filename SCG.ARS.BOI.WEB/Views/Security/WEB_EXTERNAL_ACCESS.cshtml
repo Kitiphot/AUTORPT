@@ -1,0 +1,272 @@
+﻿@using SCG.ARS.BOI.WEB.Security
+@inject ISecurityService sec
+@{
+    ViewBag.Title = "Index";
+}
+@section OverrideStyles{
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/regular.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/solid.min.css" />
+
+    <style>
+        .link-padding {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .add-icon {
+            color: #007bff;
+            cursor: pointer;
+        }
+
+            .add-icon:hover {
+                color: green;
+                cursor: pointer;
+            }
+
+        .edit-icon:hover {
+            color: blue;
+        }
+
+        .change-pass-icon:hover {
+            color: goldenrod;
+        }
+
+        .delete-icon:hover {
+            color: red;
+        }
+
+        .far {
+            padding-right: 5px;
+        }
+
+        .permission-container {
+            height: 400px;
+            overflow-y: scroll;
+        }
+
+        .padding-lvl-1 {
+            margin-left: 2rem !important;
+        }
+
+        .padding-lvl-2 {
+            margin-left: 4rem !important;
+        }
+
+        .padding-lvl-3 {
+            margin-left: 6rem !important;
+        }
+
+        .padding-lvl-4 {
+            margin-left: 8rem !important;
+        }
+        .padding-lvl-5 {
+            margin-left: 10rem !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+
+    <script type="text/javascript">
+        var columns = [];
+
+        function createColumn() {
+            var action = '';
+            var canAdd = 1 == @sec.IsAllow(SCG.ARS.BOI.WEB.Attributes.ScreenID.WEB_EXTERNAL_ACCESS, SCG.ARS.BOI.WEB.Attributes.Permission.Add);
+            if (canAdd)
+                action = "<div class='text-center' title='Add'><i class='fas fa-plus add-icon' onclick='generateExternalAccess(); return false;' title='Create'></i></div>";
+            columns = [
+                { "data": "sourceSystem", "name": "action", "title": action, "autoWidth": true, "className": "text-nowrap" },
+                { "data": "sourceSystem", "name": "SourceSystem", "title": "Source System", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "secretKey", "name": "secretKey", "title": "Secret Key", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "issuer", "name": "Issuer", "title": "Issuer", "autoWidth": true, "className": "text-nowrap" },
+                { "data": "audience", "name": "Audience", "title": "Audience", "autoWidth": true, "className": "text-nowrap" },
+            ];
+        }
+
+        $(document).ready(function () {
+            createColumn();
+            search();
+        });
+
+        function getCriteria() {
+            return {"criteria": ''};
+        }
+
+        function search() {
+            generateTable('#EADetail', '@Url.Action("SearchExternalAccess", "Security")', null, columns, created_row);
+        }
+
+        function generateExternalAccess() {
+            var sourceSystem = prompt('Enter Source System');
+            if (sourceSystem == null) {
+                return;
+            }
+            if (sourceSystem == '') {
+                toastr["warning"]('Source System is required');
+                return;
+            }
+            var jqxhr = $.post('@Url.Action("GenerateExternalAccess", "Security")', { "sourceSystem": sourceSystem })
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        toastr["success"]('Generate complete.');
+                        search();
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function () {
+
+                });
+        }
+
+        function deleteEA(sourceSystem) {
+            if (confirm('Are you sure you want to delete "' + sourceSystem + '"?')) {
+                var jqxhr = $.post('@Url.Action("DeleteExternalAccess", "Security")', { "sourceSystem": sourceSystem })
+                    .done(function (result) {
+                        if (uiHelpers.errorHandler(result)) {
+                            toastr["success"]('Delete complete.');
+                            search();
+                        }
+                    })
+                    .fail(uiHelpers.postFailHandler)
+                    .always(function () {
+
+                    });
+            }
+        }
+
+        function copyToClipboard(text) {
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        }
+
+        function testEA(sourceSystem) {
+            var jqxhr = $.post('@Url.Action("TestExternalAccess", "Security")', { "sourceSystem": sourceSystem })
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        copyToClipboard(result.data);
+                        toastr["success"]('Access Token has been copied to clipboard.');
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function () {
+
+                });
+        }
+
+        function created_row(row, data, dataIndex) {
+            var canDelete = 1 == @sec.IsAllow(SCG.ARS.BOI.WEB.Attributes.ScreenID.WEB_EXTERNAL_ACCESS, SCG.ARS.BOI.WEB.Attributes.Permission.Delete);
+
+            var deleteHtml = '<a href="#" class="link-padding delete-icon" onclick="deleteEA(\'' + data.sourceSystem + '\'); return false;" title="Delete"><i class="far fa-trash-alt"></i></a>';
+            var testHtml = '<a href="#" class="link-padding delete-icon" onclick="testEA(\'' + data.sourceSystem + '\'); return false;" title="Test"><i class="fas fa-bug"></i></a>';
+
+            var element = '';
+            if (canDelete)
+                element = element + deleteHtml;
+            element = element + testHtml;
+            $($(row).find('td')[0]).html(element);
+        }
+
+        function generateTable(controlID, serviceUrl, title, column, created_row_callback) {
+            $(controlID + ' .section-loading').show();
+            $(controlID + ' .section-title').text(title);
+            var jqxhr = $.post(serviceUrl, getCriteria())
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                            $(controlID + ' .section-table-render').DataTable({
+                                dom: 'lTf gtip',
+                                fixedHeader: true,
+                                scrollX: true,
+                                ordering: false,
+                                responsive: true,
+                                pageLength: 10,
+                                filter: true,
+                                data: result.data,
+                                columns: column,
+                                createdRow: created_row_callback
+                            });
+                        }
+                        else {
+                            var table = $(controlID + ' .section-table-render').DataTable();
+                            table.clear();
+                            $.each(result.data, function (idx, obj) {
+                                table.row.add(result.data[idx]);
+                            });
+                            table.draw();
+                        }
+                    }
+                    else {
+                        if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                            //create empty table
+                            $(controlID + ' .section-table-render').DataTable({
+                                dom: 'lTf gtip',
+                                fixedHeader: true,
+                                scrollX: true,
+                                ordering: false,
+                                responsive: true,
+                                pageLength: 10,
+                                filter: true,
+                                columns: column
+                            });
+                        }
+                        else {
+                            //empty
+                            var table = $(controlID + ' .section-table-render').DataTable();
+                            table.clear();
+                            table.draw();
+                        }
+                    }
+                    $(controlID + ' .section-table-render').DataTable().columns.adjust().draw();
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function () {
+                    $(controlID + ' .section-loading').hide();
+                });
+            return jqxhr;
+        }
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Security</h1>
+            <h4 class="card-title">External Access Maintenance</h4>
+        </div>
+    </div>
+    <div class="row" id="EADetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table class="table table-striped section-table-render" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,200 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> SCGL Reporting Services - @ViewData["Title"] </title>
+    <link rel="shortcut icon" href="~/assets/images/favicon.png" type="image/x-icon" />
+
+    @RenderSection("Styles", required: false)
+
+    <!-- ================== APP CSS START ================== -->
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <link rel="stylesheet" href="~/assets/css/Networking/style.css" />
+    <link rel="stylesheet" href="~/assets/vendor/morris/css/morris.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-duallist/css/bootstrap-duallistbox.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-select/css/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-multiselect/css/bootstrap-multiselect.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-treeview/css/bootstrap-treeview.css" />
+
+    <link href="~/assets/vendor/data-table/css/jquery.dataTables.min.css" />
+    <link href="~/assets/vendor/data-table/css/buttons.dataTables.min.css" />
+    <link href="~/assets/vendor/data-table/css/dataTables.bootstrap.min.css" />
+    <link href="~/assets/vendor/rowReorder/css/rowReorder.dataTables.min.css" />
+
+    <link rel="stylesheet" href="~/assets/vendor/summernote/css/summernote.css" />
+    <link rel="stylesheet" href="~/assets/vendor/dragula/css/dragula.min.css" />
+
+    <link rel="stylesheet" href="~/assets/vendor/markdown/css/bootstrap-markdown.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/quill/css/quill.snow.css">
+
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-daterangepicker/css/daterangepicker.css" />
+    <link rel="stylesheet" href="~/assets/vendor/minicolors/css/jquery.minicolors.css" />
+    <link rel="stylesheet" href="~/assets/vendor/pignose-calender/css/pignose.calendar.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fullcalender/css/fullcalendar.min.css" />
+
+    <link rel="stylesheet" href="~/lib/toastr.js/toastr.min.css" />
+
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/regular.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fontawesome-free-5.14.0-web/css/solid.min.css" />
+
+    <link rel="stylesheet" href="~/assets/vendor/contextmenu/css/jquery.contextMenu.min.css" />
+    <style>
+        .override-level1 {
+            width: unset !important;
+        }
+
+        .nav-link {
+            text-align: start;
+        }
+
+        .fa-normal {
+            font-size: 0.99em;
+        }
+
+        .hide-scroll-x {
+            overflow-x: hidden;
+        }
+        .select2-container--default .select2-selection--multiple {
+            background-color: transparent;
+        }
+        .select2-container--default .select2-selection--single {
+            background-color: transparent;
+        }
+    </style>
+
+    @*<link rel="stylesheet" href="~/assets/vendor/dropzone/css/dropzone.css" />*@
+
+    @RenderSection("OverrideStyles", required: false)
+
+    <!-- ================== APP CSS END ================== -->
+    <script src="~/assets/vendor/jQuery/js/jquery-3.5.1.min.js"></script>
+    <script src="~/assets/vendor/bootstrap/js/popper.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/jquery.dataTables.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/dataTables.buttons.min.js"></script>
+
+    <script src="~/assets/vendor/data-table/js/buttons.flash.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/jszip.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/pdfmake.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/vfs_fonts.js"></script>
+    <script src="~/assets/vendor/data-table/js/buttons.html5.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/buttons.print.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/dataTables.bootstrap.min.js"></script>
+    <script src="~/assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+    @*<script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>*@
+    <script src="~/assets/vendor/bootstrap-treeview/js/bootstrap-treeview.js"></script>
+    <script src="~/assets/vendor/bootstrap-duallist/js/jquery.bootstrap-duallistbox.min.js"></script>
+    <script src="~/assets/vendor/morris/js/morris.min.js"></script>
+
+    <script src="~/assets/vendor/rowReorder/js/dataTables.rowReorder.min.js"></script>
+    <script src="~/assets/vendor/rowReorder/js/rowReorder.dataTables.min.js"></script>
+
+    <script src="~/assets/vendor/colReorder/js/dataTables.colReorder.min.js"></script>
+    <script src="~/assets/vendor/colReorder/js/colReorder.dataTables.min.js"></script>
+
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-datalabels.min.js"></script>
+
+    <script src="~/assets/vendor/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script src="~/assets/vendor/bootstrap-multiselect/js/bootstrap-multiselect.min.js"></script>
+    <script src="~/assets/vendor/select2/js/select2.min.js"></script>
+    <script src="~/assets/vendor/bootstrap-input-spinner/bootstrap-input-spinner.js"></script>
+    <script src="~/assets/vendor/bootstrap-tagsinput/js/bootstrap-tagsinput.js"></script>
+
+    <script src="~/assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/assets/vendor/bootstrap-daterangepicker/js/moment.min.js"></script>
+    <script src="~/assets/vendor/bootstrap-daterangepicker/js/daterangepicker.js"></script>
+    <script src="~/assets/vendor/minicolors/js/jquery.minicolors.js"></script>
+    <script src="~/assets/vendor/pignose-calender/js/pignose.calendar.full.min.js"></script>
+    <script src="~/assets/vendor/fullcalender/js/fullcalendar.min.js"></script>
+
+    <script src="~/assets/vendor/summernote/js/summernote-bs4.min.js"></script>
+    <script src='~/assets/vendor/dragula/js/dragula.min.js'></script>
+
+    <script src="~/assets/vendor/markdown/js/markdown.js"></script>
+    <script src="~/assets/vendor/markdown/js/bootstrap-markdown.js"></script>
+    <script src="~/assets/vendor/quill/js/quill.min.js"></script>
+
+    <script src="~/assets/vendor/jquery-validation/js/jquery.validate.min.js"></script>
+    <script src="~/assets/vendor/jquery-validation/js/additional-methods.min.js"></script>
+
+    <script src="~/assets/vendor/contextmenu/js/jquery.contextMenu.min.js"></script>
+    <script src="~/assets/vendor/contextmenu/js/jquery.ui.position.js"></script>
+
+    @*<script src="~/assets/vendor/chartjs/js/samples.js"></script>
+        <script src="~/assets/vendor/chartjs/js/utils.js"></script>*@
+
+    <script src="~/lib/knockout/knockout-latest.min.js"></script>
+    <script src="~/lib/toastr.js/toastr.min.js"></script>
+    <script src="~/assets/vendor/jsPDF/jspdf.umd.min.js"></script>
+    <script src="~/assets/vendor/jsPDF/THSarabun-normal.js"></script>
+    <script src="~/assets/vendor/dropzone/js/dropzone.js"></script>
+
+    <script src="~/js/site.js"></script>
+    @*<script src="~/assets/js/demo/pickers-demo.js"></script>*@
+    <script src="~/assets/js/uiHelpers.js?v=20201002"></script>
+    <script src="~/assets/js/changePasswordDialogClass.js?v=20201002"></script>
+    <script type="text/javascript">
+        window.jsPDF = window.jspdf.jsPDF;
+    </script>
+</head>
+<body>
+    <!-- Wrapper Start -->
+    <div id="wrapper">
+        @{
+            await Html.RenderPartialAsync("_NetworkingHeader");
+        }
+        <!-- Content Wrapper Start -->
+        <div class="main-wrapper" id="main-wrapper">
+            @{
+                await Html.RenderPartialAsync("_NetworkingNavigation");
+            }
+            <!-- Main Start -->
+            <main>
+                @RenderBody()
+
+                @*@{
+                    await Html.RenderPartialAsync("_Footer");
+                }*@
+            </main><!-- Main End -->
+        </div><!-- Content Wrapper End -->
+    </div><!-- Wrapper End -->
+    <!-- ================== BEGIN BASE JS ================== -->
+    <!--[if lt IE 9]>
+      <script src="~/assets/vendor/html5shiv/js/html5shiv.js"></script>
+      <script src="~/assets/vendor/respondjs/js/respond.min.js"></script>
+
+    <![endif]-->
+    <script src="~/assets/js/app.js"></script>
+    @* <script src="~/assets/js/demo/bootstrap-duallist-demo.js"></script> *@
+    @*<script src="~/Scripts/Chart.min.js"></script>*@
+    <!-- ================== END BASE JS ================== -->
+
+    @RenderSection("Scripts", required: false)
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //remove empty group
+            $('li.nav-item.Route').each((idx, rec) => { if ($(rec).find('a.nav-link').length == 1) $(rec).remove() });
+            $('li.nav-item.Route').each((idx, rec) => { if ($(rec).find('a.nav-link').length == 1) $(rec).remove() });
+            leftMenuOffset = $('.first-row')[0].offsetTop;
+            window.addEventListener("scroll", setStickyMainMenu);
+            $("#wrapper").toggleClass("small-nav");
+        });
+
+        var leftMenuOffset = 0;
+        function setStickyMainMenu() {
+            if (window.pageYOffset > leftMenuOffset) {
+                $('#left-menu').css('top', window.pageYOffset - leftMenuOffset)
+            } else {
+                $('#left-menu').css('top', '');
+            }
+        }
+    </script>
+</body>
+</html>

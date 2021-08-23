@@ -1,0 +1,224 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles{
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <style>
+    </style>
+}
+
+@section Scripts{
+    @*<script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>*@
+    <script src="~/assets/js/transportation.js"></script>
+
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_008';
+        var column = [{ "data": "department_name", "name": "shipto_region", "title": "DEPARTMENT_NAME", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "section_name", "name": "section_name", "title": "SECTION_NAME", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "fleet_name", "name": "fleet_name", "title": "FLEET_NAME", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mat_name", "name": "matfrigrp_name", "title": "MATNAME", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "total_dn", "name": "total_dn", "title": "DN", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "ontime_dn", "name": "ontime_dn", "title": "Sum of Ontime", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "docreturn_dn", "name": "docreturn_dn", "title": "Sum of Doc Return", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "ontime_percent", "name": "ontime_percent", "title": "%Ontime", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderPercent },
+            { "data": "docreturn_percent", "name": "docreturn_percent", "title": "%Doc Return", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderPercent },
+        ];
+
+        function setCriteria(data) {
+            if (data == null) return;
+            var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+            $('#monthpicker').datepicker('setDate', dt);
+            $('#cboBusiness').val(data.criteria.business).trigger('change');
+            $('#cboFleet').val(data.criteria.fleet).trigger('change');
+            $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change');
+            $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change');
+            $('#cboMatfrg').val(data.criteria.matGroup).trigger('change');
+            $('#cboOrderType').val(data.criteria.orderType).trigger('change');
+            $('#cboTruckType').val(data.criteria.truckType).trigger('change');
+            $('#cboPlannerName').val(data.criteria.plannerName).trigger('change');
+        }
+
+        var fleet_cell, section_cell, region_cell, fleet_cnt, section_cnt, region_cnt;
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search);
+            fleet_cell = null;
+            section_cell = null;
+            region_cell = null;
+            fleet_cnt = 1;
+            section_cnt = 1;
+            region_cnt = 1;
+            var post = generateTable('#OntimeDetail', '@Url.Action("OntimeDetail", "Transportation")', null,
+                'สรุป Ontime ประจำเดือน' + uiHelpers.displayFullMonth(getSelectDate()), column, created_row);
+
+            post.always(function () {
+                var tab = $('#OntimeDetail .section-table-render');
+                var tabdt = $('#OntimeDetail .section-table-render').DataTable();
+
+                var adjustMerged = false;
+                //page changing event
+                tab.on('page.dt', function (e, setting) {
+                    adjustMerged = true;
+                });
+                //drawed event
+                tab.on('draw.dt', function (e, setting) {
+                    if (adjustMerged) {
+                        adjustMerged = false;
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').addClass('ontime-hide-cell');
+                        $(tab.find('tbody').find('tr')[0]).find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                    }
+                });
+            });
+        }
+
+        function created_row(row, data, dataIndex) {
+            //var tab = $('#OntimeDetail .section-table-render').DataTable();
+            //merge cell
+            if (region_cell == null || data.department_name != region_cell.text()) {
+                //if (region_cnt > 1)
+                //    region_cell.attr("rowspan", region_cnt);
+                region_cell = $($(row).find('td')[0]);
+                region_cnt = 1;
+
+                //if (section_cnt > 1)
+                //    section_cell.attr("rowspan", section_cnt);
+                section_cell = null;
+                section_cnt = 1;
+
+                if (fleet_cnt > 1)
+                    fleet_cell.attr("rowspan", fleet_cnt);
+                fleet_cell = null;
+                fleet_cnt = 1;
+            }
+            else {
+                if (data.total_type != 7 && data.total_type != 31) {
+                    $($(row).find('td')[0]).attr('mark-remove', 1);
+                    region_cnt++;
+                }
+            }
+
+            if (section_cell == null || data.section_name != section_cell.text()) {
+                //if (section_cnt > 1)
+                //    section_cell.attr("rowspan", section_cnt);
+                section_cell = $($(row).find('td')[1]);
+                section_cnt = 1;
+
+                //if (fleet_cnt > 1)
+                //    fleet_cell.attr("rowspan", fleet_cnt);
+                fleet_cell = null;
+                fleet_cnt = 1;
+            }
+            else {
+                if (data.total_type != 3) {
+                    $($(row).find('td')[1]).attr('mark-remove', 1);
+                    section_cnt++;
+                }
+            }
+
+            if (fleet_cell == null || data.fleet_name != fleet_cell.text()) {
+                //if (fleet_cnt > 1)
+                //    fleet_cell.attr("rowspan", fleet_cnt);
+                fleet_cell = $($(row).find('td')[2]);
+                fleet_cnt = 1;
+            }
+            else {
+                if (data.total_type != 1) {
+                    $($(row).find('td')[2]).attr('mark-remove', 1);
+                    fleet_cnt++;
+                }
+            }
+                
+            //set color
+            if (data.total_type == 1) {
+                $(row).addClass('ontime-fleet-total-row');
+                $($(row).find('td')[2]).attr('colspan', 2);
+                $($(row).find('td')[3]).remove();
+            }
+            else if (data.total_type == 3) {
+                $(row).addClass('ontime-section-total-row');
+                $($(row).find('td')[1]).attr('colspan', 3);
+                $($(row).find('td')[2]).remove();
+                $($(row).find('td')[3]).remove();
+            }
+            else if (data.total_type == 7) {
+                $(row).addClass('ontime-region-total-row');
+                $($(row).find('td')[0]).attr('colspan', 4);
+                $($(row).find('td')[1]).remove();
+                $($(row).find('td')[2]).remove();
+                $($(row).find('td')[3]).remove();
+            }
+            else if (data.total_type == 31) {
+                $($(row).find('td')[0]).text('Grand Total');
+                $(row).addClass('ontime-grand-total-row');
+                $($(row).find('td')[0]).attr('colspan', 4);
+                $($(row).find('td')[1]).remove();
+                $($(row).find('td')[2]).remove();
+                $($(row).find('td')[3]).remove();
+            }
+
+            //remove by set text and border color to transparent
+            if ($($(row).find('td')[2]).attr('mark-remove') == 1) {
+                $($(row).find('td')[2]).addClass('ontime-hide-cell');
+                $($(row).find('td')[2]).attr('title', $($(row).find('td')[2]).text());
+            }
+
+            if ($($(row).find('td')[1]).attr('mark-remove') == 1) {
+                $($(row).find('td')[1]).addClass('ontime-hide-cell');
+                $($(row).find('td')[1]).attr('title', $($(row).find('td')[1]).text());
+            }
+
+            if ($($(row).find('td')[0]).attr('mark-remove') == 1) {
+                $($(row).find('td')[0]).addClass('ontime-hide-cell');
+                $($(row).find('td')[0]).attr('title', $($(row).find('td')[0]).text());
+            }
+        }
+
+        $(document).ready(function () {
+            initialControl().then(() => {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+        });
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Transportation</h1>
+            <h4 class="card-title">รายงาน Ontime <span id="reportHeader"></span></h4>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_Transportation_Criteria_02");
+    }
+    <div class="row" id="OntimeDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table class="table table-striped section-table-render" style="width:100%" data-stripe-classes="[]"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

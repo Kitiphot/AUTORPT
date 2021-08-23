@@ -1,0 +1,695 @@
+﻿@{
+    ViewData["Title"] = "Template Trigger";
+}
+
+<div class="content-wrapper">
+    <div id="dvOverlay" class="overlay">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <!-- Heading Start -->
+    <section class="heading">
+        <h4 class="mb-2">Template Trigger</h4>
+    </section><!-- Heading End -->
+
+    <div id="accordionOne" class="accordion">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseOne"
+                   aria-expanded="false" aria-controls="collapseOne">
+                    Search Parameter
+                </a>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
+                <div class="card-body">
+                    <form id="formSearch">
+                        <div class="col-12">
+                            <div class="row" style="padding:7px">
+                                <div class="col-4">
+                                    <label class=""><b>Schedule Name</b></label>
+                                    <input class="form-control" id="txtschedulename" placeholder="Schedule Name" name="Name">
+                                </div>
+                                <div class="col-4">
+                                    <label><b>Subject</b></label>
+                                    <input class="form-control" id="txtsubject" placeholder="Subject" name="Subject">
+                                </div>
+                                <div class="col-4">
+                                    <label><b>E-mail</b></label>
+                                    <input class="form-control" id="txtemail" placeholder="E-mail" name="email">
+                                </div>
+                            </div>
+                            <div class="row" style="padding:7px">
+                                <div class="col-4">
+                                    <label class="col-12" style="padding:0px;"><b>Status-Disabled</b></label>
+                                    <select id="ddlactive" class="form-control">
+                                        <option value="">ALL</option>
+                                        <option value="Normal" selected>ACTIVE</option>
+                                        <option value="Paused">PAUSED</option>
+                                        @*<option value="Complete">COMPLETE</option>
+                                        <option value="Error">ERROR</option>
+                                        <option value="Blocked">BLOCKED</option>
+                                        <option value="None">NONE</option>*@
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                </div>
+                                <div class="col-4" style="text-align:right;padding:7px;">
+                                    <label class="col-12"></label>
+                                    <div class="col-sm-12">
+                                        <button type="button" class="btn btn-primary" onclick="AddData();">New Mail</button>
+                                        <button type="button" class="btn btn-warning" onclick="Load();">Search</button>
+                                        <button type="reset" class="btn btn-secondary">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--<div id="barheader" class="card">
+        <div class="col-12" style="padding-top:1em !important"
+             id="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <a class="header">
+                <div class="d-flex col-12">
+                    <p id="cntArrow" class="p-2 flex-grow-1" style="color:black;">Search Parameter</p>
+                    <p id="contentArrow" class="p-2 mdi mdi-plus mr-2"></p>
+                </div>
+            </a>
+        </div>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#barheader" style="background-color:white;">
+            <form id="formSearch">
+                <div class="col-12">
+                    <div class="row" style="padding:7px">
+                        <div class="col-4">
+                            <label class=""><b>Schedule Name</b></label>
+                            <input class="form-control" id="txtschedulename" placeholder="Schedule Name" name="Name">
+                        </div>
+                        <div class="col-4">
+                            <label><b>Subject</b></label>
+                            <input class="form-control" id="txtsubject" placeholder="Subject" name="Subject">
+                        </div>
+                        <div class="col-4">
+                            <label><b>E-mail</b></label>
+                            <input class="form-control" id="txtemail" placeholder="E-mail" name="email">
+                        </div>
+                    </div>
+                    <div class="row" style="padding:7px">
+                        <div class="col-4">
+                            <label class="col-12" style="padding:0px;"><b>Status-Disabled</b></label>
+                            <select id="ddlactive" class="form-control">
+                                <option value="" selected>ALL</option>
+                                <option value="Normal">NORMAL</option>
+                                <option value="Paused">PAUSED</option>
+                                <option value="Complete">COMPLETE</option>
+                                <option value="Error">ERROR</option>
+                                <option value="Blocked">BLOCKED</option>
+                                <option value="None">NONE</option>-->
+    @*<option value="WAITING" selected>Active</option>
+        <option value="PAUSED">Pause</option>
+        <option value="BLOCKED">Blocked</option>*@
+    <!--</select>
+                        </div>
+                        <div class="col-4">
+                        </div>
+                        <div class="col-4" style="text-align:right;padding:7px;">
+                            <label class="col-12"></label>
+                            <div class="col-sm-12">
+                                <button type="button" class="btn btn-primary" onclick="AddData();">New Mail</button>
+                                <button type="button" class="btn btn-warning" onclick="Load();">Search</button>
+                                <button type="reset" class="btn btn-secondary">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>-->
+    <div class="row">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="dvOverlay" class="overlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="datatTableList">
+                        <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        <div id="dvPerformance"></div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+
+@*<div class="ui inverted page dimmer" id="dimmer"><div class="ui loader"></div></div>
+    <div class="ui small left icon input">
+        <input type="text" placeholder="Search Trigger..." id="search-trigger">
+        <i class="search icon"></i>
+    </div>
+    <span>&nbsp;</span>
+    <div class="ui small floating dropdown labeled search icon button" id="trigger-group-filter">
+        <i class="filter icon"></i>
+        <span class="text">Trigger Group</span>
+        <div class="menu">
+            <div class="header">
+                Filter by group
+            </div>
+            <div class="divider"></div>
+            <div class="item" data-show-all="true"><i>All</i></div>
+
+        </div>
+    </div>
+    <a class="ui right floated primary button" href="{{ActionUrl 'New'}}">
+        <i class="plus icon"></i>New
+    </a>
+
+    <div id="msg-panel"></div>
+
+    <table class="ui single line table highlight-rows" id="trigger-list-1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Group</th>
+                <th>Schedule</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Last Fire Time</th>
+                <th>Next Fire Time</th>
+                <th>History</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each Model}}
+            {{#if JobHeaderSeparator}}
+            <tr class="job-key">
+                <td class="job-name">
+                    <a href="{{ActionUrl 'Edit' 'Jobs' group=JobGroup name=JobName}}">{{JobName}}</a>
+                </td>
+                <td class="job-group">{{JobGroup}}</td>
+                <td colspan="6" style="text-align: right">
+                    <a href="{{ActionUrl 'PauseJob' 'TemplateTrigger'}}" class="ui super tiny button btn-pause-all"><i class="pause icon"></i>Pause All</a>
+                    <a href="{{ActionUrl 'ResumeJob' 'TemplateTrigger'}}" class="ui super tiny button btn-resume-all"><i class="play icon"></i>Resume All</a>
+                </td>
+            </tr>
+            {{/if}}
+
+            <tr>
+                <td class="trigger-name">
+                    {{#if IsPaused}}<i class="small pause icon" title="Paused"></i>{{/if}}
+                    <a href="{{ActionUrl 'Edit' TemplateTrigger group=TriggerGroup name=TriggerName}}" title="{{Description}}">{{TriggerName}}</a>
+                </td>
+                <td class="trigger-group">{{TriggerGroup}}</td>
+                <td class="schedule-desc" data-content="{{ScheduleDescription}}">
+                    <i class="{{TypeIcon}} icon"></i>{{TypeString}}
+                </td>
+                <td class="trigger-start">{{nvl StartTime "N / A"}}</td>
+                <td class="trigger-end">{{nvl EndTime "N / A"}}</td>
+                <td class="trigger-last-fire">{{nvl LastFireTime "N / A"}}</td>
+                <td class="trigger-next-fire">{{nvl NextFireTime "N / A"}}</td>
+                <td class="trigger-histogram">{{>Histogram History}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    {{#unless Model}}
+    {{>EmptyList 'trigger'}}
+    {{/unless}}*@
+
+<div style="display:none">
+    <div class="ui small vertical menu borderless" id="trigger-context-menu">
+        <a class="item menu-edit"><i class="left large blue pencil alternate icon"></i>Edit</a>
+        <a class="item menu-copy"><i class="left large clone outline icon"></i>Copy</a>
+        <a class="item menu-pause"><i class="left large pause icon" style="color:#e6b800"></i>Pause</a>
+        <a class="item menu-resume"><i class="left large play green icon"></i>Resume</a>
+        <a class="item menu-delete"><i class="left large red trash alternate outline icon"></i>Delete</a>
+    </div>
+</div>
+
+<div class="ui mini modal" id="delete-dialog">
+    <div class="content">
+        <p>Are you sure you want to delete this trigger?</p>
+        <p><b class="confirm-item"></b></p>
+    </div>
+    <div class="actions">
+        <div class="ui approve red button">Delete</div>
+        <div class="ui cancel button">Cancel</div>
+    </div>
+</div>
+
+<script src="~/assets/vendor/data-table/js/dataTables.rowGroup.min.js"></script>
+<script>
+    var table = null;
+    var data = null;
+    var date = new Date();
+    var columnDefs = [
+        {
+            orderable: true,
+            targets: [0, 3]
+        },
+        {
+            orderable: false,
+            targets: '_all',
+        }
+    ];
+    var columns = [
+        {
+            "data": "templateTriggerName", "title": "Schedule Name", "autoWidth": false, "width": 100,
+            "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                console.log(oData.isPaused);
+                var pause = oData.isPaused ? "<i class='mdi mdi-pause md-18'></i>" : "";
+                $(nTd).html(pause + "<a href='/templatetrigger/Edit/" + oData.templateTriggerId + "?page=0'>" + oData.templateTriggerName + "</a>");
+            }
+        },
+        {
+            "data": null, "title": "Start-End Time", "autoWidth": false, "width": 60,
+            "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                $(nTd).text(oData.startTime.substring(3, 5) + "/" + oData.startTime.substring(0, 2) + "/" + oData.startTime.substring(6, 10) + " " + oData.startTime.substring(11, 19) +
+                    " - " + (oData.endTime ? oData.endTime.substring(3, 5) + "/" + oData.endTime.substring(0, 2) + "/" + oData.endTime.substring(6, 10) + " " + oData.endTime.substring(11, 19) : "Infinite"));
+                //$(nTd).text(oData.startTime + " - " + (oData.endTime == "1/1/0544 0:00:00" ? "Infinite" : oData.endTime));
+            }
+        },
+        {
+            "data": null, "title": "Last-Next Fire Time", "autoWidth": false, "width": 60,
+            "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+                $(nTd).text((oData.lastFireTime ? oData.lastFireTime.substring(3, 5) + "/" + oData.lastFireTime.substring(0, 2) + "/" + oData.lastFireTime.substring(6, 10) + " " + oData.lastFireTime.substring(11, 19) : "")
+                    + " -> " + oData.nextFireTime.substring(3, 5) + "/" + oData.nextFireTime.substring(0, 2) + "/" + oData.nextFireTime.substring(6, 10) + " " + oData.nextFireTime.substring(11, 19));
+                //$(nTd).text((oData.lastFireTime ? oData.lastFireTime : "") + " -> " + oData.nextFireTime);
+            }
+        },
+        { "data": "templateSubject", "name": "templateSubject", "title": "Subject", "autoWidth": false, "width": 80, },
+        { "data": "templateTo", "name": "templateTo", "title": "To", "autoWidth": false, "autoWidth": false, "width": 80, },
+        { "data": "isPaused", visible: false },
+        //{ "data": "realStatus", "name": "RealStatus", "title": "RealStatus", "autoWidth": false, "width": 80 }
+
+        //{ "data": "StatusXXX", "name": "StatusXXX", "title": "Status", "autoWidth": false, "autoWidth": false, "width": 80, }
+    ];
+
+    $(document).ready(function () {
+       Load();
+
+    });
+
+    function AddData() {
+        $('#dvOverlay').show();
+        window.location = '/templatetrigger/new';
+    }
+
+    function Load() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var page = 0;
+        var pageLength = 25;
+        if (Number.isInteger(parseInt(urlParams.get('page')))) {
+            page = parseInt(urlParams.get('page')) * pageLength;
+        }
+
+        $('#dvOverlay').show();
+
+
+        var jqxhr = $.post("/TemplateTrigger/Load", {
+            template_sched_name: $('#txtschedulename').val(),
+            template_subject : $('#txtsubject').val(),
+            template_to: $('#txtemail').val(),
+            trigger_state: $('#ddlactive').val()
+        }).done(function (result) {
+                console.log(result);
+                if (result.status) {
+                    //model.schedulers(result.data);
+                    console.log(result.data);
+                    if (table == null) {
+                        //console.log(result);
+                        table = $('#dtList').DataTable({
+                            //dom: 'Bfrtip',
+                            //buttons: [
+                            //    {
+                            //        //id: 'btnNewTrigger',
+                            //        //text: 'New',
+                            //        //className: 'btn btn-primary',
+                            //        //action: function (e, dt, node, config) {
+                            //        //    $('#dvOverlay').show();
+                            //        //    window.location = '/templatetrigger/new';
+                            //        //}
+                            //    }],
+                            columnDefs: columnDefs,
+                            columns: columns,
+                            data: result.data,
+                            //scrollX: true,
+                            //scrollY: true,
+                            //ordering: false,
+                            searching: false,
+                            paging: true,
+                            ordering: true,
+                            info: true,
+                            responsive: true,
+                            fixHeader: true,
+                            scrollX: true,
+                            filter: true, // this is for disable filter (search box)
+                            orderMulti: false, // for disable multiple column at once
+                            pageLength: pageLength,
+                            displayStart: page,
+                            bLengthChange: false,
+                            bResetDisplay: false,
+                            bSort: true,
+                            order: [
+                                [5, "asc"],
+                                [0, "asc"]
+                            ],
+                            //"rowsGroup": [0],
+                            //drawCallback: function (settings) {
+                            //    var api = new $.fn.dataTable.Api(settings);
+                            //    api.off('order.dt');
+                            //    api.off('preDraw.dt');
+                            //    api.off('column-visibility.dt');
+                            //    //api.off('search.dt');
+                            //    //api.off('page.dt');
+                            //    //api.off('length.dt');
+                            //    api.off('xhr.dt');
+                            //},
+                        });
+                        // Menu on hover with auto hide menu
+                        $.contextMenu({
+                            selector: '#dtList tbody tr a',
+                            trigger: 'hover',
+                            delay: 500,
+                            autoHide: true,
+                            callback: function (key, options) {
+                                var m = "clicked: " + key;
+                                //window.console && console.log(m) || alert(m);
+                                //console.log(options);
+                                var link = $(options.selector + ".context-menu-active");
+                                if (key == "edit") {
+                                    if(link.length >0) {
+                                        console.log(link[0].href);
+                                        $('#dvOverlay').show();
+                                        window.location = link[0].href + "?page=" + table.page.info().page;
+                                    }
+                                }
+                                else if (key == "copy") {
+                                    if (link.length > 0) {
+                                        console.log(link[0].href);
+                                        $('#dvOverlay').show();
+                                        window.location = link[0].href + "?clone=true&page=" + table.page.info().page;
+                                    }
+                                }
+                                else if (key == "pause") {
+                                    if (link.length > 0) {
+                                        var tr = $(link[0]).parent().parent();
+                                        var data = table.row(tr).data();
+                                        //console.log(data);
+                                        $('#dvOverlay').show();
+
+                                        $.ajax({
+                                            type: 'POST', url: '/TemplateTrigger/Pause',
+                                            data: JSON.stringify({ name: data.triggerName, group: data.triggerGroup }),
+                                            contentType: 'application/json', cache: false,
+                                            success: function (result) {
+                                                document.location = '/TemplateTrigger/Index?page=' + table.page.info().page;
+                                            },
+                                            error: function (e) {
+                                                $('#dvOverlay').hide();
+                                            }
+                                        });
+                                    }
+                                }
+                                else if (key == "resume") {
+                                    if (link.length > 0) {
+                                        var tr = $(link[0]).parent().parent();
+                                        var data = table.row(tr).data();
+                                        //console.log(data);
+                                        $('#dvOverlay').show();
+
+                                        $.ajax({
+                                            type: 'POST', url: '/TemplateTrigger/Resume',
+                                            data: JSON.stringify({ name: data.triggerName, group: data.triggerGroup }),
+                                            contentType: 'application/json', cache: false,
+                                            success: function (result) {
+                                                document.location = '/TemplateTrigger/Index?page=' + table.page.info().page;
+                                            },
+                                            error: function (e) {
+                                                $('#dvOverlay').hide();
+                                            }
+                                        });
+                                    }
+                                }
+                                else if (key == "delete") {
+                                    if (link.length > 0) {
+                                        var tr = $(link[0]).parent().parent();
+                                        var data = table.row(tr).data();
+                                        //console.log(data);
+                                        $('#dvOverlay').show();
+
+                                        $.ajax({
+                                            type: 'POST', url: '/TemplateTrigger/Delete',
+                                            data: JSON.stringify({ name: data.triggerName, group: data.triggerGroup }),
+                                            contentType: 'application/json', cache: false,
+                                            success: function (result) {
+                                                document.location = '/TemplateTrigger/Index?page=' + table.page.info().page;
+                                            },
+                                            error: function (e) {
+                                                $('#dvOverlay').hide();
+                                            }
+                                        });
+                                    }
+                                }
+                            },
+                            items: {
+                                "edit": {
+                                    name: "Edit",
+                                    icon: "edit"
+                                },
+                                "copy": {
+                                    name: "Copy",
+                                    icon: "copy"
+                                },
+                                "pause": {
+                                    name: "Pause",
+                                    icon: "pause"
+                                },
+                                "resume": {
+                                    name: "Resume",
+                                    icon: "resume"
+                                },
+                                "delete": {
+                                    name: "Delete",
+                                    icon: "delete"
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            //console.log(result.data);
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+
+                    $('#dtList tbody').on('click', 'tr', function (e) {
+                        //var data = table.row(this).data();
+                        //model.scheduler(data);
+                        //onSelectScheduler(data, e);
+                        table.rows('.selected').nodes().to$().removeClass('selected');
+                        $(this).toggleClass('selected');
+                    });
+
+                    $('#dtList tbody tr').on('click', 'a', function (e) {
+                        //var data = table.row($(this).parents('tr')).data();
+                        //model.scheduler(data);
+                        //onSelectScheduler(data, e);
+                        $('#dvOverlay').show();
+                    });
+
+                    //$('#dtList tbody tr').on('click', 'i.icon-control-play', function (e) {
+                    //    var data = table.row($(this).parents('tr')).data();
+                    //    console.log("i.icon-control-play");
+                    //    console.log(data);
+                    //    onClickRun(data, e);
+                    //    $(this).toggleClass('selected');
+                    //});
+
+                    //$('#dtList tbody tr').on('click', 'i.icon-control-pause', function (e) {
+                    //    var data = table.row($(this).parents('tr')).data();
+                    //    console.log("i.icon-control-pause");
+                    //    console.log(data);
+                    //    onClickPause(data, e);
+                    //    $(this).toggleClass('selected');
+                    //});
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvOverlay').hide();
+                //console.log( "finished" );
+            });
+    }
+
+
+
+    $('#barheader').on('shown.bs.collapse', function () {
+        $(this).find('p[id=contentArrow]').toggleClass('mdi mdi-plus mr-2').toggleClass('mdi mdi-minus mr-2');
+    })
+
+    $('#barheader').on('hidden.bs.collapse', function () {
+        $(this).find('p[id=contentArrow]').toggleClass('mdi mdi-plus mr-2').toggleClass('mdi mdi-minus mr-2');
+    })
+
+
+    //initDimmer();
+
+    // search handling
+
+    var fGroup = undefined;
+    function applyFilter() {
+        const fStr = $('#search-trigger').val().toLowerCase();
+        $('#trigger-list > tbody > tr.job-key').hide();
+        var lastJobKeyHeader = null;
+        $('#dtList > tbody > tr').each(function () {
+            const $_ = $(this), group = $_.data('trigger-group'), txt = $_.data('fulltext');
+            if ($_.hasClass('job-key')) {
+                lastJobKeyHeader = $_;
+            } else {
+                if (txt.indexOf(fStr) !== -1 && (!fGroup || group === fGroup)) { $_.show(); lastJobKeyHeader.show(); } else $_.hide();
+            }
+        });
+    }
+
+    var searchTimer;
+    $('#search-trigger').on('input', function (e) {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(function () {
+            searchTimer = null;
+            applyFilter();
+        }, 100);
+    });
+
+    $('#trigger-group-filter').dropdown({
+        onChange: function (v, t, elm) {
+            if (elm.data('show-all')) fGroup = undefined; else fGroup = t;
+            applyFilter();
+        }
+    });
+
+    // histogram
+    //initHistogramTooltips($('.histogram > .bar'));
+
+    // schedule tooltip
+    //$('.schedule-desc').popup({ distanceAway: -12, variation: 'very wide' });
+
+    // prepare table
+    const rowIndex = {};
+    $('#dtList > tbody > tr').each(function () {
+        const
+            $_ = $(this),
+            trgNameElm = $_.find('>.trigger-name'),
+            trgName = trgNameElm.find('a').text(),
+            trgGroup = $_.find('>.trigger-group').text();
+        console.log(trgName);
+        if (trgName) {
+            rowIndex[trgGroup + '.' + trgName] = $_;
+
+            $_.data('fulltext', (trgGroup + '.' + trgName).toLowerCase());
+            $_.data('trigger-group', trgGroup);
+
+            trgNameElm.append('<button class="ui icon mini detail button"><i class="dots icon"></i></button>');
+        } dtList_paginate
+    });
+
+
+    function doAction(url, key) {
+        $('#dimmer').dimmer('show');
+        $.ajax({
+            type: 'POST', url: url,
+            data: JSON.stringify(key),
+            contentType: 'application/json', cache: false,
+            success: function () {
+                document.location = '{{ActionUrl ""}}';
+            },
+            error: function (e) {
+                $('#dimmer').dimmer('hide');
+                prependErrorMessage(e, $('#msg-panel'));
+            }
+        });
+    }
+
+    // menu handling
+
+    function bindContextMenu(menu, row, triggerName, triggerGroup) {
+
+        const btn = row.find('.detail.button');
+
+        const mnuPause = menu.find('>.menu-pause');
+        const mnuResume = menu.find('>.menu-resume');
+
+        if (row.find('i.pause.icon').length > 0) {
+            mnuPause.hide();
+            mnuResume.show();
+        } else {
+            mnuResume.hide();
+            mnuPause.show();
+        }
+
+        mnuPause.attr('href', '{{ActionUrl "Pause"}}');
+        mnuResume.attr('href', '{{ActionUrl "Resume"}}');
+
+        const pauseResumeFunc = function () {
+            btn.popup('hide');
+            doAction($(this).attr('href'), { name: triggerName, group: triggerGroup });
+            return false;
+        };
+
+        mnuPause.click(pauseResumeFunc);
+        mnuResume.click(pauseResumeFunc);
+
+        menu.find('>.menu-edit').attr('href', row.find('>.trigger-name a').attr('href'));
+        menu.find('>.menu-copy').attr('href', '{{ActionUrl "Duplicate"}}?group=' + triggerGroup + '&name=' + triggerName);
+        menu.find('>.menu-delete').click(function () {
+            $('#delete-dialog .confirm-item').text(triggerGroup + '.' + triggerName);
+            deleteItem({ name: triggerName, group: triggerGroup }, $('#msg-panel'),
+                '{{ActionUrl "Delete"}}', '{{ActionUrl ""}}');
+        });
+
+        return menu;
+    }
+
+    $('#dtList > tbody').on('click', '> tr > td > .detail.button', function () {
+        const $button = $(this), $_ = $(this).closest('tr'), triggerName = $_.find('>.trigger-name a').text(), triggerGroup = $_.find('>.trigger-group').text();
+        $_.addClass('active-menu'); // to preserve highlighted row
+        $button.popup({
+            transition: 'slide', position: 'bottom left', variation: 'basic', on: 'click', arrowPixelsFromEdge: 0,
+            onCreate: function () { $(this).addClass('context-menu').click(function () { $button.popup('hide'); }); },
+            onHide: function () { $_.removeClass('active-menu'); },
+            html: bindContextMenu($('#trigger-context-menu').clone(), $_, triggerName, triggerGroup)
+        }).off('click').popup('show');
+    });
+
+    $('#dtList > tbody').on('click', '.btn-pause-all, .btn-resume-all', function () {
+        const $_ = $(this).closest('tr'), jobName = $_.find('>.job-name a').text(), jobGroup = $_.find('>.job-group').text();
+        doAction($(this).attr('href'), { name: jobName, group: jobGroup });
+        return false;
+    });
+
+    // lazy loading
+    //loadAdditionalData(rowIndex, '{{ActionUrl "AdditionalData"}}');
+
+</script>

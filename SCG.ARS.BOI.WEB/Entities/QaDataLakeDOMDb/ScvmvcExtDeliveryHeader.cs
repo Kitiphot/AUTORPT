@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections.Generic;
+using NodaTime;
+
+namespace SCG.ARS.BOI.WEB.Entities.QaDataLakeDOMDb
+{
+    public partial class ScvmvcExtDeliveryHeader
+    {
+        public string DeliveryNumber { get; set; }
+        public string DeliveryType { get; set; }
+        public int LegId { get; set; }
+        public string LegHeader { get; set; }
+        public long? OrderScheduleLine { get; set; }
+        public int? OrderScheduleLineNumber { get; set; }
+        public string RefDeliveryNumber { get; set; }
+        public string ShipmentNumber { get; set; }
+        public string ShipmentLoadId { get; set; }
+        public string SourceSystem { get; set; }
+        public string SystemBatchNumber { get; set; }
+        public string OrderNumber { get; set; }
+        public string OrderDocType { get; set; }
+        public string PoNumber { get; set; }
+        public int? OrderPatternId { get; set; }
+        public string CustomerCode { get; set; }
+        public string CustomerName { get; set; }
+        public string OriginCode { get; set; }
+        public string OriginName { get; set; }
+        public string OriginLocType { get; set; }
+        public string DestinationCode { get; set; }
+        public string DestinationName { get; set; }
+        public string DestinationLocType { get; set; }
+        public string ShipFromCode { get; set; }
+        public string ShipFromName { get; set; }
+        public string ShipFromType { get; set; }
+        public string ShipToCode { get; set; }
+        public string ShipToName { get; set; }
+        public string ShipToType { get; set; }
+        public string ShipToSpecialCond { get; set; }
+        public string EndCustomerCode { get; set; }
+        public string EndCustomerName { get; set; }
+        public string ServiceLevel { get; set; }
+        public string ServiceLevelDesc { get; set; }
+        public Instant? OrderDate { get; set; }
+        public Instant? RequestedDate { get; set; }
+        public Instant? PlannedDeliveryDate { get; set; }
+        public Instant? PickedUpFromDate { get; set; }
+        public Instant? PickedUpToDate { get; set; }
+        public Instant? DeliveredFromDate { get; set; }
+        public Instant? DeliveredToDate { get; set; }
+        public string VehicleTypeId { get; set; }
+        public string WarehouseLocCode { get; set; }
+        public string OutsourceCode { get; set; }
+        public bool? BigLot { get; set; }
+        public string EquipmentType { get; set; }
+        public string CarrierCode { get; set; }
+        public string ServiceType { get; set; }
+        public string MergeIntransitCode { get; set; }
+        public string TransportMode { get; set; }
+        public string SpecialOrderType { get; set; }
+        public string VesselName { get; set; }
+        public string DriverLicenseNumber { get; set; }
+        public string TrailerLicenseNumber { get; set; }
+        public string IncoTermCode { get; set; }
+        public string IncoTermDesc { get; set; }
+        public decimal? SpotRate { get; set; }
+        public string SpotUnit { get; set; }
+        public string PlannerName { get; set; }
+        public string Remark { get; set; }
+        public string ShipmentMemo { get; set; }
+        public int? RetryNumber { get; set; }
+        public bool? FlagRequiredPallet { get; set; }
+        public bool? FlagGiCompleted { get; set; }
+        public bool? FlagExecJobSchedule { get; set; }
+        public bool? FlagPreBuildLoad { get; set; }
+        public bool? FlagOverrideThroughPoint { get; set; }
+        public bool? FlagOverrideCharge { get; set; }
+        public bool? FlagReceived { get; set; }
+        public bool? FlagReturn { get; set; }
+        public bool? FlagDelete { get; set; }
+        public bool? FlagCreatedShipment { get; set; }
+        public bool? FlagSuspendLoad { get; set; }
+        public int? StatusCode { get; set; }
+        public string ErrorMessage { get; set; }
+        public Instant? BatchUpdateDate { get; set; }
+        public Instant? ShipmentProcessDate { get; set; }
+        public Instant? GiCompletedDate { get; set; }
+        public string UserCreateName { get; set; }
+        public Instant? UserCreateDate { get; set; }
+        public string UserUpdateName { get; set; }
+        public Instant? UserUpdateDate { get; set; }
+        public string ShipmentLegId { get; set; }
+        public string GiHeaderText { get; set; }
+        public string OmsRouteId { get; set; }
+        public bool? FlagRequiredPack { get; set; }
+        public bool? FlagGrCompleted { get; set; }
+        public bool? FlagPackedCompleted { get; set; }
+        public Instant? GrCompletedDate { get; set; }
+        public Instant? DeliveryCompletedDate { get; set; }
+        public Instant? DocReturnDate { get; set; }
+        public Instant? DmsRepDtt { get; set; }
+        public string ShipToTel { get; set; }
+        public string SoldToDistrict { get; set; }
+        public string SoldToStreet { get; set; }
+        public string SoldToCity { get; set; }
+        public string SoldToTel { get; set; }
+        public string SoldToPostal { get; set; }
+        public string SoldToRegion { get; set; }
+        public string SalesOrg { get; set; }
+        public string PaymentTerm { get; set; }
+        public string DmReceiverTelephone { get; set; }
+        public Instant? DmScheduleDate { get; set; }
+        public string SapShipToCode { get; set; }
+        public string SapShipToName { get; set; }
+        public Instant? KafkaTimeStamp { get; set; }
+    }
+}

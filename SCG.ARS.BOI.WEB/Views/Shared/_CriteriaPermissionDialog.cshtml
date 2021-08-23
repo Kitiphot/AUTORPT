@@ -1,0 +1,334 @@
+﻿<!-- Modal -->
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="Permission" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="overlay section-loading">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header">
+                <h5 class="modal-title">Data Permission</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6">
+                        <label for="screen-dropdown">Screen (optional)</label>
+                        <select class="screen-dropdown" name="screen" style="width: 100%;">
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        &nbsp;
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6 criteria-config">
+                        <label for="criteria-dropdown">Criteria</label>
+                        <select class="criteria-dropdown" name="criteria" style="width: 100%;">
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        &nbsp;
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6 criteria-select">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <label for="cbo-common">Criteria data</label>
+                        <select class="cbo-common" name="screen" style="width: 100%;">
+                        </select>
+                    </div>
+                    <div class="col-6 mt-4">
+                        <button class="add-button btn btn-default">Add</button>
+                    </div>
+                </div>
+                <div class="row data-permission-detail">
+                    <div class="col-12">
+                        <article class="card mb-4">
+                            <div class="card-body">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Set</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var parent_element = '#criteriaPermissionDialog';
+    var input_key = 'csi';
+    var criteriaConfigURL = '@Url.Action("ListCriteriaConfig", "Security")';
+    var criteriaURL = '@Url.Action("ListCriteriaConfig", "Security")';
+    var getScreensURL = '@Url.Action("GetScreens", "Security")';
+
+    var criteriaDetailURL = '@Url.Action("ListCriteriaPermissionByUser", "Security")';
+    var saveCriteriaDetailURL = '@Url.Action("SaveCriteriaPermissionByUser", "Security")';
+
+    var criteria_permission_columns = [
+        { "data": "menuCode", "name": "action", "title": "", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "menuDisplay", "name": "menuDisplay", "title": "Screen", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "criteriaName", "name": "criteriaName", "title": "Criteria Name", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "criteriaDisplay", "name": "criteriaDisplay", "title": "Display", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "criteriaValue", "name": "criteriaValue", "title": "Value", "autoWidth": true, "className": "text-nowrap" },
+    ];
+
+    function getScreenCode() {
+        var screenCode = $(parent_element + ' .screen-dropdown').select2('data')[0].id;
+        if (screenCode == '')
+            screenCode = null;
+        return screenCode;
+    }
+
+    function initCriteriaCbo() {
+        $(parent_element + ' .criteria-config').find('.criteria-dropdown').empty();
+        $(parent_element + ' .criteria-config').find('.criteria-dropdown').select2(
+            {
+                ajax: {
+                    url: criteriaConfigURL,
+                    dataType: 'json',
+                    data: function (params) {
+                        var query = {
+                            screenCode: getScreenCode(),
+                            criteria: params.term,
+                            page: params.page || 1
+                        }
+
+                        return query;
+                    },
+                    processResults: function (result) {
+                        var options = [];
+                        result.data.forEach(function (item, index, array) {
+                            if (item.dataCriteria != null && item.dataCriteria != '')
+                                item.dataCriteria = JSON.parse(item.dataCriteria);
+                            options.push({ "id": item.criteriaName, "text": item.criteriaName, "raw": item });
+                        });
+                        return {
+                            results: options
+                        };
+                    },
+                },
+                templateResult: function (state) {
+                    return state.text;
+                },
+                multiple: false,
+                placeholder: "Select criteria",
+                matcher: function (params, data) {
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+                    var filteredChildren = [];
+                    $.each(data.children, function (idx, child) {
+                        if (child.raw.criteriaName.toUpperCase().indexOf(params.term.toUpperCase()) == 0) {
+                            filteredChildren.push(child);
+                        }
+                    });
+                },
+            }
+        );
+    }
+
+    $(document).ready(() => {
+        uiHelpers.resetCombo(parent_element + ' .cbo-common', null);
+        uiHelpers.resetCombo(parent_element + ' .screen-dropdown', null);
+        uiHelpers.initCombo(parent_element + ' .screen-dropdown', getScreensURL, null, 'Select screen');
+        initCriteriaCbo();
+
+        $(parent_element + ' .criteria-config').find('.criteria-dropdown').on('change', function (e) {
+            $(parent_element + ' .criteria-select').find('.section-loading').show();
+            var data = $(parent_element + ' .criteria-config').find('.criteria-dropdown').select2('data');
+            if (data != null && data.length > 0) {
+                var rec = data[0]
+                uiHelpers.initCombo(parent_element + ' .cbo-common', rec.raw.dataRoute, rec.raw.dataCriteria, 'Select').always(() => {
+                    $(parent_element + ' .cbo-common').prop('data-criteria-name', rec.text);
+                    $(parent_element + ' .criteria-select').find('.section-loading').hide();
+                });
+            }
+        });
+        $(parent_element + ' .btn-primary').on('click', function () {
+            var list = $(parent_element + ' .data-permission-detail .section-table-render').DataTable().rows().data().toArray();
+            $.post(saveCriteriaDetailURL, { "key": input_key, "permissions": list })
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        genTable();
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function () {
+                });
+        });
+        $(parent_element + ' .add-button').on('click', function () {
+            $(parent_element + ' .criteria-select').removeClass('is-invalid');
+            var menuCode = $(parent_element + ' .screen-dropdown').select2('data')[0];
+            var menuName = $(parent_element + ' .screen-dropdown').select2('data')[0];
+            var selectedData = $(parent_element + ' .cbo-common').select2('data')[0];
+            var list = $(parent_element + ' .data-permission-detail .section-table-render').DataTable().rows().data().toArray();
+
+            if (menuCode == null || menuCode.id == null || menuCode.id == '')
+                menuCode = null;
+            else
+                menuCode = menuCode.id;
+            if (menuName == null || menuName.text == null || menuName.text == '')
+                menuName = null;
+            else
+                menuName = menuName.text;
+
+            if (selectedData == null || selectedData.id == null || selectedData.id == '') {
+                $(parent_element + ' .criteria-select').addClass('is-invalid');
+                toastr['warning']('Criteria data is required.');
+                return;
+            }
+
+            var isDuplicated = false;
+            list.forEach(function(item, index, array) {
+                if (item.menuCode == menuCode && item.criteriaName == $(parent_element + ' .cbo-common').prop('data-criteria-name') && item.criteriaValue == selectedData.id)
+                    isDuplicated = true;
+            });
+
+            if (isDuplicated) return;
+
+            var rec = {
+                "menuCode": menuCode,
+                "menuDisplay": menuName,
+                "criteriaName": $(parent_element + ' .cbo-common').prop('data-criteria-name'),
+                "criteriaDisplay": selectedData.text,
+                "criteriaValue": selectedData.id
+            };
+            $(parent_element + ' .data-permission-detail .section-table-render').DataTable().row.add(rec).draw(false);
+        });
+
+        genTable();
+    });
+
+    function genTable() {
+        return generatePermissionTable('.data-permission-detail', criteriaDetailURL, { "key": input_key }, 'List', criteria_permission_columns, createdPermission_row);
+    }
+
+    function createdPermission_row(row, data, dataIndex) {
+        $($(row).find('td')[0]).empty();
+        var deleteElement = $('<a href="#" class="link-padding delete-icon" title="Delete"><i class="fas fa-trash-alt"></i></a>');
+        deleteElement.on('click', function () {
+            $(parent_element + ' .data-permission-detail .section-table-render').DataTable().row($(this).parents('tr')).remove().draw();
+            return false;
+        });
+        $($(row).find('td')[0]).append(deleteElement);
+    }
+
+    function generatePermissionTable(controlID, serviceUrl, criteria, title, column, created_row_callback) {
+        $(parent_element + ' ' + controlID + ' .section-loading').show();
+        $(parent_element + ' ' + controlID + ' .section-title').text(title);
+        var jqxhr = $.post(serviceUrl, criteria)
+            .done(function (result) {
+                if (uiHelpers.errorHandler(result)) {
+                    if (!$.fn.DataTable.isDataTable(parent_element + ' ' + controlID + ' .section-table-render')) {
+                        $(parent_element + ' ' + controlID + ' .section-table-render').DataTable({
+                            dom: 'T gt',
+                            fixedHeader: true,
+                            scrollX: true,
+                            ordering: false,
+                            responsive: true,
+                            filter: true,
+                            data: result.data,
+                            columns: column,
+                            createdRow: created_row_callback,
+                            "scrollY": "200px",
+                            "scrollX": false,
+                            "scrollCollapse": true,
+                            "paging": false
+                        });
+                    }
+                    else {
+                        var table = $(parent_element + ' ' + controlID + ' .section-table-render').DataTable();
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                }
+                else {
+                    if (!$.fn.DataTable.isDataTable(parent_element + ' ' + controlID + ' .section-table-render')) {
+                        //create empty table
+                        $(parent_element + ' ' + controlID + ' .section-table-render').DataTable({
+                            dom: 't',
+                            fixedHeader: true,
+                            scrollX: true,
+                            ordering: false,
+                            responsive: true,
+                            filter: true,
+                            columns: column,
+                            "scrollY": "200px",
+                            "scrollX": false,
+                            "scrollCollapse": true,
+                            "paging": false
+                        });
+                    }
+                    else {
+                        //empty
+                        var table = $(parent_element + ' ' + controlID + ' .section-table-render').DataTable();
+                        table.clear();
+                        table.draw();
+                    }
+                }
+            })
+            .fail(uiHelpers.postFailHandler)
+            .always(function () {
+                setTimeout(function () {
+                    $(parent_element + ' ' + controlID + ' .section-table-render').DataTable().columns.adjust().draw();
+                }, 500);
+                $(parent_element + ' ' + controlID + ' .section-loading').hide();
+            });
+        return jqxhr;
+    }
+
+    function openCriteriaPermissionDialog(controlID, username, loadURL, saveURL) {
+        parent_element = controlID;
+        input_key = username;
+        criteriaDetailURL = loadURL;
+        saveCriteriaDetailURL = saveURL;
+        $(parent_element + ' .modal').modal('show');
+
+        $(parent_element + ' .criteria-select').removeClass('is-invalid');
+
+        $(parent_element + ' .screen-dropdown').val(null).trigger('change');
+        $(parent_element + ' .cbo-common').val(null).trigger('change');
+        $(parent_element + ' .criteria-config').val(null).trigger('change');
+        genTable().then(() => { $(parent_element + ' .data-permission-detail .section-table-render').DataTable().columns.adjust().draw(); });
+    }
+</script>

@@ -1,0 +1,378 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    ViewBag.Title = "Truck Performance";
+}
+
+@section OverrideStyles{
+    <style>
+        #view_report_table th, td {
+            border: 1px solid;
+        }
+
+        table[aria-describedby="view_report_table_info"] thead th {
+            border: 1px solid;
+            text-align: center;
+        }
+
+        /* remove space between header and detail */
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+        .dataTables_wrapper .dataTable .date {
+            padding: 0px 10px !important;
+            text-align: center;
+        }
+
+        td.highlight {
+            background-color: lightcyan !important;
+        }
+
+    </style>
+}
+
+
+@section Scripts{
+
+    <script src="~/assets/js/SKIC.js"></script>
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        $(document).ready(function () {
+            var isRtl = $('html').attr('dir') === 'rtl';
+            $('#monthpicker').datepicker({
+                format: "MM - yyyy",
+                startView: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            }).datepicker("setDate", new Date());
+
+
+            $('#ddlTruckType').on("change", function (element, checked) {
+                //createSubTruckTypeDropDownList($('#ddlTruckType').select2('data').map(x => x.id));
+                createSubTruckTypeDropDownList('ddlSubTruckType', $('#ddlTruckType').val());
+            //    GetCustomer('CDC', $('#cboDC').select2('data').map(x => x.id));
+            });
+
+            initCriteria()
+                .then(() => {
+                    //uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+                    Search();
+                })
+                .catch((error) => console.log('load criteria fail: ' + error));
+        });
+
+        function initCriteria() {
+            const loading = $('#criteria-loading-progress');
+            loading.show();
+
+            const promises = [
+                createFleetDropDownList('ddlFleet'),
+                createCarrierDropDownList('ddlCarrier'),
+                createTruckTypeDropDownList('ddlTruckType'),
+                createSubTruckTypeDropDownList('ddlSubTruckType', []),
+            ];
+
+            return Promise.all(promises).finally(() => { loading.hide(); });
+        }
+   
+        function Search() {
+            let selectmonth;
+            let selectyear;
+
+            let fleet = $('#ddlFleet').val();
+            let carrier = $('#ddlCarrier').val();
+            let truckType = $('#ddlTruckType').val();
+            let subTruckType = $('#ddlSubTruckType').val();
+            let datepicker = $('#monthpicker').datepicker("getDate");
+
+            selectmonth = datepicker.getMonth() + 1;
+            selectyear = datepicker.getFullYear();
+           
+            DrawTableDetail(selectmonth, selectyear, carrier, fleet, truckType, subTruckType);
+        }
+
+        function DrawTableDetail(month, year, carrier, fleet, truckType, subTruckType) {
+            const loading = $('#table-loading-progress');
+            loading.show();
+
+            $("#view_report_table").DataTable().destroy();
+            let table = $("#view_report_table").DataTable({
+                "ajax": {
+                    url: '@Url.Action("RPTPKG005_MonitorTruckActiveReport", "Report")',
+                    type: 'POST',
+                    dataType: 'Json',
+                    data: { month, year, carrierCode: carrier, fleet, truckType, subTruckType }
+                },
+                scrollX: true,
+                //ordering: false,
+                responsive: true,
+                dom: 'lTf<"html5buttons"B>gtip',
+                autoWidth: false,
+                pageLength: 10,
+                buttons: [
+                    'copy',
+                    {
+                        extend: 'excel',
+                        filename: 'Truck Performance ' + $('#daterange-99').html(),
+                    }
+                ],
+                "language": {
+                    "info": "Showing _START_ to _END_ of _TOTAL_ entries. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 = รถจองคิวได้งาน, 0 = จองคิวไม่ได้งาน, 2 = รถไม่จองคิว"
+                },
+                autoWidth: false,
+                order: [],
+                columnDefs: [
+                    { targets: [0, 1, 2, 3, 4, 5], width: '150px', className: 'text-nowrap', orderable: true },
+                    { targets: [-1, -2, -3, -4], width: '150px', orderable: false },
+                    { targets: '_all', width: '70px', className: 'date', orderable: false },
+                    {
+                        targets: Array.from({ length: 31 }, (_, i) => i + 6), // 6 - 35 (day 1 - 31)
+                        createdCell: function (cell, cellData, rowData, rowIndex, colIndex) {
+                            let day = colIndex - 5; // index 6 = day 1
+                            if (rowData["is_working_day" + day] == 0) {
+                                $(cell).css('background-color', '#eee');
+                            }
+                        }
+                    }
+                ],
+                columns: [
+                    { "data": "fleet" },
+                    { "data": "carrier" },
+                    { "data": "truck_type" },
+                    { "data": "sub_truck_type" },
+                    { "data": "truck_license" },
+                    { "data": "driver_name" },
+                    { "data": "result_day1" },
+                    { "data": "result_day2" },
+                    { "data": "result_day3" },
+                    { "data": "result_day4" },
+                    { "data": "result_day5" },
+                    { "data": "result_day6" },
+                    { "data": "result_day7" },
+                    { "data": "result_day8" },
+                    { "data": "result_day9" },
+                    { "data": "result_day10" },
+                    { "data": "result_day11" },
+                    { "data": "result_day12" },
+                    { "data": "result_day13" },
+                    { "data": "result_day14" },
+                    { "data": "result_day15" },
+                    { "data": "result_day16" },
+                    { "data": "result_day17" },
+                    { "data": "result_day18" },
+                    { "data": "result_day19" },
+                    { "data": "result_day20" },
+                    { "data": "result_day21" },
+                    { "data": "result_day22" },
+                    { "data": "result_day23" },
+                    { "data": "result_day24" },
+                    { "data": "result_day25" },
+                    { "data": "result_day26" },
+                    { "data": "result_day27" },
+                    { "data": "result_day28" },
+                    { "data": "result_day29" },
+                    { "data": "result_day30" },
+                    { "data": "result_day31" },
+                    //{ "data": "result_total" },
+                    { "data": "result_book" },
+                    { "data": "result_accept" },
+                    { "data": "result_non_accept" },
+                    { "data": "result_not_book" },
+                ]
+            });
+
+            if (month == 2) {
+                table.column(4 + 30).visible(false, false);
+                table.column(4 + 31).visible(false, false);
+                // get last day of this month by create date object day 0 of next month (March = 2)
+                let d = new Date(selectyear, 2, 0);
+
+                if (d.getDate() == 28) {
+                    table.column(4 + 29).visible(false, false);
+                }
+
+                table.columns.adjust().draw(false); // adjust column sizing and redraw
+            } else if (month == 4 || month == 6 || month == 9 || month == 11) {
+                table.column(4 + 31).visible(false, false);
+
+                table.columns.adjust().draw(false); // adjust column sizing and redraw
+            }
+
+            //$('#view_report_table tbody')
+            //    .on('mouseenter', 'td', function () {
+            //        var colIdx = table.cell(this).index().column;
+
+            //        $(table.cells().nodes()).removeClass('highlight');
+            //        $(table.column(6).nodes()).addClass('highlight');
+            //    });
+
+            loading.hide();
+            //$('#table-loading-progress').hide();
+        }
+
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h4 class="card-title">Truck Performance</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="criteria-loading-progress" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+                    <div class="form-row">
+                        <div class="form-group col-lg-4">
+                            <label for="monthpicker">Month</label>
+                            @*<input type="text" class="form-control" id="monthpicker" placeholder="Select Month ... " style="width: 100%; line-height: 27px; padding: 0 !important;">*@
+                            <input type="text" class="form-control" id="monthpicker" placeholder="Select Month ... " style="width: 100%">
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <label for="ddlFleet">Fleet</label>
+                            <select id="ddlFleet" class="form-control" name="fleet[]" multiple="multiple"></select>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <label for="ddlCarrier">Carrier</label>
+                            <select id="ddlCarrier" class="form-control" name="carrier[]" multiple="multiple"></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-4">
+                            <label for="ddlTruckType">Truck type</label>
+                            <select id="ddlTruckType" class="form-control" name="trucktype[]" multiple="multiple"></select>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            <label for="ddlSubTruckType">Sub truck type</label>
+                            <select id="ddlSubTruckType" class="form-control" name="subtrucktype[]" multiple="multiple"></select>
+                        </div>
+                        <div class="form-group col-lg-4">
+                            @*<button class="btn btn-primary submit-btn with-arrow rounded-border mr-2 mb-4" onclick="Search();">
+                                Submit
+                            </button>*@
+                            <div id="search-button" class="btn-group rounded-border mt-4">
+                                <button type="button" class="btn btn-primary search-button" onclick="Search();">Submit</button>
+                                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <div class="dropdown-menu">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<div class="row" id="DailyShipmentStatus">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <h4 class="card-title" id="DailyShipmentStatusText"></h4>
+                        <div class="d-flex align-items-center">
+                            <div class="wrapper">
+                                <a href="#" id="downloadPdf" onclick="downloadPDF('#barChartShipmentStatus','DailyShipmentStatusText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                    <i class="icon-share-alt mr-1"></i>Download PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body" id="barChartShipmentStatusLayout">
+                        <div id="barChartShipmentStatusContainer" class="chart-container">
+                            <canvas id="barChartShipmentStatus"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+    <div class="row" id="ShipmentStatusDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div id="table-loading-progress" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title" id="ShipmentStatusDetailText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table class="cell-border" id="view_report_table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">Fleet</th>
+                                        <th rowspan="2">Carrier</th>
+                                        <th rowspan="2">Truck type</th>
+                                        <th rowspan="2">Sub truck type</th>
+                                        <th rowspan="2">ทะเบียน</th>
+                                        <th rowspan="2">ชื่อ พขร.</th>
+                                        <th colspan="31">วันที่</th>
+                                        <th rowspan="2">รวมวันจองคิว</th>
+                                        <th rowspan="2">รวมวันได้งาน</th>
+                                        <th rowspan="2">รวมวันไม่ได้งาน</th>
+                                        <th rowspan="2">รวมวันไม่จองคิว</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1</th>
+                                        <th>2</th>
+                                        <th>3</th>
+                                        <th>4</th>
+                                        <th>5</th>
+                                        <th>6</th>
+                                        <th>7</th>
+                                        <th>8</th>
+                                        <th>9</th>
+                                        <th>10</th>
+                                        <th>11</th>
+                                        <th>12</th>
+                                        <th>13</th>
+                                        <th>14</th>
+                                        <th>15</th>
+                                        <th>16</th>
+                                        <th>17</th>
+                                        <th>18</th>
+                                        <th>19</th>
+                                        <th>20</th>
+                                        <th>21</th>
+                                        <th>22</th>
+                                        <th>23</th>
+                                        <th>24</th>
+                                        <th>25</th>
+                                        <th>26</th>
+                                        <th>27</th>
+                                        <th>28</th>
+                                        <th>29</th>
+                                        <th>30</th>
+                                        <th>31</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

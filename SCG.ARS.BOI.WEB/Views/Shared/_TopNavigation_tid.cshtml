@@ -1,0 +1,104 @@
+﻿@using SCG.ARS.BOI.WEB.Entities.MasterDb
+@using SCG.ARS.BOI.WEB.Repositories
+@using Microsoft.AspNetCore.Http
+@using SCG.ARS.BOI.WEB.Security
+@inject IMasterRepository MasterRepository
+@inject IHttpContextAccessor httpContextAccessor
+<!-- Top Navigation Start -->
+<nav class="navbar navbar-expand navbar-inverse bg-inverse" id="top-menu">
+    <div class="collapse navbar-collapse flex-column ml-lg-0 ml-3" id="navbarSupportedContent">
+        <ul class="navbar-nav">
+            @foreach (var item in MasterRepository.GetMasterMenu_tid())
+            {
+                <li class="dropdown-toggle-lvl1 mr-3">
+                    <a href="#" class="dropdown-toggle-lvl1 menu-title nowrap"><i class="@item.menu_icon mr-2"></i>@item.menu_name</a>
+                    <ul class="dropdown-menu dropdown-menu-lvl1 sub-menu" id="menu_@item.menu_id">
+                        @foreach (var sub_item in MasterRepository.GetSubMenu_tid(item.menu_id))
+                        {
+
+                            <li class="nav-item dropdown-toggle-lvl2 @Html.IsSelected(controller: "Report")Route">
+                                <a class="menu-title text-nowrap mr-2 dropdown-toggle-lvl2" title="@sub_item.menu_name" href="#">
+                                    @if (!string.IsNullOrEmpty(sub_item.menu_icon) && sub_item.menu_icon.StartsWith("fa"))
+                                    {
+                                        <i class="@sub_item.menu_icon md-18 mr-2"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="@sub_item.menu_icon md-18 mr-2"></i>
+                                    }
+                                    @sub_item.menu_name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-lvl2 sub-menu" id="menu_@sub_item.menu_id">
+                                    @foreach (var sub_item2 in MasterRepository.GetSubMenu_tid(sub_item.menu_id))
+                                    {
+                                        <li class="nav-item dropdown-toggle-lvl3 @Html.IsSelected(controller: "Report")Route">
+                                            <a class="menu-title text-nowrap mr-2 dropdown-toggle-lvl3" title="@sub_item.menu_name" href="#">
+                                                @if (!string.IsNullOrEmpty(sub_item2.menu_icon) && sub_item2.menu_icon.StartsWith("fa"))
+                                                {
+                                                    <i class="@sub_item2.menu_icon md-18 mr-2"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="@sub_item2.menu_icon md-18 mr-2"></i>
+                                                }
+                                                @sub_item2.menu_name
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-lvl3 sub-menu" id="menu_@sub_item2.menu_id">
+                                                @foreach (var page_item in MasterRepository.GetPageMenu_tid(sub_item2.menu_id))
+                                                {
+                                                    @if (httpContextAccessor.HttpContext.User.IsAllow(page_item.menu_page, SCG.ARS.BOI.WEB.Attributes.Permission.View))
+                                                    {
+                                                        <li class="nav-item">
+                                                            <a class="menu-title text-nowrap mr-3 @Html.IsSelected(controller: "ReportChart", action: @page_item.menu_page)" href="/@page_item.menu_path">
+                                                                @if (!string.IsNullOrEmpty(page_item.menu_icon))
+                                                                {
+                                                                    <i class="@page_item.menu_icon md-18 mr-2"></i>
+                                                                }
+                                                                &#8226; @page_item.menu_name
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </li>
+                                    }
+                                    @foreach (var page_item in MasterRepository.GetPageMenu_tid(sub_item.menu_id))
+                                    {
+                                        @if (httpContextAccessor.HttpContext.User.IsAllow(page_item.menu_page, SCG.ARS.BOI.WEB.Attributes.Permission.View))
+                                        {
+                                            <li class="nav-item">
+                                                <a class="menu-title text-nowrap mr-3 @Html.IsSelected(controller: "ReportChart", action: @page_item.menu_page)" href="/@page_item.menu_path">
+                                                    @if (!string.IsNullOrEmpty(page_item.menu_icon))
+                                                    {
+                                                        <i class="@page_item.menu_icon md-18 mr-2"></i>
+                                                    }
+                                                    &#8226; @page_item.menu_name
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        @foreach (var page_item in MasterRepository.GetPageMenu_tid(item.menu_id))
+                        {
+                            @if (httpContextAccessor.HttpContext.User.IsAllow(page_item.menu_page, SCG.ARS.BOI.WEB.Attributes.Permission.View))
+                            {
+                                <li class="nav-item">
+                                    <a class="menu-title text-nowrap mr-3 @Html.IsSelected(controller: "ReportChart", action: @page_item.menu_page)" href="/@page_item.menu_path">
+                                        @if (!string.IsNullOrEmpty(page_item.menu_icon))
+                                        {
+                                            <i class="@page_item.menu_icon md-18 mr-2"></i>
+                                        }
+                                        &#8226; @page_item.menu_name
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </li>
+            }
+        </ul>
+    </div>
+</nav>
+<!-- Top Navigation End -->

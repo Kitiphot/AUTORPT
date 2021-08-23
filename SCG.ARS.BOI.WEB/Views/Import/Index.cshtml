@@ -1,0 +1,740 @@
+@model SCG.ARS.BOI.WEB.ViewModels.UploadViewModel
+@{
+    ViewData["Title"] = "Bank Logs Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+    }
+
+    tbody tr.odd.selected, tbody tr.even.selected {
+        background-color: #B0BED9;
+    }
+</style>
+
+<script type="text/javascript">
+
+    ko.bindingHandlers.value = {
+        update: function (element, valueAccessor, allBindingsAccessor) {
+            var value = valueAccessor(), allBindings = allBindingsAccessor();
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+
+            var result = "";
+            if (valueUnwrapped == "undefined") {
+                result = "-";
+            }
+            else result = valueUnwrapped;
+            $(element).text(result);
+        }
+    };
+    ko.bindingHandlers.status = {
+        update: function (element, valueAccessor, allBindingsAccessor) {
+            var value = valueAccessor(), allBindings = allBindingsAccessor();
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+            valueUnwrapped = valueUnwrapped.length == 0 ? 0 : parseInt(valueUnwrapped);
+            var result = "";
+            if (valueUnwrapped == 0)
+                result = '<span class="label label-warning">Pending</span>';
+            else if (valueUnwrapped == 1)
+                result = '<span class="label label-primary">Processing</span>';
+            else if (valueUnwrapped == 2)
+                result = '<span class="label label-error">Fail</span>';
+            else if (valueUnwrapped == 3)
+                result = '<span class="label label-success">Completed</span>';
+            else result = valueUnwrapped;
+            $(element).html(result);
+        }
+    };
+    ko.bindingHandlers.monthYear = {
+        update: function (element, valueAccessor, allBindingsAccessor) {
+            var value = valueAccessor(), allBindings = allBindingsAccessor();
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+            //console.log(value);
+            //console.log(valueUnwrapped);
+
+            var d = "";
+            if (valueUnwrapped) {
+                var m = new Date(valueUnwrapped);///Date\([\d+-]+\)/gi.exec(valueUnwrapped);
+                //console.log(m);
+                //console.log(valueUnwrapped);
+                if (m) {
+                    d = m.toLocaleString('default', { month: 'short' }) + '-' + m.getFullYear();
+                }
+            }
+            //console.log(d);
+            $(element).text(d);
+        }
+    };
+    ko.bindingHandlers.money = {
+        update: function (element, valueAccessor, allBindingsAccessor) {
+            var value = valueAccessor(), allBindings = allBindingsAccessor();
+            var valueUnwrapped = ko.utils.unwrapObservable(value);
+
+            var m = "";
+            if (valueUnwrapped) {
+                m = parseInt(valueUnwrapped);
+                if (m) {
+                    m = String.format("{0:n0}", m);
+                }
+            }
+            $(element).text(m);
+        }
+    };
+</script>
+
+<section class="content-header">
+    <h1>
+        Import Bank Statement
+        @* <small>Import Bank Statement panel</small> *@
+    </h1>
+    <div class="text-left">
+        <!--<div class="form-group input-group date col-lg-3">
+          <input type="text" class="form-control" data-inputmask="'alias': 'M - yyyy'" data-mask>
+          <div class="input-group-addon">
+              <i class="fa fa-calendar"></i>
+          </div>
+        </div>-->
+    </div>
+    @* <div class="text-right">
+          <button type="button" class="btn btn-success toastrDefaultSuccess">
+            Launch Notification
+          </button>
+        </div> *@
+</section>
+<!-- Main content -->
+<section class="content container-fluid">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <div class="box-title">
+                <h5 class="box-title">Month / Year Selection :  </h5>
+                @* <button onclick="UpdateImportList(null)">Check Update</button> *@
+                <!-- <button type="button" class="btn btn-default" id="daterange-btn">
+                  <span>
+                      <i class="fa fa-calendar"></i> Date range picker
+                  </span>
+                  <i class="fa fa-caret-down"></i>
+                </button> -->
+            </div>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-minus"></i>
+                </button>
+                <!--<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>-->
+            </div>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div id="dtPickerImport" class="form-group col-lg-2 pull-left input-group date">
+                <input type="text" class="form-control" data-inputmask="'alias': 'M - yyyy'" data-mask>
+                <div class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                </div>
+            </div>
+            <div id="importListOverlay" class="overlay">
+                <i class="fa fa-refresh fa-spin"></i>
+            </div>
+            <div class="datatTableList form-group">
+                <table id="importList" class="table table-striped" style="width:100%"></table>
+            </div>
+
+            <!-- Upload Modal -->
+            <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div id="uploadModalOverlay" class="overlay">
+                    <i class="fa fa-refresh fa-spin"></i>
+                </div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title col-md-10" id="uploadModalTitle">Import Bank Statement Files</h5>
+                            <button type="button" id="btnCloseUploadModal" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            @{
+                                await Html.RenderPartialAsync("UploadModal");
+                            }
+                        </div>
+                        @* <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              <button type="button" class="btn btn-primary">Save changes</button>
+                            </div> *@
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirm Modal -->
+            <div id="confirm" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirmation Dialog</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Would you like to confirm delete data?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="btnConfirmDelete" type="button" class="btn btn-danger" data-dismiss="modal">Delete</button>
+                            <button id="btnConfirmClose" type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirm Reset Modal -->
+            <div id="confirmReset" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirmation Dialog</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Would you like to confirm reset data?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="btnConfirmReset" type="button" class="btn btn-danger" data-dismiss="modal">Reset</button>
+                            <button id="btnResetClose" type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script type="text/html" id="people-template">
+                <h3 data-bind="text: name"></h3>
+                <p>Credits: <span data-bind="text: credits"></span></p>
+            </script>
+
+            <script type="text/html" id="importlist-template">
+                <tr>
+                    <td><span class="col-md-6"><input data-bind="attr:{id:$index()}" type="checkbox"></span></td>
+                    <td data-bind="monthYear: accountMonthYear"></td>
+                    <td data-bind="text: bankCode"></td>
+                    <td class="text-center" data-bind="value: fileTypeCode"></td>
+                    <td class="col-sm-2" data-bind="text: fileName"></td>
+                    <td data-bind="text: uploadUserCode"></td>
+                    <td data-bind="text: uploadDateTime"></td>
+                    <td data-bind="status: status"></td>
+                    <td data-bind="text: importDateTime"></td>
+                </tr>
+            </script>
+            <script type="text/javascript">
+ function ImportListViewModel() {
+      this.importList = null;//JSON.parse('@*@Html.Raw(Json.Serialize(Model.ImporteBakingInfo))*@');
+      console.log(this.importList);
+ }
+
+ //ko.applyBindings(new ImportListViewModel(), document.getElementById('importList'));
+ //ko.applyBindings(new PepoleViewModel(), document.getElementById('people'));
+
+//var importList = JSON.parse('@*@Html.Raw(Json.Serialize(Model.ImporteBakingInfo))*@');
+//
+// var ImportPagedGridModel = function(items) {
+//    //console.log(items);
+//    this.items = ko.observableArray(items);
+//
+//    this.addItem = function() {
+//        this.items.push({ name: "New item", sales: 0, price: 100 });
+//    };
+//
+//    this.sortByName = function() {
+//        this.items.sort(function(a, b) {
+//            return a.name < b.name ? -1 : 1;
+//        });
+//    };
+//
+//    this.jumpToFirstPage = function() {
+//        this.gridViewModel.currentPageIndex(0);
+//    };
+//
+//    this.importGridViewModel = new ko.simpleGrid.viewModel({
+//        data: this.items,
+//        columns: [
+//            { headerText: "Month/Year", rowText: "accountMonthYear" },
+//            { headerText: "Bank", rowText: "bankCode" },
+//            //{ headerText: "File Type", rowText: function (item) { return "$" + item.price.toFixed(2) } }
+//        ],
+//        pageSize: 4
+//    });
+//};
+//
+//
+//ko.applyBindings(new ImportPagedGridModel(this.importList));
+
+            </script>
+
+            <script type="text/javascript">
+                //Date range as a button
+                var startDate;
+                var endDate;
+                var importListData = null;
+                var table = null;
+                var data = null;
+                var date = new Date();
+
+                $(document).ready(function () {
+
+                    var datePicker = $('#dtPickerImport').datepicker({
+                        autoclose: true,
+                        minViewMode: 1,
+                        format: 'M - yyyy',
+                        defaultDate: new Date()
+                    })
+                        .on('changeDate', function (selected) {
+                            //console.log(selected);
+                            var monthYear = selected.dates[0];
+                            $('#dtPickerUpload').datepicker('setDate', monthYear);
+                            //console.log(monthYear);
+                            //var monthYear = new Date(
+                            //  date.getFullYear(),
+                            //  date.getMonth(),
+                            //  1
+                            //).toISOString();
+                            LoadImportList(monthYear);
+                            // startDate = new Date(selected.date.valueOf());
+                            // startDate.setDate(startDate.getDate(new Date(selected.date.valueOf())));
+                            // $('.to').datepicker('setStartDate', startDate);
+                        })
+                        .on('focusout', function (evt){
+                            var date = $(this).datepicker('getDate');
+                            if(date == null)
+                                $(this).datepicker('setDate', new Date());
+                        });
+                        
+                    $('#dtPickerImport').datepicker('setDate', new Date());
+                    //var monthYear = $(".input-group.date input[typd='text']").datepicker("getDate");
+                    //console.log(datePicker);
+                    //LoadImportList(monthYear);
+
+                    $('#uploadModal').on('hidden.bs.modal', function () {
+                        RefreshImportList();
+                    })
+                });
+
+                function RefreshImportList() {
+                    var monthYear = $('#dtPickerUpload').datepicker("getDate");
+                    $('#dtPickerImport').datepicker('setDate', monthYear);
+                }
+
+                function UpdateImportList(fileInfo) {
+                    var rows = table.rows().data();
+                    //console.log(rows.length);
+                    for (i = 0; i < rows.length; i++) {
+                        var row = rows[i];
+                        if (row.importEbankingFilesId == fileInfo.importEbankingFilesId) {
+                            row.statusCode = fileInfo.statusCode;
+                            row.importDateTime = fileInfo.importDateTime;
+                            row.description = fileInfo.description;
+                            table.row(i).data(row).draw(false);
+                            //console.log(row);
+                        }
+                    }
+                }
+
+                function UpdateResetList(files){
+                    var ids = table.rows('.selected');
+                    var rows = table.rows('.selected').data();
+                    for (i = 0; i < rows.length; i++) {
+                        var row = rows[i];
+                        var file = files.filter(getRow(row.importEbankingFilesId));
+                        if (file.length > 0) {
+                            row.statusCode = file[0].statusCode;
+                            row.importDateTime = file[0].importDateTime;
+                            row.description = file[0].description;
+                            table.row(ids[0][i]).data(row).draw(false);
+                        }
+                    }
+
+                    table.rows('.selected').nodes().to$().removeClass('selected');
+                }
+
+                function getRow(importEbankingFilesId) {
+                    return function(element) {
+                        element.StatusCode = 0;
+                        return element.importEbankingFilesId == importEbankingFilesId;
+                    }
+                }
+
+                function LoadImportList(monthYear) {
+                    $('#importListOverlay').show();
+                    $.ajax({
+                        url: "/Import/LoadImportList",
+                        type: 'POST',
+                        data: JSON.stringify(getDateUTC(monthYear).toISOString()),
+                        dataType: "json",
+                        traditional: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (result) {
+                            data = result.data;
+                            //console.log(table);
+                            if (table == null){
+                                //console.log(result);
+                                GenerateDatatable(result.data, result.permission);
+                            }
+                            else {
+                                table.clear();
+                                $.each(result.data, function (idx, obj) {
+                                    //console.log(result.data);
+                                    table.row.add(result.data[idx]);
+                                });
+                                table.draw();
+                            }
+                            $('#importListOverlay').hide();
+                        },
+                        error: function (error) {
+                            $('#importListOverlay').hide();
+                            console.log(error);
+                        }
+                    });
+                }
+
+                function GenerateDatatable(data, permission) {
+                    table = $('#importList').DataTable({
+                        dom: '<"topbuttons"B>frt<"bottombuttons form-group">ip',
+                        buttons: [
+                            {
+                                text: 'Delete',
+                                className: 'btn btn-default',
+                                action: function (e, dt, node, config) {
+                                    alert('Button activated');
+                                }
+                            }],
+                        initComplete: function () {
+                            $(".bottombuttons").append("<div class='form-group col-md-3'><button type='button' id='btnImport' class='btn btn-primary' data-toggle='modal' data-target='#uploadModal'>Import</button></div>" +
+                                "<div class='form-group col-md-3'><button type='button' id='btnDelete' class='btn btn-danger'>Delete</button></div>" +
+                                "<div class='form-group col-md-3'><button type='button' id='btnClear' class='btn btn-info'>Clear all</button></div>" +
+                                "<div class='form-group col-md-3'><button type='button' id='btnReset' class='btn btn-danger'>Reset</button></div>");
+                            $(".topbuttons").hide();
+                            $("#btnDelete").on('click', function (e) {
+                                var $form = $(this).closest('form');
+                                e.preventDefault();
+                                $('#confirm').modal({
+                                    backdrop: 'static',
+                                    keyboard: false
+                                }
+                                ).on('click', '#btnConfirmDelete', function (e) {
+                                    //$form.trigger('submit');
+                                    //console.log(e);
+                                    DeleteImportList();
+                                });
+                            });
+
+                            $("#btnClear").on('click', function (e) {
+                                table
+                                    .rows('.selected')
+                                    .nodes()
+                                    .to$()
+                                    .removeClass('selected');
+                            });
+
+                            $("#btnReset").on('click', function (e) {
+                                var $form = $(this).closest('form');
+                                e.preventDefault();
+                                $('#confirmReset').modal({
+                                    backdrop: 'static',
+                                    keyboard: false
+                                }
+                                ).on('click', '#btnConfirmReset', function (e) {
+                                    //$form.trigger('submit');
+                                    //console.log(e);
+                                    ResetImportList();
+                                });
+                            });
+
+                            //console.log(permission);
+                            if (permission.length == 0 || permission[0].fullControl_Flag == false) {
+                                $('#btnImport').prop('disabled', true);
+                                $('#btnDelete').prop('disabled', true);
+                                $('#btnClear').prop('disabled', true);
+                                $('#btnReset').prop('disabled', true);
+                            }
+                        },
+                        //"processing": true, // for show progress bar
+                        //"serverSide": true, // for process server side
+                        "scrollX": true,
+                        "filter": true, // this is for disable filter (search box)
+                        "orderMulti": false, // for disable multiple column at once
+                        "pageLength": 25,
+                        "bLengthChange": false,
+                        "bResetDisplay": false,
+                        "bSort": true,
+                        "data": data,
+                        //"ajax": {
+                        //    "url": "/Import/BankImportInfos",
+                        //    "type": "POST",
+                        //    "data": {
+                        //      startDate : function(){ return startDate.toDate().toISOString() },
+                        //      endDate : function(){ return endDate.toDate().toISOString() }
+                        //    },
+                        //    "datatype": "json"
+                        //},
+                        "columnDefs":
+                            [{
+                                "className": "text-center",
+                                "targets": [0],
+                                //"orderable": false
+                            },
+                            {
+                                "className": "text-center",
+                                "targets": [1],
+                                "orderable": true,
+                                //"searchable": true
+                            },
+                            {
+                                "className": "text-center",
+                                "targets": [2],
+                                //"orderable": true
+                            },
+                            {
+                                "className": "col-md-2",
+                                "targets": [3],
+                                //"orderable": false
+                            },
+                            {
+                                "className": "text-center",
+                                "targets": [4],
+                                //"orderable": false
+                            },
+                            {
+                                "className": "text-center",
+                                "targets": [5],
+                                //"orderable": false
+                            },
+                            {
+                                "className": "text-center",
+                                "targets": [6],
+                                //"orderable": false
+                            },
+                            {
+                                "className": "text-center",
+                                "targets": [7],
+                                //"orderable": false
+                            }],
+
+                        "columns": [
+                            //{
+                            //  data: null, render: function (data, type, row) {
+                            //  //  console.log(dat);
+                            //  //  console.log(type);
+                            //  //  console.log(row);
+                            //        return "<span><input id='"+row.importEbankingFilesId+"' value='"+row.importEbankingFilesId+"' type='checkbox' click='return false;'></span>";
+                            //    }
+                            //},
+                            {
+                                "data": "accountMonthYear", "name": "AccountMonthYear", "title": "Month/Year", "autoWidth": true,
+                                "render": function (data, type, row, meta) {
+                                    return moment(new Date(data)).format("MMM-YYYY");
+                                }
+                            },
+                            { "data": "bankCode", "name": "BankCode", "title": "Bank", "autoWidth": true },
+                            { "data": "fileTypeCode", "name": "FileTypeCode", "title": "File Type", "autoWidth": true },
+                            { "data": "fileName", "name": "FileName", "title": "File Name", "autoWidth": true },
+                            { "data": "uploadUserCode", "name": "UploadUserCode", "title": "Upload By", "autoWidth": true },
+                            {
+                                "data": "uploadDateTime", "name": "UploadDateTime", "title": "Upload Date/Time", "autoWidth": true,
+                                "render": function (data, type, row, meta) {
+                                    return moment(new Date(data)).format("DD/MMM/YYYY hh:mm:ss");
+                                }
+                            },
+                            {
+                                "data": "statusCode", "name": "Status", "title": "Status", "autoWidth": true,
+                                "render": function (data, type, row, meta) {
+                                    var value = data;
+                                    var result = "";
+                                    if (value == 0)
+                                        result = '<span class="label label-warning">Pending</span>';
+                                    else if (value == 1)
+                                        result = '<span class="label label-primary">Processing</span>';
+                                    else if (value == 2) {
+                                        //console.log(row);
+                                        if (row.description != null)
+                                            result = '<span class="label label-danger" data-toggle="tooltip" data-html="true" title="' + row.description + '">Fail</span>';
+                                        else
+                                            result = '<span class="label label-danger">Fail</span>';
+
+                                    }
+                                    else if (value == 3)
+                                        result = '<span class="label label-success">Completed</span>';
+
+                                    return result;
+                                }
+                            },
+                            {
+                                "data": "importDateTime", "name": "ImportDateTime", "title": "Transfer To System Date/Time", "autoWidth": true,
+                                "render": function (data, type, row, meta) {
+                                    var date = new Date(data);
+                                    if (date.getFullYear() == 1970)
+                                        return "";
+                                    else
+                                        return moment(new Date(data)).format("DD/MMM/YYYY hh:mm:ss");
+                                }
+                            },
+                            //  {
+                            //      "render": function (data, type, full, meta)
+                            //      { return '<a class="btn btn-info" href="/Demo/Edit/' + full.CustomerID + '">Edit</a>'; }
+                            //  },
+                            //   {
+                            //       data: null, render: function (data, type, row) {
+                            //           return "<a href='#' class='btn btn-danger' onclick=DeleteData('" + row.CustomerID + "'); >Delete</a>";
+                            //       }
+                            //   },
+                        ]
+
+                    });
+
+                    $('#importList tbody').on('click', 'tr', function () {
+                        var data = table.row(this).data();
+                        //console.log(data);
+                        if (data.statusCode != 1)
+                            $(this).toggleClass('selected');
+                        else {
+                            toastr["error"]("File is " + data.fileName + " processing");
+                        }
+                    });
+                }
+
+                function DeleteImportList() {
+                    var list = [];
+                    ////console.log(data);
+                    //$("#importList tbody tr td span input[type=checkbox]:checked").each(function () {
+                    //      //console.log(this.value);
+                    //      var item = table.data.find(x => x.importEbankingFilesId == this.value);
+                    //      list.push(item);
+                    //  });
+
+                    var rows = table.rows('.selected').data();
+                    for (i = 0; i < rows.length; i++) {
+                        list.push(rows[i]);
+                    }
+
+                    //console.log(list);
+
+                    if (list.length > 0) {
+                        $('#importListOverlay').show();
+                        $.ajax({
+                            url: "/Import/DeleteImportList",
+                            type: 'POST',
+                            data: JSON.stringify(list),
+                            dataType: "json",
+                            traditional: true,
+                            contentType: "application/json; charset=utf-8",
+                            success: function (result) {
+                                //console.log(result);
+                                if (result.status)
+                                    table.rows('.selected').remove().draw(false);
+                                else
+                                    toastr["error"](result.message);
+                                $('#importListOverlay').hide();
+                            },
+                            error: function (error) {
+                                console.log(error);
+                                $('#importListOverlay').hide();
+                            }
+                        });
+                    } else {
+                        toastr["warning"]("You don't have files selected.");
+                    }
+                }
+
+                function ResetImportList() {
+                    var list = [];
+
+                    var rows = table.rows('.selected');
+                    $.each(rows[0], function( index, value ) {
+                        //console.log( index + ": " + value );
+                        var row = table.row(value).data();
+                        //console.log(row);
+                        if(row.statusCode == 2){
+                            list.push(row);
+                        }
+                        else{
+                            table.row(value).nodes().to$().removeClass('selected');
+                        }
+                    });
+
+                    //var rows = table.rows('.selected').data();
+                    ////console.log(rows);
+                    //for (i = 0; i < rows.length; i++) {
+                    //    var row = rows[i];
+                    //    //console.log(table.row( row ).index());
+                    //    if(row.statusCode == 2){
+                    //        list.push(row);
+                    //    }
+                    //    else{
+                    //        table.row(row).nodes().to$().removeClass('selected');
+                    //    }
+                    //}
+
+
+                    if(rows.data().length != list.length && list.length > 0){
+                        toastr["warning"]("you are select mixing reset status. you will reset on fail status only");
+                    }else if(rows.data().length != list.length && list.length == 0){
+                        toastr["warning"]("you can reset on fail status only.");
+                        return;
+                    }
+
+                    //console.log(list);
+
+                    if (list.length > 0) {
+                        $('#importListOverlay').show();
+                        $.ajax({
+                            url: "/Import/ResetImportList",
+                            type: 'POST',
+                            data: JSON.stringify(list),
+                            dataType: "json",
+                            traditional: true,
+                            contentType: "application/json; charset=utf-8",
+                            success: function (result) {
+                                //console.log(result);
+                                if (result.status)
+                                    UpdateResetList(result.data);
+                                    //table.rows('.selected').remove().draw(false);
+                                else
+                                    toastr["error"](result.message);
+                                $('#importListOverlay').hide();
+                            },
+                            error: function (error) {
+                                console.log(error);
+                                $('#importListOverlay').hide();
+                            }
+                        });
+                    } else {
+                        toastr["warning"]("You don't have files selected.");
+                    }
+                }
+
+                var dateRange = $('#daterange-btn').daterangepicker(
+                    {
+                        ranges: {
+                            'Today': [moment(), moment()],
+                            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                            'This Month': [moment().startOf('month'), moment().endOf('month')],
+                            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        },
+                        startDate: moment(),//moment().subtract(29, 'days'),
+                        endDate: moment()
+                    },
+                    function (start, end) {
+                        $('#daterange-btn span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+                        startDate = start;
+                        endDate = end;
+                        //table.ajax.reload();
+                        LoadImportList();
+                    }
+                );
+
+            </script>
+</section>

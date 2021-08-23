@@ -1,0 +1,44 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div id="CriteriaOveray" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+                <div class="form-row">
+                    <div class="form-group col-lg-3">
+                        <label for="cboFleet">Fleet</label>
+                        @Html.DropDownListFor(m => m.Fleet, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboFleet_waitinglist", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3" id="cbOrderDate">
+                        <label for="daterange-4" id="criteriaDate">Shipment Date</label>
+                        <input type="text" class="form-control cbFormat" id="monthpicker_waitinglist" placeholder="Select Month ... ">
+                    </div>
+                    <div class="form-group col-lg-3 pb-0">
+                        <div class="row pt-2">
+                            <div class="col-5">
+                                <div id="search-button">
+                                </div>
+                            </div>
+
+                            <div class="col-5 pt-4">
+                                <button type="button" class="btn btn-warning btn-block" onclick="clearCriteria()">Clear</button>
+                            </div>
+                            <div class="col-2 pt-4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

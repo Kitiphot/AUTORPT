@@ -1,0 +1,216 @@
+﻿@{
+    await Html.RenderPartialAsync("_Common_Transportation_Criteria_06");
+}
+<article class="card mb-4 col-12">
+    <div class="card-body">
+        @*<h4 class="card-title mb-4">Filled Tabs</h4>*@
+        <ul class="nav filled-tabs">
+            <li class="nav-item">
+                <a class="nav-link active show" data-toggle="tab" href="#filled-monthly" onclick="isActive()">Monthly</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#filled-yearly" onclick="isActive()">Yearly</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active show" id="filled-monthly">
+                <div class="row mt-4" id="SummaryMonthly">
+                    <div class="col-12 card-statistics">
+                        <h3>การจัดเที่ยวขนส่ง เดือน <span id="SummaryMonthlyDate"></span></h3>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 col-lg-2 mb-4" id="overlayMonthlySummary">
+                                <div class="card" style="padding:0 !important">
+                                    <div class="overlay section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body pointer">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="row">
+                                                    <div class="col text-center bg-summary-h">
+                                                        <h4 class="align-middle total-qty pt-2">-</h4>
+                                                        <h5 class="total-unit">Unit</h5>
+                                                        <br>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 bg-summary">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="delivery-percent pt-2">-%</h4>
+                                                        <h5>Achievement</h5>
+                                                        <br>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-10" id="Monthly">
+                                <div class="card">
+                                    <div class="overlay section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 d-flex align-items-center justify-content-between">
+                                        <h4 class="card-title report-title"></h4>
+                                        <div class="report-filename" style="display: none;"></div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="wrapper">
+                                                <a href="#" id="downloadPdf" onclick="downloadPDF('#TonMonthly'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                    <i class="icon-share-alt mr-1"></i>Download PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body pd-0 report-frame">
+                                        <div class="chart-container report-container">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="SummaryMonthlyDetail">
+                    <div class="col-12">
+                        <article class="card mb-4">
+                            <div class="card-body">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%" data-stripe-classes="[]"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="filled-yearly">
+                <div class="row mt-4" id="SummaryYearly">
+                    <div class="col-12 card-statistics">
+                        <h3>การจัดเที่ยวขนส่ง ปี <span id="SummaryYearlyDate"></span></h3>
+                        <div class="row">
+                            <div class="col-12 col-sm-6 col-lg-2 mb-4" id="overlayYearlySummary">
+                                <div class="card" style="padding:0 !important">
+                                    <div class="overlay section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body pointer">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="row">
+                                                    <div class="col text-center bg-summary-h">
+                                                        <h4 class="align-middle total-qty pt-2">-</h4>
+                                                        <h5 class="total-unit">Unit</h5>
+                                                        <br>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 bg-summary">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <h4 class="delivery-percent pt-2">-%</h4>
+                                                        <h5>Achievement</h5>
+                                                        <br>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-lg-10" id="Yearly">
+                                <div class="card">
+                                    <div class="overlay section-loading">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 d-flex align-items-center justify-content-between">
+                                        <h4 class="card-title report-title"></h4>
+                                        <div class="report-filename" style="display: none;"></div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="wrapper">
+                                                <a href="#" id="downloadPdf" onclick="downloadPDF('#TonYearly'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                    <i class="icon-share-alt mr-1"></i>Download PDF
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0 report-frame">
+                                        <div class="chart-container report-container">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="SummaryYearlyDetail">
+                    <div class="col-12">
+                        <article class="card mb-4">
+                            <div class="card-body">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table-responsive">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%" data-stripe-classes="[]"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</article>

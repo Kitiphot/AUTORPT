@@ -1,0 +1,111 @@
+﻿@using SCG.ARS.BOI.WEB.Security
+@inject ISecurityService sec
+
+<style>
+    .awesome-nav-link {
+        color: white;
+        padding: 0 15px;
+        line-height: 69px;
+    }
+
+    .awesome-nav-link:hover {
+        color: #269bff;
+    }
+</style>
+
+<div id="headerChangePassDialog">
+    @{
+        await Html.RenderPartialAsync("_ChangePasswordDialog");
+    }
+</div>
+<!-- Header Start -->
+<header class="top-bar flex-row align-items-center">
+    <!-- Logo  -->
+    <div class="nav-brand">
+        @*<div class="hamburg-icon active">
+            <a href="javascript:void(0)" class="nav-link">
+                <i class="mdi mdi-menu md-24"></i>
+            </a>
+        </div>*@
+        <div class="navbar-header">
+            <h2 class="mb-0">
+                <a class="navbar-brand" href="/Home">
+                    <img src="~/assets/images/logo-scg-logistics_40.png" alt="Admin">
+                </a>
+            </h2>
+        </div>
+    </div>
+    <!-- Logo End  -->
+    <!-- Right Nav -->
+    <div class="navbar-container">
+        <div class="right-bar-max align-self-center">
+            @*<div class="search-area">
+            <input class="form-control no-border" type="text" placeholder="Search something special" />
+            <div class="search-icon">
+                <i class="mdi mdi-magnify md-24"></i>
+                <i class="mdi mdi-arrow-left md-24"></i>
+            </div>
+            <div class="clear-icon">
+                <i class="mdi mdi-close md-24"></i>
+            </div>
+        </div>*@
+        </div>
+        <button class="d-md-none three-dots">
+            <i class="mdi mdi-dots-vertical md-24"></i>
+        </button>
+        <div class="notifications">
+            <ul>
+                @if (!sec.isLogin()) {
+                <li>
+                    <a href="#" class="nav-link" style="font-size: 0.8rem;" aria-expanded="false" title="Sign In" onclick="window.location.href = '@Url.Action("Login", "Account")' + id; return false;">
+                        <i class="fas fa-sign-in-alt fa-2x"></i>
+                    </a>
+                </li>
+                } 
+                else { 
+                <li>
+                    <a href="#" data-toggle="dropdown" style="font-size: 0.8rem;" class="nav-link auto-dropdown" id="userProfile" aria-haspopup="true"
+                       aria-expanded="false" title="@await sec.GetFullname()">
+                        <i class="far fa-user-circle fa-2x"></i>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="userProfile">
+                        <ul>
+                            <li>
+                                <a href="#" onclick="headerChangePassDialog.openChangePass(null); return false;">
+                                    Change Password
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-default btn-flat" asp-controller="Account" asp-action="Logout">Sign out</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                }
+            </ul>
+        </div>
+    </div><!-- Right Nav End -->
+</header>
+<!-- Header End -->
+
+<script type="text/javascript">
+    var headerChangePassDialog;
+    $(document).ready(function () {
+        headerChangePassDialog = new ChangePasswordDialogClass('#headerChangePassDialog', '@Url.Action("ChangePassword", "Security")', null);
+
+        var jqxhr = $.post('@Url.Action("IsPasswordExpire", "Security")')
+            .done(function (result) {
+                if (uiHelpers.errorHandler(result)) {
+                    console.log(result.data);
+                    if (result.data) {
+                        headerChangePassDialog.openChangePass(null, true);
+                    }
+                }
+
+            })
+            .fail(uiHelpers.postFailHandler)
+            .always(function (e) {
+            })
+            ;
+    });
+</script>

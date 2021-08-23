@@ -1,0 +1,366 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    ViewBag.Title = "SKIC - Order CIP & FMK";
+}
+
+@section Styles{
+}
+
+@section Scripts{
+
+    <script src="~/assets/js/SKIC.js"></script>
+
+    <script type="text/javascript">
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        $(document).ready(function () {
+            let loading = $('#criteria-loading-progress');
+            loading.show();
+            let dpicker = $('#daterange-99');
+
+            $.post("/Report/GetPKGLastWorkingRound")
+            .then(function (result) {
+                let last_date = new Date(Date.parse(result.last_date));
+                init_datepicker(dpicker, 'Yesterday', { maxSpan: { months: 1, days: -1 }, startDate: last_date, endDate: last_date });
+                loading.hide();
+                Search();
+            }).catch(function () {
+                init_datepicker(dpicker, 'Yesterday', { maxSpan: { months: 1, days: -1 } });
+                loading.hide();
+            });
+
+        });
+
+        function Search() {
+            $.ajax({
+                url: '@Url.Action("RPTPKG008_OrderCIPReport", "Report")',
+                type: 'POST',
+                data: getCriteriaParam03(),
+                dataType: 'Json'
+            }).done(function (response) {
+                DrawChart(response.chartData, response.chartGridLine);
+                DrawTable(response.tableData);
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                //$('#SectionStockByLocationType').hide();
+                //console.log( "finished" );
+            });
+
+        }
+
+        function DrawChart(data, gridLinesColor) {
+            let loading = $('#chart-loading-progress');
+            loading.show();
+
+            $('#barChartStatus').remove();
+            $('#barChartStatusContainer').append('<canvas id="barChartStatus"></canvas>');
+            var ctx = document.getElementById("barChartStatus").getContext('2d');
+            let maxValue = 0;
+            for (let i = 0; i < data.datasets.length; i++) {
+                maxValue = Math.max(maxValue, ...data.datasets[i].data);
+            }
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    plugins: {
+                        datalabels: {
+                            color: 'black',
+                            font: {
+                                //weight: 'bold'
+                            },
+                            formatter: (value, context) => {
+                                let sum = 0;
+
+                                for (let i = 0; i < context.chart.data.datasets.length; i++) {
+                                    sum += context.chart.data.datasets[i].data[context.dataIndex];
+                                }
+
+                                let percentage = (value * 100 / sum).toFixed(2) + "%";
+                                return (value == 0 ? '' : value + ' (' + percentage + ')');
+                            },
+                            rotation: 270,
+                            clamp: true
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [
+                            {
+                                //barPercentage: 0.6,
+                                stacked: false,
+                                ticks: {
+                                    autoSkip: false,
+                                    minRotation: 90,
+                                    maxRotation: 90,
+                                    rotation: 90,
+                                },
+                                gridLines: {
+                                    color: gridLinesColor,
+                                    //drawBorder: false,
+                                    tickMarkLength: 15,
+                                    //offsetGridLines: true
+                                },
+                            },
+                            {
+                                id: 'xAxis2',
+                                type: "category",
+                                gridLines: {
+                                    drawOnChartArea: false, // only want the grid lines for one axis to show up
+                                    //offsetGridLines: true
+                                    color: 'rgba(0, 0, 0, 0)'
+
+                                },
+                                scaleLabel: {
+                                    display: true
+                                },
+                                //labels: data.multiLabels,
+                                ticks: {
+                                    //autoSkip: true,
+                                    //maxRotation: 0,
+                                    //minRotation: 0,
+                                    callback: function (value, index, values) {
+                                        if (index > 0 && data.multilabels[index] == data.multilabels[index - 1])
+                                            return "";
+                                        else
+                                            return data.multilabels[index];
+                                    }
+                                }
+                            }
+                        ],
+                        yAxes: [
+                            {
+                                gridLines: {
+                                    display: true,
+                                },
+                                stacked: false,
+                                ticks: {
+                                    beginAtZero: true,
+                                    suggestedMax: Math.ceil(maxValue * 1.3) // add 30% for label
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน"
+                                },
+                                type: 'linear',
+                                id: 'left-axis',
+                                position: 'left'
+                            },
+                        ]
+                    },
+                    elements: {
+                        rectangle: {
+                            borderWidth: 1,
+                        },
+                        line: {
+                            fill: false,
+                            tension: 0
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'ช่วงเวลาการจ่ายงานกลุ่ม Order ' + $('#ddlCustGroup').val() + ' Fleet Domestic - ' + $('#daterange-99').text(),
+                        fontSize: 18
+                    },
+                    tooltips: {
+                        mode: 'x',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'x',
+                        intersect: false
+                    },
+                }
+            });
+
+            //var canvas = document.getElementById('barChartStockByLocationType');
+            //canvas.onclick = function (evt) {
+            //    var activePoints = myChart.getElementsAtEvent(evt);
+            //    if (activePoints[0]) {
+            //        var chartData = activePoints[0]['_chart'].config.data;
+            //        var idx = activePoints[0]['_index'];
+
+            //        var label = chartData.labels[idx];
+            //        var value = chartData.datasets[0].data[idx];
+
+            //        var url = label + " value=" + value;
+            //        //alert(url);
+            //    }
+            //};
+
+            loading.hide();
+        }
+
+        function DrawTable(data) {
+            let loading = $('#table-loading-progress');
+            loading.show();
+
+            var table = $("#view_report_table").DataTable().destroy();
+
+            table = $("#view_report_table").DataTable({
+                data: data,
+                scrollX: true,
+                responsive: true,
+                dom: 'lTf<"html5buttons"B>gtip',
+                pageLength: 10,
+                buttons: [
+                    'copy',
+                    {
+                        extend: 'excel',
+                        filename: 'Order ' + $('#ddlCustGroup').val() + ' ' + $('#daterange-99').html()
+                    }
+                ],
+                paging: false,
+                //ordering: false,
+                order: [],
+                columns: [
+                    { "data": "ship_to_range" },
+                    { "data": "ship_to", "className": "text-nowrap" },
+                    { "data": "order_count_range1" },
+                    {
+                        render: function (data, type, row) {
+                            return Math.round(100.0 * row.order_count_range1 / row.order_count_total, 0) + '%';
+                        }
+                    },
+                    { "data": "order_count_range2" },
+                    {
+                        render: function (data, type, row) {
+                            return Math.round(100.0 * row.order_count_range2 / row.order_count_total, 0) + '%';
+                        }
+                    },
+                    { "data": "order_count_range3" },
+                    {
+                        render: function (data, type, row) {
+                            return Math.round(100.0 * row.order_count_range3 / row.order_count_total, 0) + '%';
+                        }
+                    },
+                    { "data": "order_count_range4" },
+                    {
+                        render: function (data, type, row) {
+                            return Math.round(100.0 * row.order_count_range4 / row.order_count_total, 0) + '%';
+                        }
+                    },
+                    { "data": "order_count_total" },
+                ],
+                columnDefs: [
+                    {
+                        targets: [0, 1],
+                        orderable: true
+                    },
+                    {
+                        targets: '_all',
+                        orderable: false
+                    },
+                    {
+                        targets: [2, 4, 6, 8],
+                        className: 'text-right'
+                    },
+                    {
+                        targets: [3, 5, 7, 9],
+                        className: 'text-left'
+                    }
+                ],
+                "initComplete": function (settings, json) {
+                    MergeGridCells($('#view_report_table'), [1]);
+                }
+            });
+
+            loading.hide();
+        }
+
+    </script>
+}
+
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h4 class="card-title">Order CIP & FMK</h4>
+
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_SKIC_Criteria_03");
+    }
+    <div class="row" id="DailyShipmentStatus">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="chart-loading-progress" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="DailyShipmentStatusText"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartStatus','DailyShipmentStatusText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="barChartStatusLayout">
+                    <div id="barChartStatusContainer" class="chart-container" style="position: relative; height:85vh;">
+                        <canvas id="barChartStatus"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="ShipmentStatusDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div id="table-loading-progress" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title" id="ShipmentStatusDetailText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table class="table table-striped" id="view_report_table" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>ระยะ</th>
+                                        <th>สถานที่ส่ง</th>
+                                        <th class="text-nowrap text-right">ออกก่อน 10 โมง</th>
+                                        <th></th>
+                                        <th class="text-nowrap">ช่วงกลางวัน 10-14</th>
+                                        <th></th>
+                                        <th class="text-nowrap">ช่วงบ่าย 14-18</th>
+                                        <th></th>
+                                        <th class="text-nowrap">ช่วงหลัง 18:00</th>
+                                        <th></th>
+                                        <th>รวม</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->

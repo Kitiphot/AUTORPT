@@ -1,0 +1,335 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListUserMasterViewModel
+@{
+    ViewData["Title"] = "";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        th.ui-th-column div {
+            white-space: normal !important;
+            height: auto !important;
+            padding: 2px;
+        }
+
+        .ui-jqgrid .ui-widget-header {
+            background-color: lightyellow;
+            background-image: none
+        }
+
+        .styling {
+            background: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .ui-jqgrid tr.jqgrow {
+            outline-style: none;
+            color: darkslategray;
+            font-weight: normal;
+            cursor: pointer;
+            vertical-align: middle
+        }
+
+        .modal fade in {
+            position: relative;
+            margin: 0 auto;
+            top: 25%;
+        }
+
+        .vertical-alignment-helper {
+            display: table;
+            height: 100%;
+            width: 100%;
+        }
+
+        .vertical-align-center {
+            /* To center vertically */
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .modal-content {
+            /* Bootstrap sets the size of the modal in the modal-dialog class, we need to inherit it */
+            width: 400px;
+            height: inherit;
+            /* To center horizontally */
+            margin: 0 auto;
+        }
+
+        .ui-th-column, .ui-jqgrid .ui-jqgrid-htable th.ui-th-column {
+            border-right-width: 0.5px;
+            border-right-color: lightgray;
+            border-right-style: solid;
+            overflow: hidden;
+            text-align: center;
+            white-space: nowrap;
+            background: #1E90FF;
+        }
+        /* Set jqgrid auto resize to current web page */
+        .ui-jqgrid {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100% !important;
+        }
+
+            .ui-jqgrid > .ui-jqgrid-view {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                overflow: auto;
+                width: auto !important;
+            }
+
+                .ui-jqgrid > .ui-jqgrid-view,
+                .ui-jqgrid > .ui-jqgrid-view > .ui-jqgrid-bdiv {
+                    flex: 1;
+                    width: auto !important;
+                }
+
+                    .ui-jqgrid > .ui-jqgrid-pager,
+                    .ui-jqgrid > .ui-jqgrid-view > .ui-jqgrid-hdiv {
+                        flex: 0 0 auto;
+                        width: auto !important;
+                    }
+
+        /*enable scrollbar*/
+        .ui-jqgrid-bdiv {
+            overflow: auto
+        }
+
+        .ui-common-table {
+            width: 100% !important;
+        }
+
+        .ui-jqgrid .ui-jqgrid-hbox {
+            padding-right: 0px !important;
+        }
+
+        #pager_left, #pagerMenu_left {
+            width: 40% !important;
+        }
+
+        #pager_center, #pagerMenu_center {
+            width: 0px !important;
+        }
+        /*######### end #########*/
+    </style>
+    <script type="text/javascript">        
+        $(document).ready(function () {            
+            $.ajax({
+                url: "/UserGroupPermission/GetDataPermission",
+                type: 'GET',
+                success: function (data) {                    
+                    $.each(data.permission, function (key, entry) {
+                        if (entry.fullControl_Flag == true) {
+                            document.getElementById("btnSave").disabled = false;
+                        }
+                        else {
+                            document.getElementById("btnSave").disabled = true;
+
+                        }
+                    })
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            })
+            GetMainData(null);
+            var lastgridsel = -1;
+            intTemplate = {
+                width: 20, template: "integer",
+                align: "center", editable: true
+            };
+
+            $("#dxGridMenuConfig").jqGrid({
+                datatype: 'json',
+                mtype: 'GET',
+                colNames: ["User Id", "Menu Id", "Menu", "Description", "Full Control", "Read Only"],
+                colModel: [
+                    { name: "usergroup_id", hidden: true },
+                    { name: "menu_id", hidden: true },
+                    { name: "menu_code", template: intTemplate, width: 10, editable: false, editrules: { required: true } },
+                    { name: "menu_name", template: intTemplate, width: 25, align: "left", editable: false, editrules: { required: true } },
+                    { name: "fullcontrol_flag", template: intTemplate, width: 8, editable: true, edittype: "checkbox", formatter: "checkbox", editoptions: { value: '1:0' }, formatoptions: { disabled: false } },
+                    { name: "readonly_flag", template: intTemplate, width: 8, editable: true, edittype: "checkbox", formatter: "checkbox", editoptions: { value: '1:0' }, formatoptions: { disabled: false } }
+                ],
+                beforeSelectRow: function (rowid, e) {
+                    var currentCol = $.jgrid.getCellIndex($(e.target).closest("td")[0]);
+                    var rowData = jQuery(this).getRowData(rowid);
+                    var configFF = rowData['fullcontrol_flag'];
+                    var configRF = rowData['readonly_flag'];
+                    var FCF = jQuery(this).find('#' + rowid + ' [aria-describedby=dxGridMenuConfig_fullcontrol_flag] input[type=checkbox]');
+                    var RDF = jQuery(this).find('#' + rowid + ' [aria-describedby=dxGridMenuConfig_readonly_flag] input[type=checkbox]');
+                    //if (currentCol == "4") {
+                    //    if (configRF == "1") { FCF.prop('checked', false) }
+                    //}
+                    //else {
+                    //    if (configFF == "1") { RDF.prop('checked', false) }
+                    //}
+                    if (currentCol == "4") {
+                        if (configFF == "1") { RDF.prop('checked', false) }
+                    }
+                    else {
+                        if (configRF == "1") { FCF.prop('checked', false) }
+                    }
+                    $("#dxGridMenuConfig").saveRow(lastgridsel, false, 'clientArray');
+                    $("#dxGridMenuConfig").editRow(rowid, true);
+                    lastgridsel = rowid;
+                    $("#dxGridMenuConfig").saveRow(lastgridsel, false, 'clientArray');
+                    $("#dxGridMenuConfig").editRow(rowid, true);
+                    lastgridsel = rowid;
+                },
+                loadonce: true,
+                height: "100%",
+                viewrecords: true,
+                rowNum: 50,
+                caption: "User Group Permission",
+                emptyrecords: "No records",
+                pager: jQuery("#pagerMenu"),
+                jsonReader:
+                {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: true,
+                    Id: "0"
+                },
+                autowidth: true,
+            }).navGrid('#pagerMenu',
+                {
+                    edit: false,
+                    add: false,
+                    del: false,
+                    search: false,
+                    refresh: false,
+                    closeAfterSearch: false
+                }
+            );
+            
+        });
+        function SaveData() {
+            //var jsondata = jQuery("#dxGridMenuConfig").jqGrid('getGridParam', 'data');    
+            var jsondata = $("#dxGridMenuConfig").getGridParam('data');
+            if (jsondata.length <= 0) {                
+                alert("Please select transaction to be done before saving.");
+                return false;
+            }
+            $.ajax({
+                url: "/UserGroupPermission/SaveUserPermission",
+                type: "POST",
+                data: JSON.stringify(jsondata),
+                dataType: "json",
+                traditional: true,
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.status) {                        
+                        alert("Data was saved successfully.");                                              
+                    } else {                        
+                        alert(result.message);
+                    }
+                },
+                error: function (e) {                                        
+                    alert(e.message);
+                }
+            });
+        }
+        function GetMainData(data) {
+            intTemplate = {
+                width: 20, template: "integer", editable: true
+            };
+            $("#dxGridMainData").jqGrid({
+                url: "/UserGroup/GetUserGroup",
+                datatype: 'json',
+                mtype: 'GET',
+                colNames: ["User Id", "User Group", "Description", "Create By", "Create Date", "Update By", "Update Date"],
+                colModel: [
+                    { name: "userGroup_Id", index: "userGroup_Id", align: "left", template: intTemplate, key: true, editable: true, hidden: true },
+                    { name: "userGroup_Name", index: "userGroup_Name", align: "left", width: 11, template: intTemplate, editable: true, editrules: { required: true }, search: true, searchoptions: { sopt: ['eq', 'cn'] } },
+                    { name: "userGroup_Desc", index: "userGroup_Desc", align: "left", template: intTemplate, editable: true, editrules: { required: true }, search: true, searchoptions: { sopt: ['eq', 'cn'] } },
+                    { name: "createUser_Code", align: "center", template: intTemplate, width: 12, editable: true, search: false },
+                    { name: "create_DateTime", align: "center", template: intTemplate, width: 13, editable: true, search: false, formatter: 'date', formatoptions: { srcformat: "ISO8601Long", newformat: "d/M/Y H:i:s" } },
+                    { name: "updateUser_Code", align: "center", template: intTemplate, width: 12, editable: true, search: false },
+                    { name: "update_DateTime", align: "center", template: intTemplate, width: 13, editable: true, search: false, formatter: 'date', formatoptions: { srcformat: "ISO8601Long", newformat: "d/M/Y H:i:s" } }
+                ],
+                onSelectRow: function (userGroup_Id) {
+                    onSelectedRow(userGroup_Id);
+                },
+                height: "100%",
+                viewrecords: true,
+                rowNum: 50,
+                caption: "Users Group Info.",
+                emptyrecords: "No records",
+                pager: jQuery("#pager"),
+                jsonReader:
+                {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: false,
+                    Id: "0"
+                },
+                autowidth: true
+            }).navGrid('#pager',
+                {
+                    edit: false,
+                    add: false,
+                    del: false,
+                    search: false,
+                    refresh: false,
+                    closeAfterSearch: false
+                }
+            );            
+        }
+        function onSelectedRow(sKey) {
+            $("#dxGridMenuConfig").jqGrid().setGridParam({ url: "/UserGroupPermission/GetMenuConfig?keywords=" + sKey, datatype: 'json', page: 1 }).trigger("reloadGrid");
+        }
+
+    </script>
+</head>
+<body>
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+    </section>
+    <!-- Main content -->
+    <section class="content container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="box box-primary" style="margin-top:-20px">
+                    <div class="box-body">
+                        <div class="text-left">
+                            <h2 class="display-2" style="margin-top:0">User Group Permission</h2>
+                        </div>
+                        <div class="box box-primary">
+                            <table id="dxGridMainData" width:"100%" style="font-size:12px"></table>
+                            <div id="pager"></div>
+                            <br />
+                            <table id="dxGridMenuConfig" width:"100%" style="font-size:12px"></table>
+                            <div id="pagerMenu"></div>
+                            <br />
+                            <div id="buttonSave">
+                                <button type="button" name="btnSave" id="btnSave" class="btn btn-primary" style="width:80px" onclick="SaveData()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+    </section>
+</body>
+</html>
+
+

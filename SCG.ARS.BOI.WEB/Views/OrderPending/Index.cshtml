@@ -1,0 +1,500 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/fixedHeader.dataTables.min.css" rel="stylesheet" />
+<link href="~/assets/vendor/data-table/css/select.dataTables.min.css" rel="stylesheet" />
+<style>
+
+    .table-bordered td, .table-bordered th {
+        border: 1px solid #030303 !important;
+    }
+
+/*    .labelBlueunderline {
+        cursor: pointer;
+        color: deepskyblue;
+        text-decoration: underline;
+    }*/
+
+</style>
+<div id="dvOverlay" class="overlay">
+    <div class="loader-wrap">
+        <div class="bar-loader">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
+
+<div class="content-wrapper">
+
+    <!-- Heading Start -->
+    <section class="heading">
+        <h4 class="mb-2">Order Pending</h4>
+    </section><!-- Heading End -->
+
+    <div id="accordionOne" class="accordion">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseOne"
+                   aria-expanded="false" aria-controls="collapseOne">
+                    Search Parameter
+                </a>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
+                <div class="card-body">
+                    <form id="formSearch">
+                        <div class="col-12">
+                            <div class="row" style="padding:7px">
+                                <div class="col-4">
+                                    <label class=""><b>Truck Type</b></label>
+                                    <select id="ddltrucktype" class="form-control">
+                                        <option value="S04,S06,S06K,S06L">6W</option>
+                                        <option value="S10A">10W</option>
+                                        <option value="S10B">10Bulk</option>
+                                        <option value="S18B">18Bulk</option>
+                                        <option value="S18S,S22,S22N,S22S,S24">18W</option>
+                                        @*<option value="S04,S06,S06K,S06L">6W: รถ 4 ล้อ</option>
+        <option value="S06">6W: รถ 6 ล้อ</option>
+        <option value="S06K">6W: รถ 6 ล้อ (ขอนแก่น)</option>
+        <option value="S06L">6W: รถ 6 ล้อ (ลำพูน)</option>
+        <option value="S10A">10W: รถ 10 ล้อ (ถุง)</option>
+        <option value="S10B">10Bulk: รถ 10 ล้อ (ผง)</option>
+        <option value="S18B">18Bulk: รถ 18 ล้อ (ผง)</option>
+        <option value="S18S">18W: รถ 18 ล้อ special</option>
+        <option value="S22">18W: รถ 22 ล้อ</option>
+        <option value="S22N">18W: รถเทรลเลอร์ 22 ล้อ (ภาคเหนือ)</option>
+        <option value="S22S">18W: รถ 22 ล้อ Special</option>
+        <option value="S24">18W: รถ 24 ล้อ</option>*@
+                                    </select>
+                                    @*<input class="form-control" id="txtschedulename" placeholder="Schedule Name" name="Name">*@
+                                </div>
+                                <div class="col-4">
+                                    <label><b>Origin Region</b></label>
+                                    <select multiple="" class="form-control chosen-select" id="ddloriginregion" placeholder="Choose origin region"></select>
+                                    @*   @Html.DropDownList("txtStartPoint", new SelectList(ViewBag.OriginList, "ShippingCode", "ShippingName"), "--- ALL ---", new { @class = "chosen-select form-control input-sm multiselect" })*@
+                                </div>
+                                <div class="col-4">
+                                    <label><b>Destination Region</b></label>
+                                    <select multiple="" class="form-control chosen-select" id="ddldestinationregion" placeholder="Choose destination region"></select>
+                                    @*   @Html.DropDownList("txtStartPoint", new SelectList(ViewBag.OriginList, "ShippingCode", "ShippingName"), "--- ALL ---", new { @class = "chosen-select form-control input-sm multiselect" })*@
+                                </div>
+                            </div>
+                            <div class="row" style="padding:7px">
+                                <div class="col-4">
+                                </div>
+                                <div class="col-4">
+                                </div>
+                                <div class="col-4" style="text-align:right;padding:7px;">
+                                    <label class="col-12"></label>
+                                    <div class="col-sm-12">
+                                        <button type="button" class="btn btn-warning" onclick="LoadOrderList();">Search</button>
+                                        <button type="reset" class="btn btn-secondary" onclick="CearOrderList();">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <!--<div class="row" style="padding:7px">
+                        <div class="col-4">
+                            <label class=""><b>Truck Type</b></label>
+                            <select id="ddlactive" class="form-control">
+                                <option value="4W">4W</option>
+                                <option value="6W">6W</option>
+                                <option value="8W">8W</option>
+                                <option value="10W">10W</option>
+                                <option value="18W">18W</option>
+                                <option value="18W">เทรลเลอร์</option>
+                            </select>-->
+                    @*<input class="form-control" id="txtschedulename" placeholder="Schedule Name" name="Name">*@
+                    <!--</div>
+                    <div class="col-4">
+                        <label><b>Origin Region</b></label>
+                        <select id="ddlactive" class="form-control" placeholder="* multiple select">
+                            <option value="">----- SELECT ----</option>
+                            <option value="4W">AAAAAAAAAAAAAA</option>
+                            <option value="6W">BBBBBBBBBBBBBB</option>
+                            <option value="8W">CCCCCCCCCCCCCC</option>
+                            <option value="10W">DDDDDDDDDDDDDD</option>
+                            <option value="18W">EEEEEEEEEEEEEEE</option>
+                            <option value="18W">FFFFFFFFFFFFFFFF</option>
+                        </select>-->
+                    @*<input class="form-control" id="txtsubject" placeholder="Subject" name="Subject">*@
+                    <!--</div>
+                    <div class="col-4">
+                        <label><b>Destination Region</b></label>
+                        <select id="ddlactive" class="form-control" placeholder="* multiple select">
+                            <option value="">----- SELECT ----</option>
+                            <option value="4W">GGGGGGGGGGGGGGG</option>
+                            <option value="6W">HHHHHHHHHHHHHHHH</option>
+                            <option value="8W">IIIIIIIIIIIIIIII</option>
+                            <option value="10W">JJJJJJJJJJJJJJJJJ</option>
+                            <option value="18W">KKKKKKKKKKKKKKKKKK</option>
+                            <option value="18W">LLLLLLLLLLLLLLLLLLL</option>
+                        </select>-->
+                    @*<input class="form-control" id="txtemail" placeholder="E-mail" name="email">*@
+                    <!--</div>
+                    </div>
+                    <br />-->
+                    <table id="dtPendingList" class="table" style="width:100%" border="1">
+                        <thead style="background-color: #dfdfdf">
+                            <tr>
+                                <th rowspan="4" style="text-align:center">Business group</th>
+                                <th rowspan="4" style="text-align:center">Customer Group</th>
+                                <th rowspan="4" style="text-align:center">Product Group</th>
+                                <th rowspan="4" style="text-align:center">Last Tender</th>
+                                <th colspan="4" style="text-align:center">Booking (จองคิวแล้ว + Split order)</th>
+                                <th colspan="2" style="text-align:center">Waiting list</th>
+                                <th rowspan="4" style="text-align:center">Rank</th>
+                            </tr>
+                            <tr>
+                                <th colspan="3" style="text-align:center">Pending</th>
+                                <th rowspan="3" style="text-align:center">Tender</th>
+                                <th colspan="2" style="text-align:center">Pending</th>
+                                @*<th rowspan="3" style="text-align:center">Tender</th>*@
+                            </tr>
+                            <tr>
+                                <th colspan="3" style="text-align:center">Requested Date</th>
+                                <th style="text-align:center">Create Order (sap)</th>
+                                <th style="text-align:center">Requested Date (OMS)</th>
+                            </tr>
+                            <tr>
+                                <th style="text-align:center">Today -7</th>
+                                <th style="text-align:center">Order Same Day</th>
+                                <th style="text-align:center">Order Leadtime</th>
+                                <th style="text-align:center">Day -14</th>
+                                <th style="text-align:center">Today -13</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="~/assets/vendor/data-table/js/jquery.dataTables.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.bootstrap.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.buttons.min.js"></script>
+<script src="~/assets/vendor/data-table/js/dataTables.rowsGroup.js"></script>
+<script src="~/assets/vendor/data-table/js/buttons.html5.min.js"></script>
+
+<script>
+
+
+    var OriginRegion = "";
+    var DestinationRegion = "";
+    var TruckType = "";
+
+    $(document).ready(function () {
+
+        LoadOrderList();
+
+        $('#ddloriginregion, #ddldestinationregion').select2();
+        $('#ddloriginregion, #ddldestinationregion').empty();
+
+        for (var i = 1; i <= 7; i++) {
+            if (i == 7) {
+                $("#ddloriginregion").append('<option value=' + i + '>' + "MA" + '</option>');
+            } else {
+                $("#ddloriginregion").append('<option value=' + i + '>' + "M" + i + '</option>');
+            }
+        }
+
+        for (var i = 1; i <= 7; i++) {
+            if (i == 7) {
+                $("#ddldestinationregion").append('<option value=' + i + '>' + "MA" + '</option>');
+            } else {
+                $("#ddldestinationregion").append('<option value=' + i + '>' + "M" + i + '</option>');
+            }
+        }
+
+        //$.each(originList, function (index, value) {
+        //    $("#txtStartPoint").append('<option value=' + value.ShippingCode + '>' + value.ShippingName + '</option>');
+        //});
+
+        //$('.chosen-select').chosen({ allow_single_deselect: true, search_contains: true }).trigger("chosen:updated");
+
+    });
+
+
+
+
+    function LoadOrderList() {
+
+        $('#dvOverlay').show();
+        var request = {
+            trucktype: ""
+        }
+
+        OriginRegion = "";
+        DestinationRegion = "";
+        TruckType = "";
+        
+        var origin = $('#ddloriginregion').val();
+        var shipto = $('#ddldestinationregion').val();
+        var originlist = "";
+        var shiptolist = "";
+        if (origin.length > 0) {
+            for (var i = 0; i < origin.length; i++) {
+                if (i != 0) {
+                    originlist = originlist + "|";
+                }
+                originlist += origin[i];
+
+                if (i != 0) {
+                    OriginRegion = OriginRegion + ",";
+                }
+                OriginRegion += origin[i];
+            }
+
+        } else {
+            originlist = "1|2|3|4|5|6|7";
+            OriginRegion = "1,2,3,4,5,6,7";
+        }
+
+        if (shipto.length > 0) {
+            for (var i = 0; i < shipto.length; i++) {
+                if (i != 0) {
+                    shiptolist = shiptolist + "|";
+                }
+                shiptolist += shipto[i];
+
+                if (i != 0) {
+                    DestinationRegion = DestinationRegion + ",";
+                }
+                DestinationRegion += shipto[i];
+
+            }
+        } else {
+            shiptolist = "1|2|3|4|5|6|7";
+            DestinationRegion = "1,2,3,4,5,6,7";
+        }
+
+        TruckType = $('#ddltrucktype').val();
+
+        request.trucktype = $('#ddltrucktype').val();
+        request.origin = originlist;
+        request.shipto = shiptolist;
+
+
+        var jqxhr = $.post("/OrderPending/LoadOrderPending", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    data = result.data;
+                    bindPendingGroup(data);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#dvOverlay').hide();
+            });
+    }
+
+    function CearOrderList() {
+
+        $('#ddloriginregion').val('').change();
+        $('#ddldestinationregion').val('').change();
+    }
+
+    function bindPendingGroup(data) {
+        $('#dvOverlay').hide();
+        var table = $('#dtPendingList').DataTable({
+
+            destroy: true,
+            scrollX: true,
+            searching: false,
+            paging: false,
+            info: false,
+            lengthChange: false,
+            ordering: false,
+            dom: 'lTf<"html5buttons"B > gtip',
+            buttons: [
+                 'excel'
+            ],
+            data: data,
+            "rowsGroup": [0, 1],
+            columns: [
+                { data: "businessgroup" },
+                { data: "customergroup" },
+                { data: "productgroup" },
+                //{ data: "toltallasttender", className: 'text-center' },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '0';
+                        if (data.toltallasttender > 0) {
+                            html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'lasttender' + '\')" >' + data.toltallasttender + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '0';
+                        if (data.toltalrequestedbooking > 0) {
+                             html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'bookingtoday7' + '\')" >' + data.toltalrequestedbooking + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '0';
+                        if (data.toltalordersamedaybooking > 0) {
+                             html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'bookingordersameday' + '\')" >' + data.toltalordersamedaybooking + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '0';
+                        if (data.toltalorderleadtimebooking > 0) {
+                            html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'bookingorderleadtime' + '\')" >' + data.toltalorderleadtimebooking + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '0';
+                        if (data.toltaltender > 0) {
+                            html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'bookingtender' + '\')" >' + data.toltaltender + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '0';
+                        if (data.toltalcreatewaiting > 0) {
+                            html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'waitinglisttoday14' + '\')" >' + data.toltalcreatewaiting + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '0';
+                        if (data.toltalrequestedwaiting > 0) {
+                            html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'waitinglisttoday13' + '\')" >' + data.toltalrequestedwaiting + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (data, type, full) {
+
+                        var html = '';
+                        if (data.toltalrank > 0) {
+                            html = '<label style="cursor:pointer;color:deepskyblue;text-decoration:underline;" onclick="PendingTableFrom(\'' + data.businessgroup + '\',\'' + data.customergroup + '\',\'' + data.productgroup + '\',\'' + 'waitinglistrank' + '\')" >' + data.toltalrank + '</label>';
+                        }
+
+                        return html;
+                    }
+                },
+
+                //{ data: "toltalrequestedbooking", className: 'text-center' },
+                //{ data: "toltalordersamedaybooking", className: 'text-center' },
+                //{ data: "toltalorderleadtimebooking", className: 'text-center' },
+                //{ data: "toltaltender", className: 'text-center' },
+                //{ data: "toltalcreatewaiting", className: 'text-center' },
+                //{ data: "toltalrequestedwaiting", className: 'text-center' },
+
+                //{ data: "toltaltenderwaiting", className: 'text-center' },
+
+               // { data: "toltalrank", className: 'text-center' }
+
+                //{
+                //    data: "IsActive", className: "text-center", orderable: false,
+                //    "render": function (data, type, full, meta) {
+                //        return (data ? '<i class="glyphicon glyphicon-ok" style="font-size: 16px;"></i>' : '');
+                //    }
+                //},
+                //{
+                //    data: "null", orderable: false, className: 'hidden-480 text-center',
+                //    render: function (data, type, full) {
+                //        return '<a class="btn btn-default btn-sm btn-edit"><i class="glyphicon glyphicon-edit"></i></a>&nbsp;'
+                //            + '<a class="btn btn-default btn-sm btn-delete"><i class="ti-trash"style="color:red;"></i></a>'
+                //    }
+                //}
+            ],
+            drawCallback: function (settings) {
+                var api = new $.fn.dataTable.Api(settings);
+                api.off('order.dt');
+                api.off('preDraw.dt');
+                api.off('column-visibility.dt');
+                //api.off('search.dt');
+                //api.off('page.dt');
+                //api.off('length.dt');
+                api.off('xhr.dt');
+            },
+            //"fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+
+            //    if (aData.customergroup == "VMI:PO number") {
+            //        debugger
+            //        $('td', nRow).css('background-color', 'Red');
+            //    } else if (aData.customergroup == "4") {
+            //        $('td', nRow).css('background-color', 'Orange');
+            //    }
+            //}
+        });
+
+
+
+
+    }
+
+
+
+    var urlPendingTableFrom = '@Url.Action("PendingTable", "OrderPending", new { Id = "__id__" })';
+    function PendingTableFrom(businessgroup, customergroup, productgroup, type) {
+        window.open(urlPendingTableFrom.replace("__id__", btoa(businessgroup + "|" + customergroup + "|" + productgroup + "|" + type + "|" + OriginRegion + "|" + DestinationRegion + "|" + TruckType)), '_blank');
+   
+    }
+
+</script>
+
+

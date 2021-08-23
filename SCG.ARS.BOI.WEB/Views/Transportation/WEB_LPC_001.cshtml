@@ -1,0 +1,1320 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+@section OverrideStyles{
+
+    @*<link rel="stylesheet" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css">*@
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.3.2/css/fixedColumns.dataTables.min.css">
+    <style>
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable .percent {
+                padding: 0px !important;
+            }
+
+            .dataTables_wrapper .dataTable thead th {
+                padding: 5px 30px;
+            }
+
+        div.DTFC_LeftBodyWrapper {
+            background-color: white;
+        }
+        div.DTFC_LeftFootWrapper {
+            background-color: white;
+        }
+        div.DTFC_LeftBodyLiner {
+            overflow-y:hidden;
+        }
+        .text-weight-bold {
+            font-weight:bold;
+        }
+    </style>
+
+}
+@section Scripts{
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>*@
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/transportation.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <link rel="stylesheet" href="~/assets/css/transportation.css">
+    <script src="https://cdn.datatables.net/fixedcolumns/3.3.2/js/dataTables.fixedColumns.min.js"></script>
+    <script type="text/javascript">
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var isFirstLoad = 1;
+        var screenID = 'WEB_LPC_001';
+        @*var cacheCriteria = [];*@
+        var summary_table = [];
+        var table = null;
+        var selected = [];
+        var submitCriteria;
+        var column = [
+            { "data": "load_id", "name": "load_id", "title": "เลข Shipment", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "carrier_code", "name": "carrier_code", "title": "รหัสผู้รับเหมา", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "carrier_name", "name": "carrier_name", "title": "ชื่อผู้รับเหมา", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "driver_name", "name": "driver_name", "title": "ชื่อพนักงานขับรถ", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "truck_license", "name": "truck_license", "title": "ทะเบียรถ", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "equipment_type", "name": "equipment_type", "title": "ประเภทรถ", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "total_distance", "name": "total_distance", "title": "ระยะทาง", "autoWidth": true, "className": "text-nowrap text-right" },
+            { "data": "total_volume", "name": "total_volume", "title": "Vol./Shipment", "autoWidth": true, "className": "text-nowrap text-right" },
+            { "data": "total_weight", "name": "total_weight", "title": "Wgt./Shipment", "autoWidth": true, "className": "text-nowrap text-right" },
+            { "data": "total_shipments", "name": "total_shipments", "title": "จำนวน DN", "autoWidth": true, "className": "text-nowrap text-right" },
+            { "data": "total_stops", "name": "total_stops", "title": "จำนวน Stop", "autoWidth": true, "className": "text-nowrap text-right" },
+            { "data": "user_create_date", "name": "user_create_date", "title": "วันที่สร้าง Shipment", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate},
+            { "data": "load_prtb_ctnt", "name": "load_prtb_ctnt", "title": "หมายเหตุ", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "delivery_number", "name": "delivery_number", "title": "DN", "autoWidth": true, "className": "text-nowrap" },
+            //{ "data": "order_number", "name": "order_number", "title": "SO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "orderdate", "name": "orderdate", "title": "Order Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime},
+            { "data": "po_number", "name": "po_number", "title": "PO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "load_leg", "name": "load_leg", "title": "leg", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_code", "name": "customer_code", "title": "รหัสลูกค้า", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_name", "name": "customer_name", "title": "ชื่อลูกค้า", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_code", "name": "origin_code", "title": "รหัสต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_name", "name": "origin_name", "title": "ชื่อต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_address", "name": "origin_address", "title": "ที่อยู่ต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_amphur", "name": "origin_amphur", "title": "อำเภอต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_province", "name": "origin_province", "title": "จังหวัดต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_region", "name": "origin_region", "title": "รหัสภาคต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_country", "name": "origin_country", "title": "ประเทศต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_postal_code", "name": "origin_postal_code", "title": "รหัสไปรษณีย์ต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_code", "name": "destination_code", "title": "รหัสปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_name", "name": "destination_name", "title": "ชื่อปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_amphur", "name": "destination_amphur", "title": "อำเภอปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_province", "name": "destination_province", "title": "จังหวัดปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_address", "name": "destination_address", "title": "ที่อยู่ปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_region", "name": "destination_region", "title": "รหัสภาคปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_country", "name": "destination_country", "title": "ประเทศปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_postal_code", "name": "destination_postal_code", "title":"รหัสไปรษณีย์ปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "commodity_code", "name": "commodity_code", "title": "กลุ่มสินค้า", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mat_freight_grp", "name": "mat_freight_grp", "title": "Material Freight group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipment_prtb_ctnt", "name": "shipment_prtb_ctnt", "title": "หมายเหตุ", "Width": "500px", "className": "text-nowrap" },
+            { "data": "shipment_weight", "name": "shipment_weight", "title": "Wgt./DN", "autoWidth": true, "className": "text-nowrap  text-right" },
+            { "data": "pickup_code", "name": "pickup_code", "title": "Pickup Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_name", "name": "pickup_name", "title": "Pickup Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_block", "name": "pickup_block", "title": "Pickup Block", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_street", "name": "pickup_street", "title": "Pickup Street", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_city", "name": "pickup_city", "title": "Pickup City", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_amphur", "name": "pickup_amphur", "title": "Pickup Amphur", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_province", "name": "pickup_province", "title": "Pickup Province", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_region", "name": "pickup_region", "title": "Pickup Region", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_country", "name": "pickup_country", "title": "Pickup Country", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pickup_postal_code", "name": "pickup_postal_code", "title": "Pickup Postal Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_code", "name": "drop_code", "title": "Drop Code", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_name", "name": "drop_name", "title": "Drop Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_block", "name": "drop_block", "title": "Drop Block", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_street", "name": "drop_street", "title": "Drop Street", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_city", "name": "drop_city", "title": "Drop City", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_amphur", "name": "drop_amphur", "title": "Drop Amphur", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_province", "name": "drop_province", "title": "Drop Province", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_region", "name": "drop_region", "title": "Drop Region", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_country", "name": "drop_country", "title": "Drop Country", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "drop_postal_code", "name": "drop_postal_code", "title": "Drop Postal Code", "autoWidth": true, "className": "text-nowrap" },
+            //{ "data": "request_delivery_date", "name": "request_delivery_date", "title": "request_delivery_date", "autoWidth": true, "className": "text-nowrap" },
+            {"data": "request_delivery_date", "name": "request_delivery_date", "title": "Request Delivery Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate},
+            { "data": "incoterm", "name": "incoterm", "title": "Incoterm", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "status_display", "name": "status_display", "title": "สถานะล่าสุด", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "actual_tender_accept", "name": "actual_tender_accept", "title": "วันที่ Tender Accept", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime},
+            { "data": "actual_in_origin", "name": "actual_in_origin", "title": "วันที่เข้าต้นทาง", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime },
+            { "data": "actual_gi_date", "name": "actual_gi_date", "title": "วันที่ตัดจ่าย", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime},
+            { "data": "actual_in_transit", "name": "actual_in_transit", "title": "วันที่ In Transit", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime},
+            { "data": "actual_out_origin", "name": "actual_out_origin", "title": "วันที่ออกจากต้นทาง", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime },
+            { "data": "actual_in_destination", "name": "actual_in_destination", "title": "วันที่เข้าปลายทาง", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime},
+            {"data": "actual_delivery_date", "name": "actual_delivery_date", "title": "วันที่ส่งถึงลูกค้า", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime},
+            { "data": "actual_out_destination", "name": "actual_out_destination", "title": "วันที่ออกจากปลายทาง", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.displayDateTime},
+            { "data": "item_number", "name": "item_number", "title": "เลข Material", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "item_desc", "name": "item_desc", "title": "รายละเอียด Material", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "item_quantity", "name": "item_quantity", "title": "จำนวน Material", "autoWidth": true, "className": "text-nowrap  text-right" },
+            { "data": "item_weight", "name": "item_weight", "title": "น้ำหนัก Material", "autoWidth": true, "className": "text-nowrap  text-right" },
+            { "data": "plannername", "name": "plannername", "title": "Planner Name", "autoWidth": true, "className": "text-nowrap" }
+        ];
+
+        $(document).ready(function () {
+
+            initialControl().then(() => {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+            initialSearchCriteria_Rawdata();
+            @*cacheCriteria.push({ id: 1, name: 'a' });*@
+        @*cacheCriteria.push({ id: 2, name: 'b' });*@
+
+
+            comboOnchange();
+            comboOnchange_Rawdata();
+            isActive();
+
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $($.fn.dataTable.tables(true)).DataTable()
+                    .columns.adjust();
+
+            });
+
+            $('[data-toggle="tab"]').click(function (e) {
+                var $this = $(this),
+                    loadurl = $this.attr('href'),
+                    targ = $this.attr('data-target');
+
+                $.get(loadurl, function (data) {
+                    $(targ).html(data);
+                });
+                $("TabOverlay").fadeIn("slow");
+                $this.tab('show');
+                return false;
+            });
+
+        });
+
+        // ============================>
+        // ==== Raw Data Function =====>
+        // ============================>
+
+        function searchRawdata() {
+            var paramDate = moment(getSelectDate_Raw(), 'YYYY/MM/DD')._d;
+            $('#DNStatusDetailText').text("รายละเอียดการจัดเที่ยว ประจำเดือน" + getMonthName(paramDate.getMonth() + 1));// + ' ' + paramDate.getFullYear());
+            DrawTableDetail(getCriteria_Raw());
+        }
+
+        function initialSearchCriteria_Rawdata() {
+            var ajax = [];
+            $('#CriteriaOveray_Raw').fadeIn('xslow');
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer_Raw'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness_Raw'));
+            ajax.push(uiHelpers.initFleet('#cboFleet_Raw'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint_Raw'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion_Raw'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg_Raw'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType_Raw'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType_Raw'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName_Raw'));
+            uiHelpers.initMonthYearpicker('#monthpicker_Raw');
+            @*init_datepicker_criteria_one_month();*@
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray_Raw').fadeOut('xslow'); });//$('#CriteriaOveray_Raw').hide(); });
+            return result;
+        }
+
+
+
+        function Search() {
+
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search).then(() => {
+                $('#CriteriaOveray').fadeOut("slow");
+            });
+
+            submitCriteria = getCriteria();
+            //Monthly chart
+            GenMonthlyChartTable(submitCriteria);
+            //Monthly Table
+
+            @*ko.cleanNode(do('#div_summary'));
+            ko.applyBindings(new ViewModel());*@
+            generateSummaryShipment('#div_summary', '@Url.Action("RPTLPC001_ShipmentSummary", "ReportChart")');
+            var paramDate = moment(submitCriteria.orderStartDate, 'YYYY/MM/DD')._d;
+            var sectionRPTLPC001Text = document.getElementById('RPTLPC001Text');
+            sectionRPTLPC001Text.innerText = "สรุปการจัดเที่ยวประจำเดือน" + getMonthName(paramDate.getMonth() + 1) + ' ' + paramDate.getFullYear() ;
+            $('#reportHeader').text(getMonthName(paramDate.getMonth() + 1) + ' ' + paramDate.getFullYear());
+
+        }
+
+        function getCriteria(filter) {
+
+            var date = moment(getSelectDate());
+            var startDate;
+            var endDate;
+            if (date != null) {
+                //var tmpStartDate = date.startOf('month').format('YYYY/MM/DD');
+                //var tmpEndDate = date.endDate._d;
+                startDate = date.startOf('month').format('YYYY/MM/DD');
+                endDate = date.endOf('month').format('YYYY/MM/DD');
+            }
+
+            if (filter == null)
+                filter = {
+                    day: null, month: null, filter_group: null, carrier: null, product_group: null, aging: null, plannerName: getPlannerName(),
+                    orderStartDate: startDate, orderEndDate: endDate
+                };
+            else {
+                filter = {
+                    day: null || filter.day, month: null || filter.month, filter_group: null || filter.filter_group, carrier: null || filter.carrier,
+                    product_group: null || filter.product_group, aging_lpc: null || filter.aging_lpc, plannerName: null || filter.plannerName,
+                    status: null || filter.status,orderStartDate: null || filter.orderStartDate,
+                    orderEndDate: null || filter.orderEndDate
+                };
+            }
+
+            var criteria = {
+                orderStartDate: filter.orderStartDate,
+                orderEndDate: filter.orderEndDate,
+                business: getBusiness_m(),
+                fleet: getFleet_m(),
+                customer: getCustomer_m(),
+                shippingPoint: getShippingPoint_m(),
+                shipToRegion: getShiptoRegion_m(),
+                orderType: getOrderType_m(),
+                truckType: getTruckType_m(),
+                plannerName: filter.plannerName,
+                status: filter.status,
+                matGroup: getMatfrg_m(),
+                carrier: filter.carrier,
+                aging_lpc: filter.aging_lpc,
+                product_group: filter.product_group,
+                filter_group: filter.filter_group
+            };
+            console.log(criteria);
+
+            return criteria;
+        }
+
+        function getSubmitCriteria(filter) { // filter = {} to filter 10/12/2020
+            if (!filter) {
+                filter = {
+                    carrier: null,
+                    aging_lpc: null,
+                    status: null,
+                    orderStartDate: submitCriteria.orderStartDate,
+                    orderEndDate: submitCriteria.orderEndDate
+                };
+            }
+            else {
+                filter = {
+                    carrier: filter.carrier ?? null,
+                    aging_lpc: filter.aging_lpc ?? null,
+                    status: filter.status ?? null,
+                    orderStartDate: moment(filter.orderStartDate).format('YYYY/MM/DD') ?? submitCriteria.orderStartDate,
+                    orderEndDate: moment(filter.orderEndDate).format('YYYY/MM/DD') ?? submitCriteria.orderEndDate
+                };
+            }
+
+            $('#ModalTransactionDate').text(moment(filter.orderStartDate, 'YYYY/MM/DD').format('DD/MM/YYYY') + '-' + moment(filter.orderEndDate, 'YYYY/MM/DD').format('DD/MM/YYYY'));
+            return {
+                ...submitCriteria,
+                orderStartDate: filter.orderStartDate,
+                orderEndDate: filter.orderEndDate,
+                status: filter.status,
+                aging_lpc: filter.aging_lpc,
+                carrier: filter.carrier
+            }
+        }
+
+        function initialSearchCriteria() {
+            var ajax = [];
+            $('#CriteriaOveray').fadeIn('xslow');
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness'));
+            ajax.push(uiHelpers.initFleet('#cboFleet'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName'));
+            uiHelpers.initMonthYearpicker('#monthpicker');
+            init_datepicker_criteria_one_month();
+            var result = Promise.all(ajax).finally(() => { });//$('#CriteriaOveray').hide(); });
+            return result;
+        }
+
+        function setCriteria(data) {
+
+            @*setTimeout(function () { $('#cboBusiness').val(data.criteria.business).trigger('change'); }, 5000);*@
+        @*$('#cboBusiness').val(data.criteria.business).trigger('change');*@
+            $('#CriteriaOveray').show();
+            if (data == null) return;
+            var dt = new Date(data.criteria.orderStartDate);
+            $('#monthpicker').datepicker('setDate', dt);
+            var ajax = [];
+            ajax.push(uiHelpers.initBusiness('#cboBusiness', [], [], [], [], []).always(() => { $('#cboBusiness').val(data.criteria.business).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg', [], [], data.criteria.business, [], [], []).always(() => { $('#cboMatfrg').val(data.criteria.matGroup).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initFleet('#cboFleet', [], [], data.criteria.business, data.criteria.matGroup, [], []).always(() => { $('#cboFleet').val(data.criteria.fleet).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, []).always(() => { $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, data.criteria.shippingPoint).always(() => { $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change.select2'); }));
+            ajax.push(uiHelpers.setSelectedCriteria('#cboCustomer', '/Report/GetCustomerTransport', data.criteria.customer));
+            ajax.push($('#cboOrderType').val(data.criteria.orderType).trigger('change.select2'));
+            ajax.push($('#cboTruckType').val(data.criteria.truckType).trigger('change.select2'));
+            ajax.push($('#cboPlannerName').val(data.criteria.plannerName).trigger('change.select2'));
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+            @*ajax.push(uiHelpers.initCustomerTransport('#cboCustomer').always(() => { $('#cboCustomer').val(data.criteria.customer).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType').always(() => { $('#cboOrderType').val(data.criteria.orderType).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType').always(() => { $('#cboTruckType').val(data.criteria.truckType).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName').always(() => { $('#cboPlannerName').val(data.criteria.plannerName).trigger('change.select2'); }));*@
+
+
+            @*$('#cboFleet').val(data.criteria.fleet).trigger('change');*@
+            @*$('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change');*@
+            @*$('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change');*@
+            @*$('#cboMatfrg').val(data.criteria.matGroup).trigger('change');*@
+
+
+
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-99').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+        function GenMonthlyChartTable(criteria) {
+            genChart1(criteria);
+            //genChart2(criteria);
+            genChart3(criteria);
+            genChart4(criteria);
+        }
+
+        function genChart1(criteria) {
+            var startdate = moment(criteria.orderStartDate, 'YYYY/MM/DD')._d;
+            var currentmonthname = getMonthName(startdate.getMonth() + 1);
+            var currentyear = startdate.getFullYear();
+            var sectionRPTLPC001 = document.getElementById('RPTLPC001');
+            $('#RPTLPC001Overlay').show();
+            $('#RPTLPC001').remove();
+            $('#RPTLPC001Container').append('<canvas id="RPTLPC001"><canvas>');
+            $.ajax({
+                url: '@Url.Action("RPTLPC001_ShipmentMonthlyStatus", "Transportation")',
+                type: 'POST',
+                dataType: 'Json',
+                data: criteria,
+            }).done(function (response) {
+                //Populate chart data and show the modal
+                console.log(response);
+
+                genTable(response.dataTable.header, response.dataTable.dataDetail, "#DNStatusMonthlySummaryDataTable", "dnm_header_carrier", "dnm_detail_summary", "dnm_footer_summary", "Process / Day", 1);
+                sectionRPTLPC001.style.visibility = 'visible';
+                var ctx = document.getElementById("RPTLPC001").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response.data,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    autoSkip: false,
+                                    callback: function (value, index, values) {
+                                        return value.substring(0, 2);
+                                    }
+                                },
+                                stacked: true,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "วันที่"
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน DN"
+                                }
+                            }]
+                        },
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "top"
+                        },
+                        title: {
+                            display: true,
+                            text: "DN Status : " + currentmonthname + " " + currentyear
+                        }
+                    }
+                });
+                var canvas = document.getElementById('RPTLPC001');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var date = activePoint._chart.data.labels[activePoint._index];
+                        var status = activePoint._model.datasetLabel;
+                        var filter = { orderStartDate: moment(date, 'DD/MM/YYYY').format('YYYY/MM/DD'), orderEndDate: moment(date, 'DD/MM/YYYY').format('YYYY/MM/DD'),status:status}
+                    }
+                    genTableModal(filter);
+                };
+            }).fail(function (error) {
+                //alert(error);
+                console.log(error);
+            }).always(function () {
+                $('#RPTLPC001Overlay').hide();
+                //console.log( "finished" );
+            });
+        }
+        @*function genChart2(criteria) {
+            var startdate = moment(criteria.orderStartDate, 'YYYY/MM/DD')._d;
+            var currentmonthname = getMonthName(startdate.getMonth() + 1);
+            var currentyear = startdate.getFullYear();
+            var sectionRPTLPC002 = document.getElementById('RPTLPC002');
+            $('#RPTLPC002Overlay').show();
+            $('#RPTLPC002').remove();
+            $('#RPTLPC002Container').append('<canvas id="RPTLPC002"><canvas>');
+            $.ajax({
+                url: '@Url.Action("RPTLPC001_ShipmentYearlyStatus", "Transportation")',
+                type: 'POST',
+                data: criteria,
+                dataType: 'Json'
+            }).done(function (response) {
+                //Populate chart data and show the modal
+                sectionRPTLPC002.style.visibility = 'visible';
+
+                genTable(response.dataTable.header, response.dataTable.dataDetail, "#DNStatusYearlySummaryDataTable", "dny_header_carrier", "dny_detail_summary", "Process / Month", 2);
+                var ctx = document.getElementById("RPTLPC002").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response.outData,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "เดือน"
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน DN"
+                                }
+                            }]
+                        },
+                        //annotation: {
+                        //    annotations: [{
+                        //        type: 'line',
+                        //        mode: 'horizontal',
+                        //        scaleID: 'y-axis-0',
+                        //        value: 100000,
+                        //        borderColor: 'rgba(255, 0, 0,1)',
+                        //        borderWidth: 2,
+                        //        label: {
+                        //            enabled: false,
+                        //            content: 'Test label'
+                        //        }
+                        //    }]
+                        //},
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "top"
+                        },
+                        title: {
+                            display: true,
+                            text: "DN Status " + currentyear
+                        }
+                    }
+                });
+                var canvas = document.getElementById('RPTLPC002');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var date = activePoint._chart.data.labels[activePoint._index];
+                        var status = activePoint._model.datasetLabel;
+                        var orderStartDate = moment('01' + date + moment().year()).startOf('Month').format('YYYY/MM/DD')
+                        var orderEndDate = moment('01' + date + moment().year()).endOf('Month').format('YYYY/MM/DD')
+                        var filter = { orderStartDate: orderStartDate, orderEndDate: orderEndDate, status: status };
+                    }
+                    genTableModal(filter);
+                };
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#RPTLPC002Overlay').hide();
+                //console.log( "finished" );
+            });
+        }*@
+        function genChart3(criteria) {
+            var startdate = moment(criteria.orderStartDate, 'YYYY/MM/DD')._d;
+            var currentmonthname = getMonthName(startdate.getMonth() + 1);
+            var currentyear = startdate.getFullYear();
+            var sectionRPTLPC003 = document.getElementById('RPTLPC003');
+            $('#RPTLPC003Overlay').show();
+            $('#RPTLPC003').remove();
+            $('#RPTLPC003Container').append('<canvas id="RPTLPC003"><canvas>');
+            $.ajax({
+                url: '@Url.Action("RPTLPC001_ShipmentMonthlyStatusAging", "Transportation")',
+                type: 'POST',
+                data: criteria,
+                dataType: 'Json'
+            }).done(function (response) {
+                //Populate chart data and show the modal
+                console.log(response);
+                sectionRPTLPC003.style.visibility = 'visible';
+
+
+                genTable(response.dataTable.header, response.dataTable.dataDetail, "#DNStatusByAgingSummaryDataTable", "dna_header_carrier", "dna_detail_summary", "dna_footer_summary", "Aging / Process",3);
+                var ctx = document.getElementById("RPTLPC003").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'horizontalBar',
+                    data: response.data,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน DN"
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "Process"
+                                }
+                            }]
+                        },
+                        elements: {
+                            rectangle: {
+                                borderWidth: 2,
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: "top"
+                        },
+                        title: {
+                            display: true,
+                            text: "DN Status by Aging  " + currentmonthname + " " + currentyear
+                        }
+                    }
+                });
+                var canvas = document.getElementById('RPTLPC003');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+                        var date = moment(getSelectDate());
+                        var startDate = date.startOf('month').format('YYYY/MM/DD');
+                        var endDate = date.endOf('month').format('YYYY/MM/DD');
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var status = activePoint._chart.data.labels[activePoint._index];
+                        var aging_lpc = activePoint._model.datasetLabel;
+                        var filter = { status: status, aging_lpc: aging_lpc, orderStartDate: startDate, orderEndDate: endDate };
+
+                    }
+                    genTableModal(filter);
+                };
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#RPTLPC003Overlay').hide();
+                //console.log( "finished" );
+            });
+        }
+        function genChart4(criteria) {
+            var startdate = moment(criteria.orderStartDate, 'YYYY/MM/DD')._d;
+            var currentmonthname = getMonthName(startdate.getMonth()+1);
+            var currentyear = startdate.getFullYear();
+            var sectionRPTLPC004 = document.getElementById('RPTLPC004');
+            $('#RPTLPC004Overlay').show();
+            $('#DNStatusByCarrier').show();
+            $('#RPTLPC004').remove();
+            $('#RPTLPC004Container').append('<canvas id="RPTLPC004"><canvas>');
+            $.ajax({
+                url: '@Url.Action("RPTLPC001_ShipmentMonthlyCarrierStatus", "Transportation")',
+                type: 'POST',
+                data: criteria,
+                dataType: 'Json'
+            }).done(function (response) {
+                //Populate chart data and show the modal
+                console.log(response.data.countData);
+                @*$('#RPTLPC004Container').height(200 + (25 * response.data.countData) + 'px');*@
+                if (response.data.countData != null) {
+                    $('#RPTLPC004Container').height(150 + (20 * response.data.countData) + 'px');
+                    if (150 + (20 * response.data.countData) > $(window).height() * 0.8) {
+                        $('#RPTLPC004Layout').css({
+                            height: '80vh',
+                            overflowY: 'scroll'
+                        });
+                    }
+                }
+                sectionRPTLPC004.style.visibility = 'visible';
+                genTable(response.dataTable.header, response.dataTable.dataDetail, "#DNStatusByCarrierSummaryDataTable", "dnc_header_carrier", "dnc_detail_summary", "dnc_footer_summary","Process / Carrier",4);
+                var ctx = document.getElementById("RPTLPC004").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'horizontalBar',
+                    data: response.data,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                //ticks: {
+                                //    min: 60
+                                //},
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "จำนวน DN"
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "Carier"
+                                }
+                            }]
+                        },
+                        //elements: {
+                        //    rectangle: {
+                        //        borderWidth: 2,
+                        //    }
+                        //},
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: "DN Status by Carier  " + currentmonthname + " " + currentyear
+                        }
+                    }
+                });
+                var canvas = document.getElementById('RPTLPC004');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+                        var date = moment(getSelectDate());
+                        var startDate = date.startOf('month').format('YYYY/MM/DD');
+                        var endDate = date.endOf('month').format('YYYY/MM/DD');
+                        var activePoint = myChart.getElementAtEvent(evt)[0];
+                        var carrier = activePoint._chart.data.labels[activePoint._index];
+                        var status = activePoint._model.datasetLabel;
+                        var filter = { carrier: carrier, status: status, orderStartDate: startDate, orderEndDate: endDate };
+                    }
+                    genTableModal(filter);
+                };
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#RPTLPC004Overlay').hide();
+                $('#DNStatusByCarrier').hide();
+                //console.log( "finished" );
+            });
+        }
+
+        function drawTableDetailStatus(criteria,Status = "") {
+            var currentmonth = $('#daterange-99').data('daterangepicker').startDate._d.getMonth() + 1;
+            var currentmonthname = getMonthName(currentmonth);
+            var sectionDNStatusDetailText = document.getElementById('DNStatusDetailText');
+            if (currentdate != null) sectionDNStatusDetailText.innerText = "รายละเอียดการจัดเที่ยว ประจำเดือน" + currentmonthname;
+
+            //20200729 Warut S. Criteria Update
+            criteria.iStatus = Status;
+            drawTable(criteria);
+        }
+        function drawTableDetailCarrier(criteria, Carrier = "") {
+            criteria.selectStartDate = criteria.selectStartDate.toISOString();
+            criteria.selectEndDate = criteria.selectEndDate.toISOString();
+            var currentmonth = $('#daterange-99').data('daterangepicker').startDate._d.getMonth() + 1;
+            var currentmonthname = getMonthName(currentmonth);
+            var currentdate = $('#daterange-99').data('daterangepicker').startDate._d.getDate();
+            var sectionDNStatusDetailText = document.getElementById('DNStatusDetailText');
+            if (currentdate != null) sectionDNStatusDetailText.innerText = "รายละเอียดการจัดเที่ยว ประจำเดือน" + currentmonthname;
+
+            criteria.iCarier = Carrier;
+            drawTable(criteria);
+        }
+        function drawTable(criteria) {
+            $('#DNStatusDetailOverlay').show();
+            @*criteria.orderEndDate = criteria.orderStartDate;*@
+            //$("#dtList").DataTable().destroy();
+            var jqxhr = $.post("/Transportation/RPTLPC001_Report", criteria)
+                .done(function (result) {
+                    if (table == null) {
+                        GenerateDatatable(result.data, column);
+                        //$('#dtList').DataTable().columns.adjust().draw();
+                    }
+                    else {
+                        //GenerateDatatable(result.data, column);
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                }).always(function () {
+                    $('#DNStatusDetailOverlay').hide();
+                    //$('#dtList').DataTable().columns.adjust().draw();
+                });
+        }
+        function DrawTableDetail(criteria) {
+            drawTable(criteria);
+        }
+
+        function GenerateDatatable(data, columns) {
+            //table = $("#dtList").DataTable().destroy();
+            table = $('#dtList').DataTable({
+                dom: 'lTf<"html5buttons"B > gtip',
+                buttons: [
+                    'copy', 'excel'
+                ],
+                fixedHeader: true,
+                scrollX: true,
+                ordering: true,
+                responsive: true,
+                pageLength: 10,
+                filter: true,
+                scrollY: '40vh',
+                //"scrollY": "200px",
+                //scrollY: true,
+                //scroller: {
+                //    rowHeight: 30
+                //},
+                //"scrollY": "auto",
+                //"scrollX": "100%",
+                //"bLengthChange": false,
+                //"bAutoWidth": true,
+                //"scrollCollapse": true,
+                //"sScrollY": "80vh",
+                //bScrollCollapse: true,
+                data: data,
+                columns: columns
+            });
+            table.columns.adjust().draw(false);
+        }
+
+        function getMonthName(index) {
+            var month = new Array();
+            month[0] = "มกราคม";
+            month[1] = "กุมภาพันธ์";
+            month[2] = "มีนาคม";
+            month[3] = "เมษายน";
+            month[4] = "พฤษภาคม";
+            month[5] = "มิถุนายน";
+            month[6] = "กรกฎาคม";
+            month[7] = "สิงหาคม";
+            month[8] = "กันยายน";
+            month[9] = "ตุลาคม";
+            month[10] = "พฤศจิกายน";
+            month[11] = "ธันวาคม";
+            return month[index - 1];
+        }
+
+        function genTableModal(filter) {
+            $('#modals-transaction').modal('show');
+            generateTableLeadModal_SC('#DNDetailModal', '@Url.Action("RPTLPC001_Report", "Transportation")',
+                filter, null, column);
+        }
+
+        function isActive() {
+            setTimeout(() => {
+                if ($('#filled-dashboard').is(':visible')) {
+                    $('#rawdata-criteria').hide();
+                    $('#dashboard-criteria').show();
+                }
+                else if ($('#filled-rawdata').is(':visible')) {
+                    $('#dashboard-criteria').hide();
+                    $('#rawdata-criteria').show();
+                }
+            }, 10)
+        }
+
+        function onSearch(status) {
+            var filter = { orderStartDate: submitCriteria.orderStartDate, orderEndDate: submitCriteria.orderEndDate, status: status }
+            genTableModal(filter);
+        }
+    </script>
+}
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Transportation</h1>
+    <h4>รายงานการจัดเที่ยว by DN</h4>
+    <ul class="nav filled-tabs">
+        <li class="nav-item">
+            <a class="nav-link active show" data-toggle="tab" href="#filled-dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#filled-rawdata">Raw Data</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active show" id="filled-dashboard">
+            @{
+                await Html.RenderPartialAsync("_Common_Transportation_Criteria_07");
+                await Html.RenderPartialAsync("_Common_Summarize_Transportation");
+            }
+
+            <div class="row" id="RPTLPC001Detail">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div id="RPTLPC001Overlay" class="overlay">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <h4 class="card-title" id="RPTLPC001Text"></h4>
+                            <div class="d-flex align-items-center">
+                                <div class="wrapper">
+                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#RPTLPC001','RPTLPC001Text'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" id="RPTLPC001Layout">
+                            <div id="RPTLPC001Container" class="chart-container">
+                                <canvas id="RPTLPC001"></canvas>
+                            </div>
+                        </div>
+                        <div class="row m-2" id="RPTLPC001DataTable">
+                            <div class="col-12">
+                                <article class="card mb-4">
+                                    <div class="card-body" style="overflow-x: auto;">
+                                        <div id="DNStatusMonthlyOverlay" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h4 class="card-title" id="DNStatusByMonthlyText"></h4>
+                                        <div class="table-responsive">
+                                            <div class="dataTables_wrapper">
+                                                <table id="DNStatusMonthlySummaryDataTable" class="table" style="width:100%">
+                                                    <thead id="dnm_header_summary">
+                                                        <tr id="dnm_header_carrier">
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="dnm_detail_summary">
+                                                    </tbody>
+                                                    <tfoot id="dnm_footer_summary">
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*<div class="row" id="RPTLPC002Detail">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div id="RPTLPC002Overlay" class="overlay">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex align-items-center justify-content-between">
+                                <h4 class="card-title" id="RPTLPC002Text"></h4>
+                                <div class="d-flex align-items-center">
+                                    <div class="wrapper">
+                                        <a href="#" id="downloadPdf" onclick="downloadPDF('#RPTLPC002','RPTLPC002Text'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                            <i class="icon-share-alt mr-1"></i>Download PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body" id="RPTLPC002Layout">
+                                <div id="RPTLPC002Container" class="chart-container">
+                                    <canvas id="RPTLPC002"></canvas>
+                                </div>
+                            </div>
+                            <div class="row m-2" id="RPTLPC002DataTable">
+                                <div class="col-12">
+                                    <article class="card mb-4">
+                                        <div class="card-body" style="overflow-x: auto;">
+                                            <div id="DNStatusYearlyOverlay" class="overlay">
+                                                <div class="loader-wrap">
+                                                    <div class="bar-loader">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h4 class="card-title" id="DNStatusByYearlyText"></h4>
+                                            <div class="table-responsive">
+                                                <div class="dataTables_wrapper">
+                                                    <table id="DNStatusYearlySummaryDataTable" class="table" style="width:100%">
+                                                        <thead id="dny_header_summary">
+                                                            <tr id="dny_header_carrier">
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="dny_detail_summary">
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+            <div class="row" id="RPTLPC003Detail">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div id="RPTLPC003Overlay" class="overlay">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <h4 class="card-title" id="RPTLPC003Text"></h4>
+                            <div class="d-flex align-items-center">
+                                <div class="wrapper">
+                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#RPTLPC003','RPTLPC003Text'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" id="RPTLPC003Layout">
+                            <div id="RPTLPC003Container" class="chart-container">
+                                <canvas id="RPTLPC003"></canvas>
+                            </div>
+                        </div>
+                        <div class="row m-2" id="RPTLPC003DataTable">
+                            <div class="col-12">
+                                <article class="card mb-4">
+                                    <div class="card-body" style="overflow-x: auto;">
+                                        <div id="DNStatusByAgingOverlay" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h4 class="card-title" id="DNStatusByAgingText" style="text-align:left unset;"></h4>
+                                        <div class="table-responsive">
+                                            <div class="dataTables_wrapper">
+                                                <table id="DNStatusByAgingSummaryDataTable" class="table" style="text-align:center !important;" width="100%">
+                                                    <thead id="dna_header_summary">
+                                                        <tr id="dna_header_carrier">
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="dna_detail_summary" class="divTextCenter">
+                                                    </tbody>
+                                                    <tfoot id="dna_footer_summary" class="divTextCenter">
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="RPTLPC004Detail">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div id="RPTLPC004Overlay" class="overlay">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <h4 class="card-title" id="RPTLPC004Text"></h4>
+                            <div class="d-flex align-items-center">
+                                <div class="wrapper">
+                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#RPTLPC004','RPTLPC004Text'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body pb-0" id="RPTLPC004Layout">
+                            <div id="RPTLPC004Container" class="chart-container">
+                                <canvas id="RPTLPC004"></canvas>
+                            </div>
+                        </div>
+                        <div class="row m-2" id="RPTLPC004DataTable">
+                            <div class="col-12">
+                                <article class="card mb-4">
+                                    <div class="card-body" style="overflow-x: auto;">
+                                        <div id="DNStatusByCarrierOverlay" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h4 class="card-title" id="DNStatusByCarrierText"></h4>
+                                        <div class="table-responsive">
+                                            <div class="dataTables_wrapper">
+                                                <table id="DNStatusByCarrierSummaryDataTable" class="table" style="width:100%">
+                                                    <thead id="dnc_header_summary">
+                                                        <tr id="dnc_header_carrier">
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="dnc_detail_summary">
+                                                    </tbody>
+                                                    <tfoot id="dnc_footer_summary">
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="filled-rawdata">
+            @{
+                await Html.RenderPartialAsync("_Common_Transportation_Criteria_Rawdata_07");
+            }
+            <div class="row" id="DNStatusDetail">
+                <div class="col-12">
+                    <article class="card mb-4">
+                        <div class="card-body">
+                            <div id="DNStatusDetailOverlay" class="overlay">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="card-title" id="DNStatusDetailText"></h4>
+                            <div class="table-responsive">
+                                <div class="dataTables_wrapper">
+                                    <table id="dtList" class="table table-striped" style="width:100%;"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Content End -->
+<div class="modal modal-default" id="modals-transaction">
+    <div class="modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;margin:auto">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    รายละเอียดการจัดเที่ยวระหว่างวันที่ <span id="ModalTransactionDate"></span>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col">
+                        <div class="row" id="DNDetailModal">
+                            <div class="col-12">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">Close</button>
+                @*<button type="button" class="btn btn-primary" onclick="SaveStock()">Save</button>*@
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function genTable(header, data, table_id, header_id, detail_id, footer_id, header_text, table_index) {
+        //var thead = document.getElementById("header_summary");
+        var tr = document.getElementById(header_id);
+        var tbody = document.getElementById(detail_id);
+        var tfoot = document.getElementById(footer_id);
+        var thRowType = document.createElement("th");
+        thRowType.innerText = header_text;
+        thRowType.className = "BlankRow text-nowrap";
+        tr.appendChild(thRowType);
+
+        if (summary_table[table_index] == null) {
+
+            $.each(header, function (index, dataHeader) {
+                var th = document.createElement("th");
+                th.innerText = dataHeader;
+                th.className = "text-center text-nowrap";
+                tr.appendChild(th);
+            });
+
+            var sum_footer = [];
+            $.each(data, function (index, dataRowType) {
+                var tr_detail = document.createElement("tr");
+                var td = document.createElement("td");
+                td.innerText = dataRowType.rowType;
+                td.className = "text-nowrap text-left";
+                tr_detail.appendChild(td);
+
+                $.each(dataRowType.qty, function (index, dataQty) {
+                    var td_qty = document.createElement("td");
+                    td_qty.innerText = dataQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");;
+                    td_qty.className = "text-nowrap text-right";
+                    tr_detail.appendChild(td_qty);
+
+                    if (sum_footer[index] == null)
+                        sum_footer.push(0);
+
+                    sum_footer[index] += dataQty;
+                });
+                tbody.appendChild(tr_detail);
+            });
+
+            var tr_footer = document.createElement("tr");
+            var td = document.createElement("td");
+            td.innerText = "Total";
+            td.className = "text-nowrap text-left text-weight-bold";
+            tr_footer.appendChild(td);
+            for (var i = 0; i < sum_footer.length; i++) {
+                var td = document.createElement("td");
+                td.innerText = sum_footer[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                td.className = "text-nowrap text-right text-weight-bold";
+                tr_footer.appendChild(td);
+            }
+            //tfoot.appendChild(tr_footer);
+            tbody.appendChild(tr_footer);
+
+            summary_table[table_index] = $(table_id).DataTable({
+                responsive: true,
+                bSort: false,
+                paging: false,
+                "dom": 'lrtip',
+                "info": false,
+                scrollX: true,
+                scrollCollapse: true,
+                fixedColumns: {
+                    leftColumns: 1,
+                    //rightColumns: 1
+                }
+            });
+
+        }
+        else {
+
+            //summary_table = $('#CheckMoveByLoactionSummaryDataTable').DataTable().destroy();
+            $('#' + header_id).html('');
+            $('#' + detail_id).html('');
+            tr.appendChild(thRowType);
+
+            $.each(header, function (index, dataHeader) {
+                var th = document.createElement("th");
+                th.innerText = dataHeader;
+                th.className = "text-center text-nowrap";
+                tr.appendChild(th);
+            });
+
+            $.each(data, function (index, dataRowType) {
+                var tr_detail = document.createElement("tr");
+                var td = document.createElement("td");
+                td.innerText = dataRowType.rowType;
+                td.className = "text-nowrap text-left";
+                tr_detail.appendChild(td);
+
+                $.each(dataRowType.qty, function (index, dataQty) {
+                    var td_qty = document.createElement("td");
+                    td_qty.innerText = dataQty;
+                    td_qty.className = "text-nowrap text-right";
+                    tr_detail.appendChild(td_qty);
+                });
+
+                tbody.appendChild(tr_detail);
+            });
+        }
+
+    }</script>

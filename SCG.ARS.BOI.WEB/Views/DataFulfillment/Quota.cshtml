@@ -1,0 +1,614 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Quota";
+}
+@section OverrideStyles {
+    <link rel="stylesheet" href="~/assets/vendor/chosen/chosen.bs4.css" />
+}
+@section Scripts{
+    <script src="~/assets/vendor/chosen/chosen.jquery.min.js"></script>
+    <script src="~/assets/js/ChartJSHelper.js"></script>
+
+    <script type="text/javascript">
+var isRtl = $('html').attr('dir') === 'rtl';
+var listTable = $('#DataList');
+var chart1;
+var chart2;
+
+function goToDetail() {
+    window.location = '@Url.Action("QuotaDetail", "DataFulfillment")?fg=' + $('#ddlGroup').val() + '&f=' + $('#ddlFleet').val();
+}
+
+function goToUpload() {
+    window.location = '@Url.Action("UploadLimit", "DataFulfillment")?fg=' + $('#ddlGroup').val() + '&f=' + $('#ddlFleet').val();
+}
+
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+var initialFleet = null;
+$(document).ready(function () {
+
+
+    $.ajax({
+        url: '@Url.Action("GetData", "DataFulfillment")?service=/AutoSplitReport/LoadProfileGroup',
+        type: 'POST',
+        data: null,
+        dataType: 'json',
+        success: function (result) {
+            if (result.isComplete) {
+                var data = JSON.parse(result.data)
+                data.forEach(function (item) {
+                    $('#ddlGroup').append($('<option></option>').html(item.Name).val(item.ProfileCode));
+                });
+            }
+            $('#ddlGroup').chosen({ width: '100%' });
+            if (getParameterByName('fg') != null) {
+                $('#ddlGroup').val(getParameterByName('fg')).trigger('chosen:updated');
+                initialFleet = getParameterByName('f');
+            }
+        },
+        error: function (e) {
+            alert(e.message);
+        }
+    });
+
+    $('#ddlGroup').on('change', function () {
+        $('#ddlFleet').chosen('destroy');
+        $('#ddlFleet').empty();
+        $('#ddlFleet').append($('<option></option>').html('-').val(0));
+        if ($('#ddlGroup').val() == '0') {
+            $.ajax({
+                url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadProfile',
+                type: 'POST',
+                data: null,
+                dataType: 'json',
+                success: function (result) {
+                    if (result.isComplete) {
+                        var data = JSON.parse(result.data)
+                        data.forEach(function (item) {
+                            $('#ddlFleet').append($('<option></option>').html(item.Name).val(item.ID));
+                        });
+                    }
+                    $('#ddlFleet').chosen({ width: '100%' });
+                    if (initialFleet != null)
+                        $('#ddlFleet').val(initialFleet).trigger('chosen:updated').trigger('change');
+                    initialFleet = null;
+                },
+                error: function (e) {
+                    alert(e.message);
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: '@Url.Action("GetData", "DataFulfillment")?service=/AutoSplitReport/LoadProfile',
+                type: 'POST',
+                data: { data: JSON.stringify({ inParentCode: $('#ddlGroup').val() }) },
+                dataType: 'json',
+                success: function (result) {
+                    if (result.isComplete) {
+                        var data = JSON.parse(result.data)
+                        data.forEach(function (item) {
+                            $('#ddlFleet').append($('<option></option>').html(item.Name).val(item.ID));
+                        });
+                    }
+                    $('#ddlFleet').chosen({ width: '100%' });
+                    if (initialFleet != null)
+                        $('#ddlFleet').val(initialFleet).trigger('chosen:updated').trigger('change');
+                    initialFleet = null;
+                },
+                error: function (e) {
+                    alert(e.message);
+                }
+            });
+        }
+    });
+
+    $('#ddlFleet').chosen({ width: '100%' });
+
+    $('#ddlGroup').trigger('change');
+
+    $.ajax({
+        url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadVehicle',
+        type: 'POST',
+        data: null,
+        dataType: 'json',
+        success: function (result) {
+            if (result.isComplete) {
+                var data = JSON.parse(result.data)
+                data.forEach(function (item) {
+                    $('#ddlVehicle').append($('<option></option>').html(item.Name).val(item.Code));
+                });
+            }
+            $('#ddlVehicle').chosen({ width: '100%' });
+        },
+        error: function (e) {
+            alert(e.message);
+        }
+    });
+
+    $.ajax({
+        url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadCarrier',
+        type: 'POST',
+        data: null,
+        dataType: 'json',
+        success: function (result) {
+            if (result.isComplete) {
+                var data = JSON.parse(result.data)
+                data.forEach(function (item) {
+                    $('#ddlCarrier').append($('<option></option>').html(item.Name).val(item.Code));
+                });
+            }
+            $('#ddlCarrier').chosen({ width: '100%' });
+        },
+        error: function (e) {
+            alert(e.message);
+        }
+    });
+
+
+    $('#txtDate').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        locale: {
+            format: 'DD/MM/YYYY'
+        },
+        opens: (isRtl ? 'left' : 'right')
+    });
+
+    listTable.DataTable({
+        dom: "lTf<'html5buttons'B>gtip",
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        scrollX: true,
+        scrollY: '80em',
+        language: {
+            paginate: {
+                previous: '&nbsp',
+                next: '&nbsp'
+            }
+        },
+        searching: true,
+        columns: [
+            { data: 'ProfileName', title: 'Profile Name' },
+            { data: 'CarrierCode', title: 'Carrier Code' },
+            { data: 'CarrierName', title: 'Carrier Name', },
+            { data: 'LimitQty', title: 'Quota' },
+            { data: 'CurrentQty', title: 'Current' },
+            { data: 'AvailableQty', title: 'Available' }
+        ],
+        'order': [[2, 'asc']],
+        columnDefs: [
+            { targets: [3, 4, 5], className: 'text-right' }
+        ]
+
+    });
+
+
+    $("#btnFind").on("click", function () {
+        if ($('#ddlFleet').val() == '0' || $('#ddlFleet').val() == null || $('#ddlFleet').val() == '') {
+            toastr.warning('กรุณาเลือก Fleet');
+            return;
+        }
+
+        LoadQuotaSummary();
+        LoadQuotaSummaryPercent();
+        LoadQuotaHistory();
+    });
+    SetDefaultValue();
+});
+
+function LoadQuotaHistory() {
+    $.ajax({
+        url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadQuotaHistory',
+        type: 'POST',
+        data: { data: JSON.stringify(getCriteria()) },
+        dataType: 'json',
+        success: function (result) {
+            if (result.data == null)
+                result = null
+            else
+                result = JSON.parse(result.data);
+            if (!$.fn.DataTable.isDataTable('#HistoryHeaderTable')) {
+                $('#HistoryHeaderTable').DataTable({
+                    scrollX: true,
+                    language: {
+                        paginate: {
+                            previous: '&nbsp',
+                            next: '&nbsp'
+                        }
+                    },
+                    data: result.data,
+                    searching: true,
+                    columns: [
+                        {
+                            data: 'importDate', title: 'Import Time',
+                            render: function (data, type, row, meta) {
+                                            return data == null ? '' : moment(new Date(data)).format('HH:mm:ss');
+                            }
+                        },
+                        { data: 'filename', title: 'Filename' },
+                    ]
+                });
+            }
+            else {
+                var table = $('#HistoryHeaderTable').DataTable();
+                table.clear();
+                $.each(result.data, function (idx, obj) {
+                    table.row.add(result.data[idx]);
+                });
+                table.draw();
+            }
+            $('#HistoryHeaderTable').on('click', 'tbody tr', function () {
+                var table = $('#HistoryHeaderTable').DataTable();
+                var row = table.row($(this)).data();
+                window.open('@Url.Action("LoadQuotaHistoryFile", "Quota")' + '?filename=' + row.fullFilename, '_blank');
+            });
+        },
+        error: function (e) {
+            alert(e.message);
+        }
+    });
+}
+
+function SetDefaultValue() {
+    if ($('#txtDate').val() == '') { $('#txtDate').val() = moment(); }
+}
+
+function LoadQuotaSummary() {
+    $.ajax({
+        url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadQuotaSummary',
+        type: 'POST',
+        data: { data: JSON.stringify(getCriteria()) },
+        dataType: 'json',
+        success: function (result) {
+            if (result.data == null)
+                result = null
+            else
+                result = JSON.parse(result.data);
+            if (result == null || result.length == 0) {
+                toastr.warning('ไม่พบข้อมูล');
+            }
+            ShowList(result);
+            ShowChart(result);
+        },
+        error: function (e) {
+            alert(e.message);
+        }
+    });
+}
+
+function getCriteria() {
+    let date = moment($('#txtDate').data('daterangepicker').startDate).format('YYYY-MM-DD'); //datetangepicker
+    let vehicle = String($('#ddlVehicle').chosen().val());
+    let carrier = String($('#ddlCarrier').chosen().val());
+    let profileID = $('#ddlFleet').val();
+    return {
+        ProfileID: profileID,
+        Date: date,
+        InVehicleCode: vehicle,
+        InCarrierCode: carrier
+    };
+}
+
+function LoadQuotaSummaryPercent() {
+    let date = $('#txtDate').data('daterangepicker').startDate.toISOString(); //datetangepicker
+    let vehicle = String($('#ddlVehicle').chosen().val());
+    let carrier = String($('#ddlCarrier').chosen().val());
+    let profileID = $('#ddlFleet').val();
+
+    $.ajax({
+        url: '@Url.Action("GetData", "DataFulfillment")?service=/Quota/LoadQuotaSummaryPercent',
+        type: 'GET',
+        data: { data: JSON.stringify(getCriteria()) },
+        dataType: 'json',
+        success: function (result) {
+            if (result.data == null)
+                result = null
+            else
+                result = JSON.parse(result.data);
+            ShowChartPercent(result);
+        },
+        error: function (e) {
+            alert(e.message);
+        }
+    });
+}
+function ShowList(result) {
+    listTable.DataTable().clear().draw();
+    result.forEach(function (item) {
+        listTable.DataTable().row.add(item).draw(false);
+    });
+
+    $('.dataTables_scrollHeadInner')[0].setAttribute('style', 'width:100%');
+}
+
+function ShowChart(result) {
+    let label = []
+    let current = []
+    let limit = []
+    let reject = []
+    for (let i = 0; i < result.length; i++) {
+        label.push(result[i].CarrierName);
+        current.push(result[i].CurrentQty);
+        limit.push(result[i].LimitQty);
+        reject.push(result[i].RejectQty);
+    }
+
+    if (chart1 != null) chart1.destroy();
+
+    if (result != '') {
+        $('#chartContainer').attr('style', 'height:90em;display:block;');
+    }
+    else {
+        $('#chartContainer').attr('style', 'height:90em;display:none;');
+    }
+    let ctx = document.getElementById('cnvChart').getContext('2d');
+    chart1 = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: label,
+            datasets: [
+                {
+                    type: 'horizontalBar',
+                    label: 'Quota',
+                    data: limit,
+                    backgroundColor: convertToRGB(colorPalette[3], '0.5'),
+                    borderColor: convertToRGB(colorPalette[3], '1'),
+                    borderWidth: 1,
+                    stack: false,
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'left',
+                        display: function (context) {
+                            return context.dataset.data[context.dataIndex] > 0;
+                        },
+                        formatter: Math.round,
+                        font: {
+                            size: 10,
+                        }
+                    }
+                },
+                {
+                    type: 'horizontalBar',
+                    label: 'Current',
+                    data: current,
+                    backgroundColor: convertToRGB(colorPalette[2], '0.5'),
+                    borderColor: convertToRGB(colorPalette[2], '1'),
+                    borderWidth: 1,
+                    datalabels: {
+                        anchor: 'center',
+                        align: 'center',
+                        display: function (context) {
+                            return context.dataset.data[context.dataIndex] > 0;
+                        },
+                        formatter: Math.round,
+                        font: {
+                            size: 10,
+                        }
+                    }
+                },
+                {
+                    type: 'horizontalBar',
+                    label: 'Reject',
+                    data: reject,
+                    backgroundColor: convertToRGB(colorPalette[1], '0.5'),
+                    borderColor: convertToRGB(colorPalette[1], '1'),
+                    borderWidth: 1,
+                    datalabels: {
+                        anchor: 'center',
+                        align: 'center',
+                        display: function (context) {
+                            return context.dataset.data[context.dataIndex] > 0;
+                        },
+                        formatter: Math.round,
+                        font: {
+                            size: 10,
+                        }
+                    }
+                }
+
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                display: true
+            },
+            plugins: {
+            },
+            scales: {
+                xAxes: [{
+                    stacked: true,
+                    ticks: {
+                        autoSkip: false,
+                    }
+                    }],
+                yAxes: [{
+                    stacked: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+        }
+    });
+    console.log(chart1);
+}
+function ShowChartPercent(result) {
+    let label = []
+    let current = []
+    let limit = []
+    for (let i = 0; i < result.length; i++) {
+        label.push(result[i].CarrierName);
+        current.push(result[i].CurrentRatio);
+        limit.push(result[i].LimitRatio);
+    }
+    if (chart2 != null) chart2.destroy();
+
+    if (result != '') {
+        $('#chartContainerPer').attr('style', 'height:90em;display:block;');
+    }
+    else {
+        $('#chartContainerPer').attr('style', 'height:90em;display:none;');
+    }
+    let ctx = document.getElementById('cnvChartPer').getContext('2d');
+    Chart.defaults.global.defaultFontSize = 12;
+    chart2 = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: label,
+            datasets: [
+                {
+                    label: 'Quota',
+                    data: limit,
+                    backgroundColor: convertToRGB(colorPalette[3], '0.5'),
+                    borderWidth: 1
+                },
+                {
+                    label: 'Current',
+                    data: current,
+                    backgroundColor: convertToRGB(colorPalette[2], '0.5'),
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                display: true
+            },
+            plugins: {
+                datalabels: {
+                    anchor: 'end',
+                    align: 'right',
+                    display: function (context) {
+                        return context.dataset.data[context.dataIndex] > 0;
+                    },
+                    formatter: Math.round
+                }
+            },
+            scales: {
+                xAxes: [{
+                    stacked: false,
+                    ticks: {
+                        autoSkip: false,
+                    }
+                }],
+                yAxes: [{
+                    stacked: false,
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function (value) {
+                            return value + '%'
+                        }
+                    }
+                }]
+            }
+        }
+    });
+}
+    </script>
+
+}
+
+<div class="content-wrapper">
+    <article class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlGroup">Fleet Group</label><br />
+                    <select id="ddlGroup" class="form-control" data-placeholder=" . . . ">
+                        <option value="0">-</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlFleet">Fleet</label>
+                    <select id="ddlFleet" class="form-control" data-placeholder=" . . . ">
+                        <option value="0">-</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="txtDate">วันที่</label>
+                    <input id="txtDate" class="form-control" />
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 form-group">
+                    <label for="ddlVehicle">ประเภทรถ</label><br />
+                    <select id="ddlVehicle" class="form-control" data-placeholder=" . . . " multiple></select>
+                </div>
+                <div class="col-12 col-lg-6 form-group">
+                    <label for="ddlCarrier">ผู้รับเหมา</label><br />
+                    <select id="ddlCarrier" class="form-control" data-placeholder=" . . . " multiple></select>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-6 form-group">
+                    <a href="#" class="btn btn-outline-info" role="button" onclick="goToDetail();">Detail</a>
+                </div>
+                <div class="col-6 form-group">
+                    <a href="#" class="btn btn-outline-primary" role="button" onclick="goToUpload();">Upload</a>
+                    <input id="btnFind" type="button" class="btn btn-primary float-right" value="Find" />
+                </div>
+            </div>
+            <hr />
+
+
+            <div id="Test" hidden>
+                <hr />
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-md-6">
+
+                    <div class="tab-panel">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab" href="#qty">Qty</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#percent">Percentage</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#history">History</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="qty">
+                                <div class="w-100 mb-4" style="height: 100em;display:none;" id="chartContainer">
+                                    <canvas id="cnvChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="percent">
+                                <div class="w-100 mb-4" style="height: 100em;display:none;" id="chartContainerPer">
+                                    <canvas id="cnvChartPer"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="history">
+                                <div class="w-100 mb-4" style="height: 100em;display:block;" id="table-history">
+                                    <table id="HistoryHeaderTable" class="table table-striped w-100"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="table-responsive">
+                        <table id="DataList" class="table table-striped w-100"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</div>

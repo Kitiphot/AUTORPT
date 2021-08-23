@@ -1,0 +1,147 @@
+﻿<div id="Allsummary" class="row">
+    <div class="overlay section-loading" hidden="hidden">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 card-statistics">
+        <div class="row" id="div_summary" data-bind="foreach: summary">
+            <div class="col-12">
+                <div class="form-row">
+                    <div class="col-sm-12 col-lg-7 mb-7">
+                        <div class="form-row">
+                            <div id="total_no_po" class="col-sm-6 col-lg-4 col-md-12 mb-4" onclick="SearchCriteria(1);">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-around align-items-center">
+                                            <div class="btn btn-success btn-rounded px-3 py-3 mr-2">
+                                                <i class="icon-wallet md-18"></i>
+                                            </div>
+                                            <div class="mr-2">
+                                                <h6 class="card-title">New Order<br>Creation</h6>
+                                                <h5 data-bind="text: new_order"></h5>
+                                                <div class="progress progress-xs">
+                                                    <div class="progress-bar bg-success" role="progressbar"
+                                                         data-bind="attr: {'aria-valuenow': (new_order/total)*100,} , style: {width:(new_order/total)*100+'%'}"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="total_no_sent_date" class="col-sm-6 col-lg-4 col-md-12 mb-4" onclick="SearchCriteria(2);">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-around align-items-center">
+                                            <div class="btn btn-warning btn-rounded px-3 py-3 mr-2">
+                                                <i class="icon-wallet md-18"></i>
+                                            </div>
+                                            <div class="mr-2">
+                                                <h6 class="card-title">Processing</h6>
+                                                <h5 data-bind="text: processing"></h5>
+                                                <div class="progress progress-xs">
+                                                    <div class="progress-bar bg-warning" role="progressbar"
+                                                         data-bind="attr: {'aria-valuenow': (processing/total)*100,} , style: {width:(processing/total)*100+'%'}"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="total_no_order_confirm" class="col-sm-12 col-lg-4 col-md-12 mb-4" onclick="SearchCriteria(3);">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-around align-items-center">
+                                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color: rgba(235, 119, 52,0.9);color:white">
+                                                <i class="icon-wallet md-18"></i>
+                                            </div>
+                                            <div class="mr-2">
+                                                <h6 class="card-title">Wait confirm to customer</h6>
+                                                <h5 data-bind="text: wait_confirm"></h5>
+                                                <div class="progress progress-xs">
+                                                    <div class="progress-bar" style="background-color: rgba(235, 119, 52,0.9);" role="progressbar"
+                                                         data-bind="attr: {'aria-valuenow': (wait_confirm/total)*100,} , style: {width:(wait_confirm/total)*100+'%'}"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-5 mb-5">
+                        <div class="form-row">
+
+                            <div id="total_no_shipment" class="col-sm-12 col-lg-6 mb-4 " onclick="SearchCriteria(4);">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-around align-items-center">
+                                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color: rgba(99, 99, 99,0.9);color:white">
+                                                <i class="icon-wallet md-18"></i>
+                                            </div>
+                                            <div class="mr-2">
+                                                <h6 class="card-title">Confirmed</h6>
+                                                <h5 data-bind="text: confirmed"></h5>
+                                                <div class="progress progress-xs">
+                                                    <div class="progress-bar" role="progressbar" style="background-color: rgba(99, 99, 99,0.9);color:white"
+                                                         data-bind="attr: {'aria-valuenow': (confirmed/total)*100,} , style: {width:(confirmed/total)*100+'%'}"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="total_no_close" class="col-sm-12 col-lg-6 mb-4" onclick="SearchCriteria(5);">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-around align-items-center">
+                                            <div class="btn btn-danger btn-rounded px-3 py-3 mr-2">
+                                                <i class="icon-wallet md-18"></i>
+                                            </div>
+                                            <div class="mr-2">
+                                                <h6 class="card-title">Completed</h6>
+                                                <h5 data-bind="text: completed"></h5>
+                                                <div class="progress progress-xs">
+                                                    <div class="progress-bar bg-success" role="progressbar"
+                                                         data-bind="attr: {'aria-valuenow': (completed/total)*100,} , style: {width:(completed/total)*100+'%'}"
+                                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                                    @*<div class="progress-bar bg-success w-25" role="progressbar" aria-valuenow="25"
+                                aria-valuemin="0" aria-valuemax="100"></div>*@
+                                                </div>
+                                            </div>
+                                            <div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

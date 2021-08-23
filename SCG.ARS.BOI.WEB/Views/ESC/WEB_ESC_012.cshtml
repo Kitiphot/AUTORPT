@@ -1,0 +1,628 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Index";
+}
+<script src="~/assets/js/warehouse.js"></script>
+<link href="~/assets/css/warehouse.css" rel="stylesheet" />
+<style>
+    #TodayReceiving_Table th, td {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+
+    .dataTables_wrapper .dataTable thead th {
+        padding: 5px 30px;
+    }
+
+    #TodayReceiving_Table th {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    table[aria-describedby="TodayReceiving_Table_info"] thead th {
+        border: 1px #eee solid;
+        text-align: center;
+    }
+
+    .dataTables_wrapper .dataTable {
+        margin: 0 !important;
+    }
+
+    hr.myhrline {
+        margin: 0px;
+    }
+
+    h4, h5, h6, p {
+        margin: 2px;
+    }
+
+    div.card-body {
+        padding: 1% !important;
+    }
+</style>
+<script>
+    /*-----------------------*/
+    /*Initial on Webpage Load*/
+    /*-----------------------*/
+    var isFirstLoad = 1;
+    var table = null;
+    var selected_customer = [];
+    var selected_dc = [];
+    var screenID = 'WEB_ESC_012';
+    var column = [
+        {
+            "data": "picking_date", "name": "picking_date", "title": "Pick Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate},
+        { "data": "invoice_no", "name": "invoice_no", "title": "Invoice No", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "final_destination_code", "name": "final_destination_code", "title": "Final Destination Code", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "final_destination_name", "name": "final_destination_name", "title": "Final Destination Name", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "city", "name": "city", "title": "City", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "province", "name": "province", "title": "State/Province", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "weight", "name": "weight", "title": "WGT", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "volumn", "name": "volumn", "title": "VOL", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "installment", "name": "installment", "title": "Installment", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "shipment_no", "name": "shipment_no", "title": "Shipment No", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "product_id", "name": "product_id", "title": "Product ID", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "doc_no", "name": "doc_no", "title": "Doc No", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "type_code", "name": "type_code", "title": "Type Code", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "type_name", "name": "type_name", "title": "Type Name", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "doc_type", "name": "doc_type", "title": "Doc Type", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "ship_qty", "name": "ship_qty", "title": "Ship QTY", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "picking_no", "name": "picking_no", "title": "Picking No", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "product_barcode", "name": "product_barcode", "title": "SKU Barcode", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "product_code", "name": "product_code", "title": "Product Code", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "product_name", "name": "product_name", "title": "Product Name", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "pick_qty", "name": "pick_qty", "title": "Pick QTY", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "unit_code", "name": "unit_code", "title": "Unit Code", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "perpcs", "name": "perpcs", "title": "per PCS", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "uomtn", "name": "uomtn", "title": "UOM tn", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "pcs2", "name": "pcs2", "title": "pcs2", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "pick_unit_charge", "name": "pick_unit_charge", "title": "Pick Unit Charge", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "pick_charge_unit", "name": "pick_charge_unit", "title": "Charge Unit", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "pick_charge_item", "name": "pick_charge_item", "title": "Charge Item", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "packing_no", "name": "packing_no", "title": "Packing No", "autoWidth": true, "className": "text-nowrap" },
+        {"data": "pack_date", "name": "pack_date", "title": "Pack Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate},
+        { "data": "shipping_mark", "name": "shipping_mark", "title": "Pack ShippingMark", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "package_code", "name": "package_code", "title": "Package Code", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "package_name", "name": "package_name", "title": "Package Name", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "box_no", "name": "box_no", "title": "Box No", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "pack_qty", "name": "pack_qty", "title": "Pack QTY", "autoWidth": true, "className": "text-nowrap text-right" },
+        { "data": "pack_charge_unit", "name": "pack_charge_unit", "title": "Charge Unit", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "pack_charge_item", "name": "pack_charge_item", "title": "Charge Item", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "void_no", "name": "void_no", "title": "Void No", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "void_charge", "name": "void_charge", "title": "Charge Item", "autoWidth": true, "className": "text-nowrap" }
+    ];
+
+    function GetDateDisplay() {
+        var tmpPickStartDate = $('#daterange-01').data('daterangepicker').startDate._d;
+        var tmpPickEndDate = $('#daterange-01').data('daterangepicker').endDate._d;
+        var tmpPackStartDate = $('#daterange-02').data('daterangepicker').startDate._d;
+        var tmpPackEndDate = $('#daterange-02').data('daterangepicker').endDate._d;
+        var pickStartDate = tmpPickStartDate.getDate() + "/" + (tmpPickStartDate.getMonth() + 1) + "/" + tmpPickStartDate.getFullYear();
+        var pickEndDate = tmpPickEndDate.getDate() + "/" + (tmpPickEndDate.getMonth() + 1) + "/" + tmpPickEndDate.getFullYear();
+        var packStartDate = tmpPackStartDate.getDate() + "/" + (tmpPackStartDate.getMonth() + 1) + "/" + tmpPackStartDate.getFullYear();
+        var packEndDate = tmpPackEndDate.getDate() + "/" + (tmpPackEndDate.getMonth() + 1) + "/" + tmpPackEndDate.getFullYear();
+
+        DateDis = {
+            pickStartDate: pickStartDate,
+            pickEndDate: pickEndDate,
+            packStartDate: packStartDate,
+            packEndDate: packEndDate
+        }
+        return DateDis;
+    }
+
+    function initialSearchCriteria() {
+        var ajax = [];
+        $('#CriteriaOveray').show();
+        ajax.push(GetCustomerESC('ESC'));
+        ajax.push(GetDCESC('ESC'));
+        var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+        return result;
+    }
+
+    $(document).ready(function () {
+        init_datepicker_twin_criteria();
+
+        $('#cboDC').on("change", function (element, checked) {
+            GetCustomerESC('ESC', $('#cboDC').select2('data').map(x => x.id));
+        });
+
+        initialControl().then(() => {
+            //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+            uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+        });
+
+    });
+
+</script>
+
+<script>
+    function Search() {
+        uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+        GetSummary(getRequest());
+        GetPickPackByCustomerChart(getRequest());
+        DrawTableDetail(getRequest());
+    }
+
+    function setCriteria(data) {
+        if (data == null) return;
+        $('#daterange-01').data('daterangepicker').setStartDate(new Date(data.criteria.selectPickStartDate));
+        $('#daterange-01').data('daterangepicker').setEndDate(new Date(data.criteria.selectPickEndDate));
+        $('#daterange-02').data('daterangepicker').setStartDate(new Date(data.criteria.selectPackStartDate));
+        $('#daterange-02').data('daterangepicker').setEndDate(new Date(data.criteria.selectPackEndDate));
+        $('#cboDC').val(data.criteria.selectDc).trigger('change');
+        $('#cboCustomer').val(data.criteria.selectCustomer).trigger('change');
+    }
+
+    function getRequest(CustomerName = null) {
+        var customer = $('#cboCustomer').select2('data').map(x => x.id);
+        var dc = $('#cboDC').select2('data').map(x => x.id);
+        var tmpPickStartDate = $('#daterange-01').data('daterangepicker').startDate._d;
+        var tmpPickEndDate = $('#daterange-01').data('daterangepicker').endDate._d;
+        var tmpPackStartDate = $('#daterange-02').data('daterangepicker').startDate._d;
+        var tmpPackEndDate = $('#daterange-02').data('daterangepicker').endDate._d;
+        var pickStartDate = tmpPickStartDate.getFullYear() + "/" + (tmpPickStartDate.getMonth() + 1) + "/" + tmpPickStartDate.getDate();
+        var pickEndDate = tmpPickEndDate.getFullYear() + "/" + (tmpPickEndDate.getMonth() + 1) + "/" + tmpPickEndDate.getDate();
+
+        var packStartDate = tmpPackStartDate.getFullYear() + "/" + (tmpPackStartDate.getMonth() + 1) + "/" + tmpPackStartDate.getDate();
+        var packEndDate = tmpPackEndDate.getFullYear() + "/" + (tmpPackEndDate.getMonth() + 1) + "/" + tmpPackEndDate.getDate();
+        if (!customer) {
+            customer = null;
+        }
+        if (!dc) {
+            dc = null;
+        }
+        var request = {
+            selectPickStartDate: pickStartDate,
+            selectPickEndDate: pickEndDate,
+            selectPackStartDate: packStartDate,
+            selectPackEndDate: packEndDate,
+            selectDc: dc,
+            selectCustomer: customer,
+            selectCustomerName: CustomerName
+        };
+        return request;
+    }
+
+    function GetPickPackByCustomerChart(request) {
+        var DateDis = GetDateDisplay();
+        var sectionPickByCustomerText = document.getElementById('barChartPickByCustomerText');
+        var sectionPackByCustomerText = document.getElementById('barChartPackByCustomerText');
+        sectionPickByCustomerText.innerText = "สรุปการ Pick สินค้า ประจำวันที่ " + DateDis.pickStartDate + "-" + DateDis.pickEndDate;
+        sectionPackByCustomerText.innerText = "สรุปการ Pack สินค้า ประจำวันที่ " + DateDis.packStartDate + "-" + DateDis.packEndDate;
+        var sectionPickPackDate = document.getElementById('PickPackDate');
+        sectionPickPackDate.innerText = "ประจำวันที่ " + DateDis.packStartDate + "-" + DateDis.packEndDate;
+
+            $('#barChartPickByCustomer').remove();
+            $('#barChartPickByCustomerContainer').append('<canvas id="barChartPickByCustomer"><canvas>');
+
+            $('#SectionBarChartPickByCustomer').show();
+            $.ajax({
+                url: '@Url.Action("RPTESC005_PickByCustomer", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                var ctx = document.getElementById("barChartPickByCustomer").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                barPercentage: 0.4,
+                                stacked: false,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: ""
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 90,
+                                    minRotation: 0
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "ชิ้น"
+                                }
+                            }]
+                        },
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display:false,
+                            position: "bottom"
+                        },
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    }
+                });
+                var canvas = document.getElementById('barChartPickByCustomer');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        // x label
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var Customerlabel = chartData.labels[idx];
+                    }
+                    DrawTableDetail(getRequest(Customerlabel));
+                };
+
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionBarChartPickByCustomer').hide();
+                //console.log( "finished" );
+            });
+
+
+            $('#SectionBarChartPackByCustomer').show();
+            $('#barChartPackByCustomer').remove();
+            $('#barChartPackByCustomerContainer').append('<canvas id="barChartPackByCustomer"><canvas>');
+
+
+            $.ajax({
+                url: '@Url.Action("RPTESC005_PackByCustomer", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }).done(function (response) {
+                var ctx = document.getElementById("barChartPackByCustomer").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: response,
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                barPercentage: 0.4,
+                                stacked: false,
+                                gridLines: {
+                                    display: false,
+                                }
+                                ,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: ""
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 90,
+                                    minRotation: 0
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                ticks: {
+                                    beginAtZero: true,
+                                },
+                                type: 'linear',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: "กล่อง"
+                                }
+                            }]
+                        },
+                        elements: {
+                            line: {
+                                fill: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display:false,
+                            position: "bottom"
+                        },
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    }
+                });
+                var canvas = document.getElementById('barChartPackByCustomer');
+                canvas.onclick = function (evt) {
+                    var activePoints = myChart.getElementsAtEvent(evt);
+                    if (activePoints[0]) {
+
+                        // x label
+                        var chartData = activePoints[0]['_chart'].config.data;
+                        var idx = activePoints[0]['_index'];
+                        var Customerlabel = chartData.labels[idx];
+                        //console.log('CustomerName');
+                        //console.log(Customerlabel);
+                    }
+                    DrawTableDetail(getRequest(Customerlabel));
+                };
+
+            }).fail(function (error) {
+                console.log(error);
+            }).always(function () {
+                $('#SectionBarChartPackByCustomer').hide();
+                //console.log( "finished" );
+            });
+
+        }
+
+    function DrawTableDetail(request) {
+
+        //ESC Text
+        var sectionPickPackText = document.getElementById('PickPackDetailText');
+        var DateDis = GetDateDisplay();
+        sectionPickPackText.innerText = "รายละเอียดการ Pack สินค้า ประจำวันที่ " + DateDis.packStartDate + "-" + DateDis.packEndDate;
+
+        $('#SectionPickPackDetail').show();
+        var jqxhr = $.post("/Warehouse/RPTESC005_PickPackReport", request)
+            .done(function (result) {
+                //if (result.status) {
+                if (table == null) {
+                    GenerateDatatable(result.data, column);
+                }
+                else {
+                    table.clear();
+                    $.each(result.data, function (idx, obj) {
+                        table.row.add(result.data[idx]);
+                    });
+                    table.draw();
+                }
+                //} else {
+                //toastr["error"](result.message);
+                //}
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function (e) {
+                $('#SectionPickPackDetail').hide();
+            });
+
+    }
+
+        function isEmpty(obj) {
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key))
+                    return false;
+            }
+            return true;
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-base').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+</script>
+
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Warehouse</h1>
+    <h4 class="card-title">รายงานการ Pick & Pack สินค้า</h4>
+
+    @{
+        await Html.RenderPartialAsync("_Common_WH_Criteria_05");
+    }
+
+    <div class="row" style="margin-top:2%;">
+        <div class="col-12 card-statistics">
+            <h4>
+                Pick & Pack <span id="PickPackDate"></span>
+            </h4>
+            <div id="SectionSummaryPickPack" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="div_summary" data-bind="foreach: summary">
+                <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                    <div class="card">
+                        <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                            <div class="row mb-2 mt-2">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        @*<h5>CDC วังน้อย</h5>*@
+                                        <b data-bind="text:dc_name"></b>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="myhrline" />
+                            <div class="row mb-2 mt-2">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <p style="text-align:left">Pick(PCs.)</p>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <p style="text-align:right">Pack(Box)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-2 mt-2">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <b data-bind="text: formatCurrency(pick_qty)">1000</b>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <b data-bind="text: formatCurrency(pack_qty)">2000</b>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title"></h4>
+                    <div class="row" id="PickByCustomer">
+                        @*//Today Receiving*@
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionBarChartPickByCustomer" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barChartPickByCustomerText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartPickByCustomer','barChartPickByCustomerText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barChartPickByCustomerLayout">
+                                    <div id="barChartPickByCustomerContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barChartPickByCustomer"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div id="SectionBarChartPackByCustomer" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barChartPackByCustomerText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartPackByCustomer','barChartPackByCustomerText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body" id="barChartPackByCustomerLayout">
+                                    <div id="barChartPackByCustomerContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barChartPackByCustomer"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="PickPackDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div id="SectionPickPackDetail" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title" id="PickPackDetailText"></h4>
+                    <div>
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->
+
+
+<script>
+
+    var model = {
+        summary: ko.observableArray([])
+    }
+
+    ko.applyBindings(model, document.getElementById("div_summary"));
+
+    function GetSummary(request) {
+        $('#SectionSummaryPickPack').show();
+
+
+        var jqxhr = $.post("/Warehouse/RPTESC005_PickPackSummary", request)
+            .done(function (result) {
+                model.summary(result.data);
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#SectionSummaryPickPack').hide();
+            });
+    }
+    var formatCurrency = function (amount) {
+        if (!amount) {
+            return "0";
+        }
+        amount += '';
+        x = amount.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        }
+        return "" + x1 + x2;
+    }
+
+</script>

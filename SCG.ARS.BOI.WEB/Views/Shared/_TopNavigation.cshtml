@@ -1,0 +1,121 @@
+﻿@using SCG.ARS.BOI.WEB.Entities.MasterDb
+@using SCG.ARS.BOI.WEB.Repositories
+@using Microsoft.AspNetCore.Http
+@using SCG.ARS.BOI.WEB.Security
+@inject IMasterRepository MasterRepository
+@inject IHttpContextAccessor httpContextAccessor
+@inject ISecurityService sec
+<!-- Top Navigation Start -->
+<nav class="navbar navbar-expand navbar-inverse bg-inverse" id="top-menu">
+    <div class="collapse navbar-collapse flex-column ml-lg-0 ml-3" id="navbarSupportedContent">
+        <ul class="navbar-nav">
+            @foreach (var item in MasterRepository.GetSubMenu(0)) {
+                <li class="dropdown-toggle-lvl1 mr-3">
+                    @{
+                        var subMenuLv1 = MasterRepository.GetSubMenu(item.menu_id);
+                    }
+                    @if (item.menu_path == null) {
+                        <a href="#" onclick="return false;" class="dropdown-toggle-lvl1 menu-title nowrap" @*style="@(subMenuLv1.Count == 0 ? "filter: blur(1px)" : "")"*@><i class="@item.menu_icon mr-2"></i>@item.menu_name</a>
+                    } else {
+                        <a href="/@item.menu_path" class="dropdown-toggle-lvl1 menu-title nowrap"><i class="@item.menu_icon mr-2"></i>@item.menu_name</a>
+                    }
+                    @if (item.menu_name == "Data Fulfillment") {
+                        <ul class="dropdown-menu dropdown-menu-lvl1 sub-menu" id="menu_@item.menu_id">
+                            <li class="nav-item">
+                                <a class="menu-title text-nowrap mr-3" href="https://scglbsdfvm01/scg_dfs_demo/Quota/Index?ln=@await sec.GetFullname()">
+                                    @*&#8226;*@ Quota
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="menu-title text-nowrap mr-3" href="https://scglbsdfvm01/scg_dfs_demo/AutoSplitReport/Index?ln=@await sec.GetFullname()">
+                                    @*&#8226;*@ Auto Split Report
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="menu-title text-nowrap mr-3" href="https://scglbsdfvm01/scg_dfs_demo/NoProfile/Index?ln=@await sec.GetFullname()">
+                                    @*&#8226;*@ No Profile Report
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                    <ul class="dropdown-menu dropdown-menu-lvl1 sub-menu" id="menu_@item.menu_id" style="@(subMenuLv1.Count == 0 ? "visibility:hidden" : "")">
+                        @foreach (var subItemLv1 in subMenuLv1) {
+
+                            @if (subItemLv1.menu_path != null) {
+                                if (httpContextAccessor.HttpContext.User.IsAllow(subItemLv1.menu_code, SCG.ARS.BOI.WEB.Attributes.Permission.View)) {
+                                    <li class="nav-item">
+                                        <a class="menu-title text-nowrap mr-3 @Html.IsSelected(controller: "ReportChart", action: subItemLv1.menu_page)" href="/@subItemLv1.menu_path">
+                                            @*@if (!string.IsNullOrEmpty(subItemLv1.menu_icon)) {*@
+                                            <i class="@subItemLv1.menu_icon md-18 mr-2"></i>
+                                            @*}*@
+                                            @*&#8226;*@ @subItemLv1.menu_name
+                                        </a>
+                                    </li>
+                                }
+                            } else {
+                                var subMenuLv2 = MasterRepository.GetSubMenu(subItemLv1.menu_id);
+                                <li class="nav-item dropdown-toggle-lvl2 @Html.IsSelected(controller: "Report")Route">
+                                    <a class="menu-title text-nowrap mr-2 dropdown-toggle-lvl2" title="@subItemLv1.menu_name" href="#" style="@(subMenuLv2.Count == 0 ? "filter: blur(1px)" : "")">
+                                        @if (!string.IsNullOrEmpty(subItemLv1.menu_icon) && subItemLv1.menu_icon.StartsWith("fa")) {
+                                                <i class="@subItemLv1.menu_icon md-18 mr-2"></i>
+                                            } else {
+                                            <i class="@subItemLv1.menu_icon md-18 mr-2"></i>
+                                            }
+                                            @subItemLv1.menu_name
+                                        </a>
+                                    <ul class="dropdown-menu dropdown-menu-lvl1 sub-menu" id="menu_@item.menu_id" style="@(subMenuLv2.Count == 0 ? "visibility:hidden" : "")">
+                                        @foreach (var subItemLv2 in subMenuLv2) {
+                                            @if (subItemLv2.menu_path != null) {
+                                                if (httpContextAccessor.HttpContext.User.IsAllow(subItemLv2.menu_code, SCG.ARS.BOI.WEB.Attributes.Permission.View)) {
+                                                    <li class="nav-item">
+                                                        <a class="menu-title text-nowrap mr-3 @Html.IsSelected(controller: "ReportChart", action: subItemLv2.menu_page)" href="/@subItemLv2.menu_path">
+                                                            @*@if (!string.IsNullOrEmpty(subItemLv2.menu_icon)) {*@
+                                                            <i class="@subItemLv2.menu_icon md-18 mr-2"></i>
+                                                            @*}*@
+                                                            @*&#8226;*@ @subItemLv2.menu_name
+                                                        </a>
+                                                    </li>
+                                                }
+                                            } else {
+                                                var subMenuLv3 = MasterRepository.GetSubMenu(subItemLv2.menu_id);
+                                                <li class="nav-item dropdown-toggle-lvl3 @Html.IsSelected(controller: "Report")Route">
+                                                    <a class="menu-title text-nowrap mr-3 dropdown-toggle-lvl2" title="@subItemLv2.menu_name" href="#" style="@(subMenuLv3.Count == 0 ? "filter: blur(1px)" : "")">
+                                                        @if (!string.IsNullOrEmpty(subItemLv2.menu_icon) && subItemLv2.menu_icon.StartsWith("fa")) {
+                                                            <i class="@subItemLv2.menu_icon md-18 mr-2"></i>
+                                                        } else {
+                                                            <i class="@subItemLv2.menu_icon md-18 mr-2"></i>
+                                                        }
+                                                        @subItemLv2.menu_name
+                                                    </a>
+                                                    <ul class="dropdown-menu dropdown-menu-lvl3 sub-menu" id="menu_@item.menu_id" style="@(subMenuLv3.Count == 0 ? "visibility:hidden" : "")">
+                                                        @foreach (var subItemLv3 in subMenuLv3) {
+                                                            @if (subItemLv3.menu_path != null) {
+                                                                if (httpContextAccessor.HttpContext.User.IsAllow(subItemLv3.menu_code, SCG.ARS.BOI.WEB.Attributes.Permission.View)) {
+                                                                    <li class="nav-item">
+                                                                        <a class="menu-title text-nowrap mr-3 @Html.IsSelected(controller: "ReportChart", action: subItemLv3.menu_page)" href="/@subItemLv3.menu_path">
+                                                                            @if (!string.IsNullOrEmpty(subItemLv3.menu_icon)) {
+                                                                                <i class="@subItemLv3.menu_icon md-18 mr-2"></i>
+                                                                            }
+                                                                            @*&#8226;*@ @subItemLv3.menu_name
+                                                                        </a>
+                                                                    </li>
+                                                                }
+                                                            } else {
+                                                                // current stop at sub lv3
+                                                            }
+                                                        }
+                                                    </ul>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </li>
+            }
+        </ul>
+    </div>
+</nav>
+<!-- Top Navigation End -->

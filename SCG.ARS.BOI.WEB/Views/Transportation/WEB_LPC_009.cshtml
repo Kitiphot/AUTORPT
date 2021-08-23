@@ -1,0 +1,552 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles{
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <style>
+        .dataTables_wrapper .dataTable thead th {
+            padding: 5px 30px;
+        }
+    </style>
+}
+
+@section Scripts{
+    @*<script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+        <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+        <script src="~/assets/js/uiHelpers.js"></script>*@
+    <script src="~/assets/js/transportation.js"></script>
+
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_009';
+        var column = [
+            { "data": "delivery_date", "name": "delivery_date", "title": "Delivery Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDate },
+            { "data": "invoice_no", "name": "invoice_no", "title": "Invoice No", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_name", "name": "customer_name", "title": "Customer", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "from_name", "name": "from_name", "title": "Origin", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "to_name", "name": "to_name", "title": "Destination", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "quantity", "name": "quantity", "title": "Quantity", "autoWidth": true, "className": "text-nowrap  text-right", "render": uiHelpers.renderN2 },
+            { "data": "item_name", "name": "item_name", "title": "Item Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "menual_close_remark", "name": "menual_close_remark", "title": "Remark", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "carrier_name", "name": "carrier_name", "title": "Carrier Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "driver_name", "name": "driver_name", "title": "Driver Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "license_no", "name": "license_no", "title": "License No", "autoWidth": true, "className": "text-nowrap" }
+        ];
+
+        function setCriteria(data) {
+
+            @*$('#CriteriaOveray').show();*@
+            if (data == null) return;
+            var dt = new Date(data.criteria.orderStartDate);
+            $('#monthpicker').datepicker('setDate', dt);
+            var ajax = [];
+            ajax.push(uiHelpers.initBusiness('#cboBusiness', [], [], [], [], []).always(() => { $('#cboBusiness').val(data.criteria.business).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg', [], [], data.criteria.business, [], [], []).always(() => { $('#cboMatfrg').val(data.criteria.matGroup).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initFleet('#cboFleet', [], [], data.criteria.business, data.criteria.matGroup, [], []).always(() => { $('#cboFleet').val(data.criteria.fleet).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, []).always(() => { $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, data.criteria.shippingPoint).always(() => { $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change.select2'); }));
+            @*ajax.push($('#cboCustomer').val(data.criteria.customer).trigger('change.select2'));*@
+            ajax.push(uiHelpers.setSelectedCriteria('#cboCustomer', '/Report/GetCustomerTransport', data.criteria.customer));
+            ajax.push($('#cboOrderType').val(data.criteria.orderType).trigger('change.select2'));
+            ajax.push($('#cboTruckType').val(data.criteria.truckType).trigger('change.select2'));
+            ajax.push($('#cboPlannerName').val(data.criteria.plannerName).trigger('change.select2'));
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').fadeOut('xslow'); });
+        }
+
+        function initialSearchCriteria() {
+            var ajax = [];
+            $('#CriteriaOveray').fadeIn('xslow');
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness'));
+            ajax.push(uiHelpers.initFleet('#cboFleet'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName'));
+            uiHelpers.initMonthYearpicker('#monthpicker');
+            init_datepicker_criteria_one_month();
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').fadeOut('xslow'); });
+            return result;
+        }
+
+        function getCriteria(filter) {
+
+            var date = moment(getSelectDate());
+            var startDate;
+            var endDate;
+            if (date != null) {
+                //var tmpStartDate = date.startOf('month').format('YYYY/MM/DD');
+                //var tmpEndDate = date.endDate._d;
+                startDate = date.startOf('month').format('YYYY/MM/DD');
+                endDate = date.endOf('month').format('YYYY/MM/DD');
+            }
+
+            if (filter == null)
+                filter = {
+                    day: null, month: null, filter_group: null, carrier: null, product_group: null, aging: null, plannerName: getPlannerName(),
+                    orderStartDate: startDate, orderEndDate: endDate
+                };
+            else {
+                filter = {
+                    day: null || filter.day, month: null || filter.month, filter_group: null || filter.filter_group, carrier: null || filter.carrier,
+                    product_group: null || filter.product_group, aging_lpc: null || filter.aging_lpc, plannerName: null || filter.plannerName,
+                    status: null || filter.status, orderStartDate: null || filter.orderStartDate,
+                    orderEndDate: null || filter.orderEndDate
+                };
+            }
+
+            var criteria = {
+                orderStartDate: filter.orderStartDate,
+                orderEndDate: filter.orderEndDate,
+                business: getBusiness_m(),
+                fleet: getFleet_m(),
+                customer: getCustomer_m(),
+                shippingPoint: getShippingPoint_m(),
+                shipToRegion: getShiptoRegion_m(),
+                orderType: getOrderType_m(),
+                truckType: getTruckType_m(),
+                plannerName: filter.plannerName,
+                status: filter.status,
+                matGroup: getMatfrg_m(),
+                carrier: filter.carrier,
+                aging_lpc: filter.aging_lpc,
+                product_group: filter.product_group,
+                filter_group: filter.filter_group
+            };
+            console.log(criteria);
+
+            return criteria;
+        }
+
+        function getSubmitCriteria(filter) {
+            filter = {
+                carrier: null || filter.carrier, aging_lpc: null || filter.aging_lpc, status: null || filter.status,
+                filter_group: null || filter.filter_group,
+                orderStartDate: null || filter.orderStartDate, orderEndDate: null || filter.orderEndDate
+            };
+            $('#ModalTransactionDate').text(moment(filter.orderStartDate, 'DD/MM/YYYY').format('DD/MM/YYYY') + '-' + moment(filter.orderEndDate, 'DD/MM/YYYY').format('DD/MM/YYYY'));
+            return {
+                ...submitCriteria,
+                orderStartDate: filter.orderStartDate,
+                orderEndDate: filter.orderEndDate,
+                status: filter.status,
+                aging_lpc: filter.aging_lpc,
+                filter_group: filter.filter_group,
+                carrier: filter.carrier
+            }
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-99').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+        // ============================>
+        // ==== Raw Data Function =====>
+        // ============================>
+
+        function searchRawdata() {
+            genTable(null);
+        }
+
+        function initialSearchCriteria_Rawdata() {
+            var ajax = [];
+            $('#CriteriaOveray_Raw').fadeIn('xslow');
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer_Raw'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness_Raw'));
+            ajax.push(uiHelpers.initFleet('#cboFleet_Raw'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint_Raw'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion_Raw'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg_Raw'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType_Raw'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType_Raw'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName_Raw'));
+            uiHelpers.initMonthYearpicker('#monthpicker_Raw');
+            @* init_datepicker_criteria_one_month();*@
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray_Raw').fadeOut('xslow'); });//$('#CriteriaOveray_Raw').hide(); });
+            return result;
+        }
+
+
+        function Search() {
+            submitCriteria = getCriteria();
+
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search);
+            $('#DamageByMonth' + ' .section-loading').show();
+            $.post("/Transportation/DamageMonthly", submitCriteria)
+                .done(function (result) {
+                    generateGraph_SC_CB_NT('#DamageByMonth', result,
+                        'bar', "วันที่", 'ชิ้น', "จำนวนสินค้าเสียหาย " + uiHelpers.displayFullMonthYear(getSelectDate()),
+                        'จำนวนสินค้าเสียหาย ' + uiHelpers.displayFullMonthYear(getSelectDate()), null,
+                        function (activePoint) {
+                            var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                            /*var date = activePoint._chart.data.labels.indexOf(activePoint._model.label) + 1;*/
+                            var date = moment(activePoint._chart.data.labels[activePoint._index], 'DD-MM-YYYY').format('YYYY/MM/DD');
+                            var filter = { orderStartDate: date, orderEndDate: date };
+                            genTableModal(filter);
+                        });
+                }).fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $('#DamageByMonth' + ' .section-loading').hide();
+                });
+
+            //$.post("/Transportation/DamageYearly", submitCriteria)
+            //    .done(function (result) {
+                    generateGraph_SC('#DamageByYear', '@Url.Action("DamageYearly", "Transportation")',
+                        'bar', 'วันที่', 'ชิ้น', "จำนวนสินค้าเสียหาย: " + uiHelpers.displayFullYear(getSelectDate()),
+                        null, null,
+                        function (activePoint) {
+                            var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                            //var date = activePoint._chart.data.labels.indexOf(activePoint._model.label) + 1;
+                            var startDate = moment(activePoint._chart.data.labels[activePoint._index], 'MMM').startOf('month').format('YYYY/MM/DD');
+                            var endDate = moment(activePoint._chart.data.labels[activePoint._index], 'MMM').endOf('month').format('YYYY/MM/DD');
+                            var filter = { orderStartDate: startDate, orderEndDate: endDate };
+                            genTableModal(filter);
+                        });
+                //}).fail(uiHelpers.postFailHandler)
+                //.always(function (e) {
+                //    $('#DamageByYear' + ' .section-loading').hide();
+                //});
+
+
+
+            @*generateGraph_SC('#DamageByYear', '@Url.Action("DamageYearly", "Transportation")',
+                'bar', null, null, "จำนวนสินค้าเสียหาย: " + uiHelpers.displayFullYear(getSelectDate()),
+                null, null,
+                function (activePoint) {
+                    var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                    var month = activePoint._chart.data.labels.indexOf(activePoint._model.label) + 1;
+                    var filter = { month: month };
+                    //genTable(filter);
+                });*@
+        }
+
+        function genTable(filter) {
+            if (filter == null) filter = { };
+            var data_date = new Date(new Date().getFullYear(), (filter.month || (getSelectDate().getMonth() + 1)) - 1, 1);
+                    generateTable_SC('#DamageDetail', '@Url.Action("DamageDetail", "Transportation")',
+                        filter, 'รายละเอียดจำนวนสินค้าเสียหาย ประจำเดือน' + uiHelpers.displayFullMonth(data_date), column);
+        }
+
+        $(document).ready(function () {
+            isActive();
+            initialControl().then(() => {
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+            initialSearchCriteria_Rawdata();
+            comboOnchange();
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            });
+        });
+
+        function genTableModal(filter) {
+            $('#modals-transaction').modal('shof');
+            generateTableLeadModal_SC('#DamageModal', '@Url.Action("DamageDetail", "Transportation")',
+                filter, null, column);
+        }
+
+        function generateGraph_SC(controlID, serviceUrl, graph_type, xLabel, yLabel, graph_title, report_title, legendPosition, graph_click, animationComplete, max_yaxis = null) {
+            $(controlID + ' .section-loading').show();
+            $(controlID + ' .report-graph').remove();
+            $(controlID + ' .report-title').text(report_title);
+            $(controlID + ' .report-filename').val(graph_title.replace(/ /g, '_').replace(/:/g, ''));
+            $(controlID + ' .report-container').append('<canvas class="report-graph"></canvas>');
+            $.post(serviceUrl, getSubmitCriteria({ orderStartDate: moment(submitCriteria.orderStartDate).startOf('year').format('YYYY/MM/DD'), orderEndDate: moment(submitCriteria.orderStartDate).endOf('year').format('YYYY/MM/DD') }))
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        var ctx = $(controlID + ' .report-graph')[0].getContext('2d');
+                        if (result.countData != null) {
+                            $(controlID + ' .report-container').width(200 + (25 * result.countData) + 'px');
+                        }
+                        var yTicks = null;
+                        if (max_yaxis == null) {
+                            yTicks = {
+                                beginAtZero: true,
+                            };
+                        }
+                        else {
+                            yTicks = {
+                                beginAtZero: true,
+                                max: max_yaxis
+                            };
+                        }
+                        var myChart = new Chart(ctx, {
+                            onAnimationComplete: animationComplete,
+                            type: graph_type,
+                            data: result.data,
+                            options: {
+                                scales: {
+                                    xAxes: [{
+                                        ticks: {
+                                            autoSkip: false
+                                        },
+                                        stacked: true,
+                                        gridLines: {
+                                            display: false,
+                                        }
+                                        ,
+                                        scaleLabel: {
+                                            display: xLabel != null,
+                                            labelString: xLabel
+                                        },
+                                        maxBarThickness: 80
+                                    }],
+                                    yAxes: [{
+                                        ticks: {
+                                            autoSkip: false
+                                        },
+                                        stacked: true,
+                                        scaleLabel: {
+                                            display: yLabel != null,
+                                            labelString: yLabel
+                                        },
+                                        ticks: yTicks,
+                                        maxBarThickness: 80
+                                    }]
+                                },
+                                elements: {
+                                    line: {
+                                        fill: false
+                                    }
+                                },
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                legend: {
+                                    position: legendPosition,
+                                    display: legendPosition != null
+                                },
+                                title: {
+                                    display: true,
+                                    text: graph_title
+                                },
+                                plugins: {
+                                    datalabels: {
+                                        display: false,
+                                    }
+                                }
+                            }
+                        });
+
+                        $(controlID + ' .report-graph').click(
+                            function (evt) {
+                                var activePoints = myChart.getElementAtEvent(evt);
+                                if (graph_click != null)
+                                    graph_click(activePoints[0]);
+                            }
+                        );
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $(controlID + ' .section-loading').hide();
+                });
+        }
+        function isActive() {
+            setTimeout(function () {
+                if ($('#upload-file').is(':visible')) {
+                    $('#criteriaSection').fadeOut(300);
+                }
+                else if ($('#filled-dashboard').is(':visible')) {
+                    $('#criteriaSection').fadeIn(1300);
+                }
+                else if ($('#filled-rawdata').is(':visible')) {
+                    $('#criteriaSection').fadeIn(1300);
+                }
+            }, 100)
+        }
+    </script>
+}
+
+<div class="content-wrapper">
+    <h1>Transportation</h1>
+    <h2>รายงานสินค้าเสียหาย</h2>
+    @*<h4 class="card-title">รายงานสินค้าเสียหาย <span id="reportHeader"></span></h4>*@
+    <ul class="nav filled-tabs">
+        <li class="nav-item">
+            <a class="nav-link active show" data-toggle="tab" href="#filled-dashboard" onclick="isActive()">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#filled-rawdata" onclick="isActive()">Raw Data</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#upload-file" onclick="isActive()">Upload File</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane" id="upload-file">
+            <div class="row">
+                <div class="col-3 col-sm-3 col-md-3 mt-4 mb-4">
+                    <label for="uploadFile">Uploda file</label>
+                    <div class="col-12">
+                        <input type="file" id="uploadFile" />
+                    </div>
+                </div>
+
+                <div class="col-6 col-sm-6 col-md-6 mt-2 mb-4">
+                    <label for="Clear"></label>
+                    <div class="col-sm-12">
+                        <button type="button" class="btn btn-warning" onclick="ClearData()">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane active show" id="filled-dashboard">
+            @{
+                await Html.RenderPartialAsync("_Common_Transportation_Criteria_07");
+            }
+            <div class="row">
+                <div class="col-12 card-statistics">
+                    <div>
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="DamageByMonth">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <h4 class="card-title report-title"></h4>
+                            <div class="report-filename" style="display: none;"></div>
+                            <div class="d-flex align-items-center">
+                                <div class="wrapper">
+                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#DamageByMonth'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container report-container">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4" id="DamageByYear">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <h4 class="card-title report-title"></h4>
+                            <div class="report-filename" style="display: none;"></div>
+                            <div class="d-flex align-items-center">
+                                <div class="wrapper">
+                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#DamageByYear'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container report-container">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="filled-rawdata">
+            @{
+                await Html.RenderPartialAsync("_Common_Transportation_Criteria_Rawdata_07");
+            }
+            <div class="row" id="DamageDetail">
+                <div class="col-12">
+                    <article class="card mb-4">
+                        <div class="card-body">
+                            <div class="overlay section-loading">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="card-title section-title"></h4>
+                            <div class="table-responsive">
+                                <div class="dataTables_wrapper">
+                                    <table class="table table-striped section-table-render" style="width:100%"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-default" id="modals-transaction">
+    <div class="modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;margin:auto">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    สรุป Reject ระหว่างวันที่ <span id="ModalTransactionDate"></span>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col">
+                        <div class="row" id="DamageModal">
+                            <div class="col-12">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">Close</button>
+                @*<button type="button" class="btn btn-primary" onclick="SaveStock()">Save</button>*@
+            </div>
+        </form>
+    </div>
+</div>

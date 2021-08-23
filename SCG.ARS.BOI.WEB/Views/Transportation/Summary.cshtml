@@ -1,0 +1,893 @@
+﻿@{
+    ViewBag.Title = "Transportation Summary";
+}
+
+@section OverrideStyles {
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <style>
+        /* fix select2 placeholder width 0 in inactive tabs*/
+        .select2-container--default .select2-search--inline .select2-search__field {
+            width: initial !important;
+        }
+
+        #SummaryMonthlyDetail thead,
+        #SummaryMonthlyDetail th {
+            text-align: center !important;
+        }
+
+        #SummaryYearlyDetail thead,
+        #SummaryYearlyDetail th {
+            text-align: center !important;
+        }
+
+    </style>
+}
+
+@section Scripts{
+
+    <script src="~/assets/js/transportation.js"></script>
+
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_008';
+        var column = [
+            { "data": "department", "name": "department", "title": "Department", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "section", "name": "section", "title": "Section", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mat_freight", "name": "mat_freight", "title": "Mat Freight", "autoWidth": true, "className": "text-nowrap" },
+            //{ "data": "total_delivery", "name": "total_delivery", "title": "Total Delivery", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery1", "name": "delivery1", "title": "1", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery2", "name": "delivery2", "title": "2", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery3", "name": "delivery3", "title": "3", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery4", "name": "delivery4", "title": "4", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery5", "name": "delivery5", "title": "5", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery6", "name": "delivery6", "title": "6", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery7", "name": "delivery7", "title": "7", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery8", "name": "delivery8", "title": "8", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery9", "name": "delivery9", "title": "9", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery10", "name": "delivery10", "title": "10", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery11", "name": "delivery11", "title": "11", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery12", "name": "delivery12", "title": "12", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery13", "name": "delivery13", "title": "13", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery14", "name": "delivery14", "title": "14", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery15", "name": "delivery15", "title": "15", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery16", "name": "delivery16", "title": "16", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery17", "name": "delivery17", "title": "17", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery18", "name": "delivery18", "title": "18", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery19", "name": "delivery19", "title": "19", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery20", "name": "delivery20", "title": "20", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery21", "name": "delivery21", "title": "21", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery22", "name": "delivery22", "title": "22", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery23", "name": "delivery23", "title": "23", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery24", "name": "delivery24", "title": "24", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery25", "name": "delivery25", "title": "25", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery26", "name": "delivery26", "title": "26", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery27", "name": "delivery27", "title": "27", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery28", "name": "delivery28", "title": "28", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery29", "name": "delivery29", "title": "29", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery30", "name": "delivery30", "title": "30", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery31", "name": "delivery31", "title": "31", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger }
+        ];
+
+        var column_yearly = [
+            { "data": "department", "name": "department", "title": "Department", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "section", "name": "section", "title": "Section", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mat_freight", "name": "mat_freight", "title": "Mat Freight", "autoWidth": true, "className": "text-nowrap" },
+            //{ "data": "total_delivery", "name": "total_delivery", "title": "Total Delivery", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery1", "name": "delivery1", "title": "1", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery2", "name": "delivery2", "title": "2", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery3", "name": "delivery3", "title": "3", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery4", "name": "delivery4", "title": "4", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery5", "name": "delivery5", "title": "5", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery6", "name": "delivery6", "title": "6", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery7", "name": "delivery7", "title": "7", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery8", "name": "delivery8", "title": "8", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery9", "name": "delivery9", "title": "9", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery10", "name": "delivery10", "title": "10", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery11", "name": "delivery11", "title": "11", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "delivery12", "name": "delivery12", "title": "12", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger }
+        ];
+
+        const controllerDict = {
+            'tab-shipment': 'Shipment',
+            'tab-ton': 'Ton',
+            'tab-piece': 'Piece',
+            'tab-ontime': 'Ontime'
+        };
+
+        function getBusiness_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboBusiness').val() == null || $(ancestor + '#cboBusiness').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboBusiness').val();
+            }
+        }
+
+        function getFleet_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboFleet').val() == null || $(ancestor + '#cboFleet').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboFleet').val();
+            }
+        }
+
+        function getCustomer_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboCustomer').val() == null || $(ancestor + '#cboCustomer').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboCustomer').val();
+            }
+        }
+
+        function getShippingPoint_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboShippingPoint').val() == null || $(ancestor + '#cboShippingPoint').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboShippingPoint').val();
+            }
+        }
+
+        function getShiptoRegion_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboShiptoRegion').val() == null || $(ancestor + '#cboShiptoRegion').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboShiptoRegion').val();
+            }
+        }
+
+        function getOrderType_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboOrderType').val() == null || $(ancestor + '#cboOrderType').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboOrderType').val();
+            }
+        }
+
+        function getTruckType_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboTruckType').val() == null || $(ancestor + '#cboTruckType').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboTruckType').val();
+            }
+        }
+
+        function getPlannerName_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboPlannerName').val() == null || $(ancestor + '#cboPlannerName').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboPlannerName').val();
+            }
+        }
+
+        function getMatfrg_m(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            if ($(ancestor + '#cboMatfrg').val() == null || $(ancestor + '#cboMatfrg').val() == '') {
+                return [];
+            }
+            else {
+                return $(ancestor + '#cboMatfrg').val();
+            }
+        }
+
+        function setCriteria(tabName, data) {
+            if (data == null) return;
+            var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+
+            const ancestor = '#' + tabName + ' ';
+            $(ancestor + '#monthpicker').datepicker('setDate', dt);
+            $(ancestor + '#cboBusiness').val(data.criteria.business).trigger('change');
+            $(ancestor + '#cboFleet').val(data.criteria.fleet).trigger('change');
+            $(ancestor + '#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change');
+            $(ancestor + '#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change');
+            $(ancestor + '#cboMatfrg').val(data.criteria.matGroup).trigger('change');
+            $(ancestor + '#cboOrderType').val(data.criteria.orderType).trigger('change');
+            $(ancestor + '#cboTruckType').val(data.criteria.truckType).trigger('change');
+            //$('#cboPlannerName').val(data.criteria.plannerName).trigger('change');
+        }
+
+        function initialSearchCriteria(tabName) {
+            const ancestor = '#' + tabName + ' ';
+            var ajax = [];
+            $(ancestor + '#CriteriaOveray').show();
+            ajax.push(uiHelpers.initCustomerTransportAjax(ancestor + '#cboCustomer'));
+            ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness'));
+            ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet'));
+            ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint'));
+            ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion'));
+            ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg'));
+            ajax.push(uiHelpers.initOrderType(ancestor + '#cboOrderType'));
+            ajax.push(uiHelpers.initTruckType(ancestor + '#cboTruckType'));
+            //ajax.push(uiHelpers.initPlannerName(ancestor + '#cboPlannerName'));
+            uiHelpers.initMonthYearpicker(ancestor + '#monthpicker');
+            var result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+            return result
+        }
+
+        function getSelectDate(tabName) {
+            const ancestor = '#' + tabName + ' ';
+
+            var selectDate = $(ancestor + '#monthpicker').datepicker('getDate');
+            if (selectDate == null)
+                selectDate = new Date();
+            return selectDate;
+        }
+
+        function getCriteria(tabName, filter) {
+            if (filter == null)
+                filter = { day: null, month: null, filter_group: null, carrier: null, product_group: null, aging: null, plannerName: getPlannerName() };
+            else
+                filter = { day: null || filter.day, month: null || filter.month, filter_group: null || filter.filter_group, carrier: null || filter.carrier, product_group: null || filter.product_group, aging: null || filter.aging, plannerName: null || filter.plannerName };
+
+            var date = moment(getSelectDate(tabName));
+            var startDate;
+            var endDate;
+            var yearStartDate;
+            var yearEndDate;
+
+            if (date != null) {
+                //var tmpStartDate = date.startOf('month').format('YYYY/MM/DD');
+                //var tmpEndDate = date.endDate._d;
+                startDate = date.startOf('month').format('YYYY/MM/DD');
+                endDate = date.endOf('month').format('YYYY/MM/DD');
+                yearStartDate = date.startOf('year').format('YYYY/MM/DD');
+                yearEndDate = date.endOf('year').format('YYYY/MM/DD');
+            }
+
+            var criteria = {
+                orderStartDate: startDate,
+                orderEndDate: endDate,
+                business: getBusiness_m(tabName),
+                fleet: getFleet_m(tabName),
+                customer: getCustomer_m(tabName),
+                shippingPoint: getShippingPoint_m(tabName),
+                shipToRegion: getShiptoRegion_m(tabName),
+                orderType: getOrderType_m(tabName),
+                truckType: getTruckType_m(tabName),
+                plannerName: getPlannerName_m(tabName),
+                matGroup: getMatfrg_m(tabName),
+                yearStartDate: yearStartDate,
+                yearEndDate: yearEndDate
+            };
+
+            return criteria;
+        }
+
+        var mat_freight_cell, section_cell, department_cell, mat_freight_cnt, section_cnt, department_cnt;
+
+        function Search(tabName) {
+
+            const ancestor = '#' + tabName + ' ';
+            mat_freight_cell = null;
+            section_cell = null;
+            department_cell = null;
+            mat_freight_cnt = 1;
+            section_cnt = 1;
+            department_cnt = 1;
+            let controllerPrefix = controllerDict[tabName];
+
+            var post_monthly = generateTableWithoutPaging(
+                ancestor + '#SummaryMonthlyDetail',
+                @*'@Url.Action("TonMonthlyDetail", "Transportation")',*@
+                '/Transportation/' + controllerPrefix + 'MonthlyDetail',
+                null, null, column, created_row);
+
+            var post_yearly = generateTableWithoutPaging(
+                ancestor + '#SummaryYearlyDetail',
+                @*'@Url.Action("TonYearlyDetail", "Transportation")',*@
+                '/Transportation/' + controllerPrefix + 'YearlyDetail',
+                null, null, column_yearly, created_row);
+
+            post_monthly.always(function () {
+                var tab = $(ancestor + '#SummaryMonthlyDetail .section-table-render');
+                var tabdt = $(ancestor + '#SummaryMonthlyDetail .section-table-render').DataTable();
+
+                var adjustMerged = false;
+                //page changing event
+                tab.on('page.dt', function (e, setting) {
+                    adjustMerged = true;
+                });
+                //drawed event
+                tab.on('draw.dt', function (e, setting) {
+                    if (adjustMerged) {
+                        adjustMerged = false;
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').addClass('ontime-hide-cell');
+                        $(tab.find('tbody').find('tr')[0]).find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                    }
+                });
+            });
+
+            post_yearly.always(function () {
+                var tab = $(ancestor + '#SummaryYearlyDetail .section-table-render');
+                var tabdt = $(ancestor + '#SummaryYearlyDetail .section-table-render').DataTable();
+
+                var adjustMerged = false;
+                //page changing event
+                tab.on('page.dt', function (e, setting) {
+                    adjustMerged = true;
+                });
+                //drawed event
+                tab.on('draw.dt', function (e, setting) {
+                    if (adjustMerged) {
+                        adjustMerged = false;
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                        tab.find('tbody').find('tr').find('td[mark-remove=1]').addClass('ontime-hide-cell');
+                        $(tab.find('tbody').find('tr')[0]).find('td[mark-remove=1]').removeClass('ontime-hide-cell');
+                    }
+                });
+            });
+            generateSummary(tabName, ancestor + '#SummaryMonthly', ancestor + '#overlayMonthlySummary', '/Transportation/' + controllerPrefix + 'SummaryMonthly');
+            generateSummary(tabName, ancestor + '#SummaryYearly', ancestor + '#overlayYearlySummary', '/Transportation/' + controllerPrefix + 'SummaryYearly');
+
+            generateGraphTransportSummary(ancestor + '#Monthly', '/Transportation/' + controllerPrefix + 'Monthly',
+                'bar', 'Shipment Date', 'Shipment','',
+                null, 'top');
+
+            generateGraphTransportSummary(ancestor + '#Yearly', '/Transportation/' + controllerPrefix + 'Yearly',
+                'bar', 'Shipment Month', 'Shipment','',
+                null, 'top');
+
+            var selectedDate = getSelectDate();
+            var date = moment(selectedDate);
+            $('#SummaryMonthlyDate').text(uiHelpers.displayFullMonth(date) + ' ' + date.format('YYYY'));
+            $('#SummaryYearlyDate').text(date.format('YYYY'));
+        }
+
+        function generateSummary(tabName, controlID, overlaySection, serviceUrl) {
+            $(overlaySection + ' .section-loading').show();
+            var jqxhr = $.post(serviceUrl, getCriteria(tabName))
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        $(controlID + ' .total-qty').text(uiHelpers.displayInteger(result.data[0].total));
+                        $(controlID + ' .delivery-percent').text(uiHelpers.displayN2(result.data[0].delivery_percent) + '%');
+
+                        $(controlID + ' .ontime-percent').text(uiHelpers.displayN2(result.data[0].ontime_percent) + '%');
+                        $(controlID + ' .ontime').text(uiHelpers.displayInteger(result.data[0].ontime_delivery));
+                        $(controlID + ' .delay').text(uiHelpers.displayInteger(result.data[0].delay_delivery));
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $(overlaySection + ' .section-loading').hide();
+                })
+                ;
+        }
+
+        function created_row(row, data, dataIndex) {
+            //var tab = $('#OntimeDetail .section-table-render').DataTable();
+            //merge cell
+            if (data.total_type == 0) {
+                if (department_cell == null || data.department != department_cell.text()) {
+                    //if (region_cnt > 1)
+                    //    region_cell.attr("rowspan", region_cnt);
+                    department_cell = $($(row).find('td')[0]);
+                    department_cnt = 1;
+
+                    //if (section_cnt > 1)
+                    //    section_cell.attr("rowspan", section_cnt);
+                    section_cell = null;
+                    section_cnt = 1;
+
+                    if (mat_freight_cnt > 1)
+                        mat_freight_cell.attr("rowspan", mat_freight_cnt);
+                    mat_freight_cell = null;
+                    mat_freight_cnt = 1;
+                }
+                else {
+                    if (data.total_type != 7 && data.total_type != 31) {
+                        $($(row).find('td')[0]).attr('mark-remove', 1);
+                        department_cnt++;
+                    }
+                }
+
+                if (section_cell == null || data.section != section_cell.text()) {
+                    //if (section_cnt > 1)
+                    //    section_cell.attr("rowspan", section_cnt);
+                    section_cell = $($(row).find('td')[1]);
+                    section_cnt = 1;
+
+                    //if (fleet_cnt > 1)
+                    //    fleet_cell.attr("rowspan", fleet_cnt);
+                    mat_freight_cell = null;
+                    mat_freight_cnt = 1;
+                }
+                else {
+                    if (data.total_type != 3) {
+                        $($(row).find('td')[1]).attr('mark-remove', 1);
+                        section_cnt++;
+                    }
+                }
+
+                if (mat_freight_cell == null || data.mat_freight != mat_freight_cell.text()) {
+                    //if (fleet_cnt > 1)
+                    //    fleet_cell.attr("rowspan", fleet_cnt);
+                    mat_freight_cell = $($(row).find('td')[2]);
+                    mat_freight_cnt = 1;
+                }
+                else {
+                    if (data.total_type != 1) {
+                        $($(row).find('td')[2]).attr('mark-remove', 1);
+                        mat_freight_cnt++;
+                    }
+                }
+            }
+            //set color
+
+            if (data.total_type == 1) {
+                $(row).addClass('ontime-mat-frg-total-row');
+                $($(row).find('td')[2]).attr('colspan', 1);
+            }
+            else if (data.total_type == 3) {
+                $(row).addClass('ontime-section-total-row');
+                $($(row).find('td')[1]).attr('colspan', 2);
+                $($(row).find('td')[2]).remove();
+            }
+            else if (data.total_type == 7) {
+                $($(row).find('td')[0]).text('Grand Total');
+                $(row).addClass('ontime-grand-total-summary-row');
+                $($(row).find('td')[0]).attr('colspan', 2);
+                $($(row).find('td')[1]).remove();
+            }
+            else if (data.total_type == 31) {
+
+                $(row).addClass('ontime-grand-total-row');
+                $($(row).find('td')[0]).attr('colspan', 2);
+                $($(row).find('td')[1]).remove();
+                $($(row).find('td')[2]).remove();
+            }
+
+            //remove by set text and border color to transparent
+            if ($($(row).find('td')[2]).attr('mark-remove') == 1) {
+                $($(row).find('td')[2]).addClass('ontime-hide-cell');
+                $($(row).find('td')[2]).attr('title', $($(row).find('td')[2]).text());
+            }
+
+            if ($($(row).find('td')[1]).attr('mark-remove') == 1) {
+                $($(row).find('td')[1]).addClass('ontime-hide-cell');
+                $($(row).find('td')[1]).attr('title', $($(row).find('td')[1]).text());
+            }
+
+            if ($($(row).find('td')[0]).attr('mark-remove') == 1) {
+                $($(row).find('td')[0]).addClass('ontime-hide-cell');
+                $($(row).find('td')[0]).attr('title', $($(row).find('td')[0]).text());
+            }
+        }
+
+        function comboOnchange(tabName) {
+            var CriteriaObj = {
+                business: {
+                    value: [],
+                    flag: false,
+                    count: 0
+                },
+                fleet: {
+                    value: [],
+                    flag: false,
+                    count: 0
+                },
+                matfrg: {
+                    value: [],
+                    flag: false,
+                    count: 0
+                },
+                shippingpoint: {
+                    value: [],
+                    flag: false,
+                    count: 0
+                },
+                shiptoregion: {
+                    value: [],
+                    flag: false,
+                    count: 0
+                }
+            };
+
+            const ancestor = '#' + tabName + ' ';
+
+            $(ancestor + '#cboBusiness').on("select2:clear", function (element, checked) {
+                //if (flagClear == false) {
+                console.log('Clear Business');
+                CriteriaObj.business.value = getBusiness_m(tabName);
+                CriteriaObj.business.flag = true;
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+                //let selectBusiness = $('#cboBusiness').select2('data').map(x => x.id);
+                //let selectFleet = $('#cboFleet').select2('data').map(x => x.id);
+                //let selectMatfreight = $('#cboMatfrg').select2('data').map(x => x.id);
+                //let selectShippingpoint = $('#cboShippingPoint').select2('data').map(x => x.id);
+                //let selectRegion = $('#cboShiptoRegion').select2('data').map(x => x.id);
+
+                //$('#cboFleet').val(fleet).trigger('change.select2');
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], CriteriaObj.business.value, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], CriteriaObj.business.value, CriteriaObj.matfrg.value, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, CriteriaObj.shippingpoint.value).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //}
+            });
+
+            $(ancestor + '#cboFleet').on("select2:clear", function (element, checked) {
+                console.log('Clear Fleet');
+                CriteriaObj.fleet.value = getFleet_m();
+                CriteriaObj.fleet.flag = true;
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], CriteriaObj.business.value, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], CriteriaObj.business.value, CriteriaObj.matfrg.value, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, CriteriaObj.shippingpoint.value).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+            });
+
+            $(ancestor + '#cboMatfrg').on("select2:clear", function (element, checked) {
+                console.log('Clear Matfrg');
+                //matfrg = getMatfrg();
+                CriteriaObj.matfrg.value = getMatfrg_m();
+                CriteriaObj.matfrg.flag = true;
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], CriteriaObj.business.value, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], CriteriaObj.business.value, CriteriaObj.matfrg.value, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, CriteriaObj.shippingpoint.value).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+            });
+
+            $(ancestor + '#cboShippingPoint').on("select2:clear", function (element, checked) {
+                console.log('Clear ShippingPoint');
+                //matfrg = getMatfrg();
+                CriteriaObj.shippingpoint.value = getShippingPoint_m();
+                CriteriaObj.shippingpoint.flag = true;
+                //shippingpoint = getShippingPoint();
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], CriteriaObj.business.value, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], CriteriaObj.business.value, CriteriaObj.matfrg.value, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, CriteriaObj.shippingpoint.value).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+                //flagClear = true;
+            });
+
+            $(ancestor + '#cboShiptoRegion').on("select2:clear", function (element, checked) {
+                console.log('Clear ShipToRegion');
+                //shiptoregion = getShiptoRegion();
+                CriteriaObj.shiptoregion.value = getShiptoRegion_m();
+                CriteriaObj.shiptoregion.flag = true;
+                //flagClear = true;
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], CriteriaObj.business.value, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], CriteriaObj.business.value, CriteriaObj.matfrg.value, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], CriteriaObj.business.value, CriteriaObj.fleet.value, CriteriaObj.matfrg.value, CriteriaObj.shippingpoint.value).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+            });
+
+            //=============
+            // On Change
+            //=============
+
+            $(ancestor + '#cboBusiness').on("change", function (element, checked) {
+                if (CriteriaObj.business.flag == true) {
+                    if (CriteriaObj.business.count == 0) {
+                        CriteriaObj.business.flag = false;
+                    }
+                    CriteriaObj.business.count--;
+                    element.preventDefault();
+                    return;
+                }
+
+                //console.log('Change Business Flag:' + CriteriaObj.business.flag);
+                CriteriaObj.business.value = getBusiness_m();
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+                let selectBusiness = $(ancestor + '#cboBusiness').select2('data').map(x => x.id);
+                let selectFleet = $(ancestor + '#cboFleet').select2('data').map(x => x.id);
+                let selectMatfreight = $(ancestor + '#cboMatfrg').select2('data').map(x => x.id);
+                let selectShippingpoint = $(ancestor + '#cboShippingPoint').select2('data').map(x => x.id);
+                let selectRegion = $(ancestor + '#cboShiptoRegion').select2('data').map(x => x.id);
+
+                $(ancestor + '#cboMatfrg').empty();
+                $(ancestor + '#cboFleet').empty();
+                $(ancestor + '#cboShippingPoint').empty();
+                $(ancestor + '#cboShiptoRegion').empty();
+
+                //ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], selectMatfreight, selectFleet, selectShippingpoint, selectRegion).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], selectBusiness, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], selectBusiness, selectMatfreight, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], selectBusiness, selectFleet, selectMatfreight, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], selectBusiness, selectFleet, selectMatfreight, selectShippingpoint).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+
+                CriteriaObj.business.count = $(ancestor + '#cboBusiness').select2('data').length;
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+            });
+            //}
+
+            $(ancestor + '#cboMatfrg').on("change", function (element, checked) {
+                if (CriteriaObj.matfrg.flag == true) {
+                    if (CriteriaObj.matfrg.count == 0) {
+                        CriteriaObj.matfrg.flag = false;
+                    }
+                    CriteriaObj.matfrg.count--;
+                    element.preventDefault();
+                    return;
+                }
+                console.log('Change Matfrg Flag:' + CriteriaObj.matfrg.flag);
+                CriteriaObj.matfrg.value = getMatfrg_m();
+
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+                let selectBusiness = $(ancestor + '#cboBusiness').select2('data').map(x => x.id);
+                let selectFleet = $(ancestor + '#cboFleet').select2('data').map(x => x.id);
+                let selectMatfreight = $(ancestor + '#cboMatfrg').select2('data').map(x => x.id);
+                let selectShippingpoint = $(ancestor + '#cboShippingPoint').select2('data').map(x => x.id);
+                let selectRegion = $(ancestor + '#cboShiptoRegion').select2('data').map(x => x.id);
+
+                $(ancestor + '#cboBusiness').empty();
+                $(ancestor + '#cboFleet').empty();
+                $(ancestor + '#cboShippingPoint').empty();
+                $(ancestor + '#cboShiptoRegion').empty();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                //ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], selectBusiness, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], selectBusiness, selectMatfreight, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], selectBusiness, selectFleet, selectMatfreight, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], selectBusiness, selectFleet, selectMatfreight, selectShippingpoint).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+                CriteriaObj.matfrg.count = $(ancestor + '#cboMatfrg').select2('data').length;
+            });
+
+            $(ancestor + '#cboFleet').on("change", function (element, checked) {
+
+                if (CriteriaObj.fleet.flag == true) {
+
+                    if (CriteriaObj.fleet.count == 0) {
+                        CriteriaObj.fleet.flag = false;
+                    }
+                    CriteriaObj.fleet.count--;
+                    element.preventDefault();
+                    return;
+                }
+
+                console.log('Change Fleet Flag:' + CriteriaObj.fleet.flag);
+                CriteriaObj.fleet.value = getFleet_m();
+
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+
+                let selectBusiness = $(ancestor + '#cboBusiness').select2('data').map(x => x.id);
+                let selectFleet = $(ancestor + '#cboFleet').select2('data').map(x => x.id);
+                let selectMatfreight = $(ancestor + '#cboMatfrg').select2('data').map(x => x.id);
+                let selectShippingpoint = $(ancestor + '#cboShippingPoint').select2('data').map(x => x.id);
+                let selectRegion = $(ancestor + '#cboShiptoRegion').select2('data').map(x => x.id);
+
+                $(ancestor + '#cboBusiness').empty();
+                $(ancestor + '#cboMatfrg').empty();
+                $(ancestor + '#cboShippingPoint').empty();
+                $(ancestor + '#cboShiptoRegion').empty();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], selectBusiness, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                //ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], selectBusiness, selectMatfreight, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], selectBusiness, selectFleet, selectMatfreight, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], selectBusiness, selectFleet, selectMatfreight, selectShippingpoint).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                CriteriaObj.fleet.count = $(ancestor + '#cboFleet').select2('data').length;
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+            });
+
+            $(ancestor + '#cboShippingPoint').on("change", function (element, checked) {
+                if (CriteriaObj.shippingpoint.flag == true) {
+                    if (CriteriaObj.shippingpoint.count == 0) {
+                        CriteriaObj.shippingpoint.flag = false;
+                    }
+                    CriteriaObj.shippingpoint.count--;
+                    element.preventDefault();
+                    return;
+                }
+                console.log('Change ShippingPoint Flag:' + CriteriaObj.shippingpoint.flag);
+                CriteriaObj.shippingpoint.value = getShippingPoint_m();
+
+                //shippingpoint = getShippingPoint();
+
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+                let selectBusiness = $(ancestor + '#cboBusiness').select2('data').map(x => x.id);
+                let selectFleet = $(ancestor + '#cboFleet').select2('data').map(x => x.id);
+                let selectMatfreight = $(ancestor + '#cboMatfrg').select2('data').map(x => x.id);
+                let selectShippingpoint = $(ancestor + '#cboShippingPoint').select2('data').map(x => x.id);
+                let selectRegion = $(ancestor + '#cboShiptoRegion').select2('data').map(x => x.id);
+
+                $(ancestor + '#cboBusiness').empty();
+                $(ancestor + '#cboMatfrg').empty();
+                $(ancestor + '#cboFleet').empty();
+                $(ancestor + '#cboShiptoRegion').empty();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], selectBusiness, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], selectBusiness, selectMatfreight, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                //ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], selectBusiness, selectFleet, selectMatfreight, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], selectBusiness, selectFleet, selectMatfreight, selectShippingpoint).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+                CriteriaObj.shippingpoint.count = $(ancestor + '#cboShippingPoint').select2('data').length;
+            });
+
+            $(ancestor + '#cboShiptoRegion').on("change", function (element, checked) {
+                if (CriteriaObj.shiptoregion.flag == true) {
+                    if (CriteriaObj.shiptoregion.count == 0) {
+                        CriteriaObj.shiptoregion.flag = false;
+                    }
+                    CriteriaObj.shiptoregion.count--;
+                    element.preventDefault();
+                    return;
+                }
+                console.log('Change ShipToRegion Flag:' + CriteriaObj.shiptoregion.flag);
+                CriteriaObj.shiptoregion.value = getShiptoRegion_m();
+
+                let ajax = [];
+                $(ancestor + '#CriteriaOveray').show();
+                let selectBusiness = $(ancestor + '#cboBusiness').select2('data').map(x => x.id);
+                let selectFleet = $(ancestor + '#cboFleet').select2('data').map(x => x.id);
+                let selectMatfreight = $(ancestor + '#cboMatfrg').select2('data').map(x => x.id);
+                let selectShippingpoint = $(ancestor + '#cboShippingPoint').select2('data').map(x => x.id);
+                let selectRegion = $(ancestor + '#cboShiptoRegion').select2('data').map(x => x.id);
+
+                $(ancestor + '#cboBusiness').empty();
+                $(ancestor + '#cboMatfrg').empty();
+                $(ancestor + '#cboFleet').empty();
+                $(ancestor + '#cboShippingPoint').empty();
+
+                ajax.push(uiHelpers.initBusiness(ancestor + '#cboBusiness', [], [], [], [], []).always(() => { $(ancestor + '#cboBusiness').val(CriteriaObj.business.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initMatfrg(ancestor + '#cboMatfrg', [], [], selectBusiness, [], [], []).always(() => { $(ancestor + '#cboMatfrg').val(CriteriaObj.matfrg.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initFleet(ancestor + '#cboFleet', [], [], selectBusiness, selectMatfreight, [], []).always(() => { $(ancestor + '#cboFleet').val(CriteriaObj.fleet.value).trigger('change.select2'); }));
+                ajax.push(uiHelpers.initShippingPoint(ancestor + '#cboShippingPoint', [], [], selectBusiness, selectFleet, selectMatfreight, []).always(() => { $(ancestor + '#cboShippingPoint').val(CriteriaObj.shippingpoint.value).trigger('change.select2'); }));
+                //ajax.push(uiHelpers.initShiptoRegion(ancestor + '#cboShiptoRegion', [], [], selectBusiness, selectFleet, selectMatfreight, selectShippingpoint).always(() => { $(ancestor + '#cboShiptoRegion').val(CriteriaObj.shiptoregion.value).trigger('change.select2'); }));
+                let result = Promise.all(ajax).finally(() => { $(ancestor + '#CriteriaOveray').hide(); });
+                //alert($(ancestor + '#cboBusiness').select2('data').map(x => x.id));
+                CriteriaObj.shiptoregion.count = $(ancestor + '#cboShiptoRegion').select2('data').length;
+            });
+        }
+
+        $(document).ready(function () {
+            //initialControl().then(() => {
+            //    uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            //});
+            //$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            //    $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            //});
+            //comboOnchange();
+            //isActive();
+
+            const tabNames = ['tab-shipment', 'tab-ton', 'tab-piece', 'tab-ontime'];
+            tabNames.forEach(function (tabName, tabIndex) {
+                $('#' + tabName + ' select[id ^= cbo]').each(function (index, value) {
+                    $(this).attr('data-select2-id', this.id + '-' + tabName);
+                });
+
+                initialSearchCriteria(tabName).then(() => {
+                    uiHelpers.getDefaultCriteria(screenID + '-' + tabName)
+                        .done((result) => {
+                            setCriteria(tabName, result.data);
+
+                            uiHelpers.initCriteria(screenID, '#' + tabName + ' #search-button',
+                                () => setCriteria(tabName),
+                                () => getCriteria(tabName, null),
+                                () => Search(tabName)
+                            );
+
+                            const unitDict = {
+                                'tab-shipment': 'Shipment',
+                                'tab-ton': 'Ton',
+                                'tab-piece': 'Piece',
+                            }
+
+                            $('#' + tabName + ' #SummaryMonthly .total-unit').text(unitDict[tabName]);
+                            $('#' + tabName + ' #SummaryYearly .total-unit').text(unitDict[tabName]);
+                        })
+                        .always(function () {
+                            if (tabIndex == 0) {
+                                Search(tabName);
+                            }
+                        });
+                });
+            });
+            comboOnchange();
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            });
+            //isActive();
+        });
+
+        function isActive() {
+            setTimeout(function () {
+                if ($('#filled-monthly').is(':visible')) {
+                    console.log('hide');
+                }
+                else if ($('#filled-yearly').is(':visible')) {
+                    console.log('show');
+                }
+            }, 100)
+        }
+
+
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Transportation</h1>
+            <h4 class="card-title">รายงานสรุปยอดขนส่ง (Transportation Summary)</h4>
+        </div>
+    </div>
+    <ul class="nav filled-tabs">
+        <li class="nav-item">
+            <a class="nav-link active show" data-toggle="tab" href="#tab-shipment">Shipment</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab-ton">Ton</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab-piece">Piece</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab-ontime">On time</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active show" id="tab-shipment">
+            @{
+                await Html.RenderPartialAsync("_Transportation_Performance");
+            }
+        </div>
+        <div class="tab-pane" id="tab-ton">
+            @{
+                await Html.RenderPartialAsync("_Transportation_Performance");
+            }
+        </div>
+        <div class="tab-pane" id="tab-piece">
+            @{
+                await Html.RenderPartialAsync("_Transportation_Performance");
+            }
+        </div>
+        <div class="tab-pane" id="tab-ontime">
+            @{
+                await Html.RenderPartialAsync("_Transportation_Performance_Ontime");
+            }
+        </div>
+    </div>
+</div>

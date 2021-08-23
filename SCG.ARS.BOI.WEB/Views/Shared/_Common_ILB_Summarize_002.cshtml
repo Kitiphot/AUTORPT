@@ -1,0 +1,177 @@
+﻿<div id="Allsummary" class="row">
+    <div class="overlay section-loading" hidden="hidden">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 card-statistics">
+        <div class="row" id="div_summary" data-bind="foreach: summary">
+
+            <div id="total_no_est" class="col-12 col-sm-6 col-lg-3 mb-4" onclick="SearchCriteria(1);">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around align-items-center">
+                            <div class="btn btn-success btn-rounded px-3 py-3 mr-2">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">No Cargo <br> Readiness Date</h6>
+                                <h6 id="b2Text" data-bind="text: total_no_readiness"></h6>
+                                <div class="progress progress-xs">
+                                    <div id="b2Bar" class="progress-bar bg-success" role="progressbar"
+                                         data-bind="attr: {'aria-valuenow': (total_no_readiness/total_shpmnt)*100,} , style: {width:(total_no_readiness/total_shpmnt)*100+'%'}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+
+                                    @*<div class="progress-bar bg-danger w-75" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+                                        aria-valuemax="100"></div>*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="total_no_actual_etd" class="col-12 col-sm-6 col-lg-3 mb-4" onclick="SearchCriteria(2);">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around align-items-center">
+                            <div class="btn btn-warning btn-rounded px-3 py-3 mr-2">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ติดตามสถานะ <br> Actual ETD</h6>
+                                <h6 id="b3Text" data-bind="text: total_no_act_etd"></h6>
+                                <div class="progress progress-xs">
+                                    <div id="b3Bar" class="progress-bar bg-warning" role="progressbar"
+                                         data-bind="attr: {'aria-valuenow': (total_no_act_etd/total_shpmnt)*100,} , style: {width:(total_no_act_etd/total_shpmnt)*100+'%'}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                    @*<div class="progress-bar bg-warning w-50" role="progressbar" aria-valuenow="25"
+                                        aria-valuemin="0" aria-valuemax="100"></div>*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="total_no_actual_etd" class="col-12 col-sm-6 col-lg-3 mb-4" onclick="SearchCriteria(3);">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around align-items-center">
+                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color: rgba(235, 119, 52,0.9);color:white;">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ติดตามสถานะ <br> Receive Ship Docs</h6>
+                                <h6 id="b3Text" data-bind="text: pending_shipdoc"></h6>
+                                <div class="progress progress-xs">
+                                    <div id="b3Bar" class="progress-bar" style="background-color: rgba(235, 119, 52,0.9);" role="progressbar"
+                                         data-bind="attr: {'aria-valuenow': (pending_shipdoc/total_shpmnt)*100,} , style: {width:(pending_shipdoc/total_shpmnt)*100+'%'}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*</div>*@
+            @*</div>*@
+            @*<div class="col-lg-5 col-xl-5 col-md-12 col-sm-12 pr-0">*@
+            @*<div class="form-row">*@
+
+            <div id="total_no_actual_etd" class="col-12 col-sm-6 col-lg-3 mb-3" onclick="SearchCriteria(4);">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around align-items-center">
+                            <div class="btn btn-danger btn-rounded px-3 py-3 mr-2">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ติดตามสถานะ <br>Custom Release</h6>
+                                <h6 id="b3Text" data-bind="text: pending_custom_release"></h6>
+                                <div class="progress progress-xs">
+                                    <div id="b3Bar" class="progress-bar bg-danger" role="progressbar"
+                                         data-bind="attr: {'aria-valuenow': (pending_custom_release/total_shpmnt)*100,} , style: {width:(pending_custom_release/total_shpmnt)*100+'%'}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="total_no_delivery" class="col-12 col-sm-6 col-lg-3 mb-3" onclick="SearchCriteria(5);">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around align-items-center">
+                            <div class="btn btn-secondary btn-rounded px-3 py-3 mr-2" style="background-color: rgba(99, 99, 99,0.9);color:white">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ติดตามสถานะ <br> Delivery</h6>
+                                <h6 id="b4Text" data-bind="text: total_no_delivery"></h6>
+                                <div class="progress progress-xs">
+                                    <div id="b4Bar" class="progress-bar bg-secondary" role="progressbar" style="background-color: rgba(99, 99, 99,0.9)"
+                                         data-bind="attr: {'aria-valuenow': (total_no_delivery/total_shpmnt)*100,} , style: {width:(total_no_delivery/total_shpmnt)*100+'%'}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="total_no_close" class="col-12 col-sm-6 col-lg-3 mb-3" onclick="SearchCriteria(6);">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around align-items-center">
+                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color:rgba(204, 121, 224,0.8);color:white">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ติดตาม Update <br>Payment</h6>
+                                <h6 id="b5Text" data-bind="text: total_no_cl_shpmnt"></h6>
+                                <div class="progress progress-xs">
+                                    <div id="b5Bar" class="progress-bar" role="progressbar" style="background-color:rgba(204, 121, 224,0.8);"
+                                         data-bind="attr: {'aria-valuenow': (total_no_cl_shpmnt/total_shpmnt)*100,} , style: {width:(total_no_cl_shpmnt/total_shpmnt)*100+'%'}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pending_close" class="col-12 col-sm-6 col-lg-3 mb-3" onclick="SearchCriteria(7);">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-around align-items-center">
+                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color: rgba(43, 46, 207,0.8);color: white">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ติดตามสถานะ <br>Close</h6>
+                                <h6 id="b5Text" data-bind="text: pending_close"></h6>
+                                <div class="progress progress-xs">
+                                    <div id="b5Bar" class="progress-bar" role="progressbar" style="background-color: rgba(43, 46, 207,0.8);"
+                                         data-bind="attr: {'aria-valuenow': (pending_close/total_shpmnt)*100,} , style: {width:(pending_close/total_shpmnt)*100+'%'}"
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*</div>
+                </div>*@
+        </div>
+    </div>
+</div>
+
+

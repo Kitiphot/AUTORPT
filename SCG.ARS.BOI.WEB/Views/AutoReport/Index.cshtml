@@ -1,0 +1,1382 @@
+﻿
+@{
+    ViewData["Title"] = "Auto Report";
+}
+<style>
+    .bootstrap-tagsinput {
+        width: 75% !important;
+    }
+
+    #tree_left_menu.hamburg-icon {
+        display: inline-block;
+        margin-right: 20px;
+        position: relative;
+    }
+
+        #tree_left_menu.hamburg-icon:before {
+            background: rgba(0, 0, 0, 0.0625);
+            border-radius: 100%;
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 42px;
+            height: 42px;
+            text-align: center;
+            content: '';
+            transform: scale(0);
+            -webkit-transform: scale(0);
+            -ms-transform: scale(0);
+            -moz-transform: scale(0);
+            transition: transform, 0.25s;
+        }
+        /* line 31, ../sass/layout/_header.scss */
+        #tree_left_menu.hamburg-icon:hover:before, #tree_left_menu.hamburg-icon.active:before {
+            transform: scale(1);
+            -webkit-transform: scale(1);
+            -ms-transform: scale(1);
+            -moz-transform: scale(1);
+            transition: transform, 0.25s;
+        }
+
+    .wrapper {
+        display: flex;
+        width: 100%;
+    }
+
+    #sidebar {
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 999;
+        background: #7386D5;
+        color: #fff;
+        transition: all 0.3s;
+    }
+</style>
+<script src="~/assets/js/autoreport.js"></script>
+<!-- Content Start -->
+<div class="content-wrapper">
+    <div class="row mb-4">
+        <div class="col-12 d-flex align-items-center">
+            <h4 class="page-title">Report Customization</h4>
+            <div id="tree_left_menu" class="hamburg-icon active">
+                <a href="javascript:void(0)" class="nav-link">
+                    <i class="mdi mdi-menu md-24"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="left-panel" class="col col-sm col-md-4 col-lg-4">
+            <div id="dvTreeOverlay" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div id="accordionTree" class="accordion">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        @*<a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseTree"
+                                aria-expanded="false" aria-controls="collapseTree">
+                                รายงาน
+                            </a>*@
+                        @*<div class="form-inline">
+                                <button id="btnAdd" class="btn-sm btn-primary ml-2" style="display:none">Add</button>
+                                <button id="btnEdit" class="btn-sm btn-info ml-2" style="display:none">Edit</button>
+                                <button id="btnCopy" class="btn-sm btn-warning ml-2" style="display:none">Copy</button>
+                                <button id="btnDelete" class="btn-sm btn-danger ml-2" style="display:none">Delete</button>
+                                <button id="btnClear" class="btn-sm btn-primary ml-2" style="display:none">Clear</button>
+                            </div>*@
+                    </div>
+                    <div id="collapseTree" class="collapse show" aria-labelledby="headingTree" data-parent="#accordionTree">
+                        <div class="card-body">
+                            <div id="tree"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-sm col-md-8 col-lg-8" id="right-panel">
+            <div id="dvParamsOverlay" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div id="dvColumnsOverlay" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div id="accordionOne" class="accordion">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseOne"
+                           aria-expanded="false" aria-controls="collapseOne">
+                            รายละเอียดฟังก์ชั่น
+                        </a>
+                    </div>
+                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-12">
+                                    <div id="dvFunctions" data-bind="foreach: functions">
+                                        <div class="form-row">
+                                            <div class="form-group col-6">
+                                                <label class="form-label">ฟังก์ชั่น</label>
+                                                <input type="text" class="form-control" readonly data-bind="attr:{value: function_name, id: 'txt_function_name_'+$index()}">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label class="form-label">รายงาน</label>
+                                                <input type="text" class="form-control" readonly data-bind="attr:{value: report_name, id: 'txt_report_name_'+$index()}">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <button type="button" class="btn btn-primary btn-sm mb-1" data-bind="event:{click: $parent.newTemplate}">
+                                                    <i class="mdi mdi-plus-circle md-14 ml-1"></i>
+                                                    <span class="align-middle">New Sub Report</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="dvTemplates" data-bind="foreach: templates">
+                                        <div class="form-row">
+                                            <div class="form-group col-6">
+                                                <label class="form-label">ฟังก์ชั่น</label>
+                                                <input type="text" class="form-control" readonly data-bind="attr:{value: function_name, id: 'txt_function_name_'+$index()}">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label class="form-label">รายงาน</label>
+                                                <input type="text" class="form-control" readonly data-bind="attr:{value: report_name, id: 'txt_template_report_name_'+$index()}">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <label class="form-label">รายงานย่อย</label>
+                                                <input type="text" class="form-control" readonly data-bind="attr:{value: report_desc, id: 'txt_report_desc_'+$index()}">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <label class="form-label">เทมเพลต</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" data-bind="value: template_name, id: 'txt_report_template_'+$index()" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <button type="button" class="btn btn-primary btn-sm mb-1" data-bind="event:{click: $parent.editTemplate}">
+                                                    <i class="mdi mdi-grease-pencil md-14 ml-1"></i>
+                                                    <span class="align-middle">Edit</span>
+                                                </button>
+                                                <button type="button" class="btn btn-success btn-sm mb-1" data-bind="event:{click: $parent.copyTemplate}">
+                                                    <i class="mdi mdi-content-copy md-14 ml-1"></i>
+                                                    <span class="align-middle">Copy</span>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-sm mb-1" data-bind="event:{click: $parent.deleteTemplate}">
+                                                    <i class="mdi mdi-delete md-14 ml-1"></i>
+                                                    <span class="align-middle">Delete</span>
+                                                </button>
+                                                <button type="button" class="btn btn-warning btn-sm mb-1" data-bind="event:{click: $parent.resetTemplate}">
+                                                    <i class="mdi mdi-undo-variant md-14 ml-1"></i>
+                                                    <span class="align-middle">Reset</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <button type="button" class="btn btn-success btn-sm mb-1" id="btnRawData" data-bind="event:{click: $parent.downloadExcelSample}">
+                                                    <i class="mdi mdi-download md-14 ml-1"></i>
+                                                    <span class="align-middle">Sample Data</span>
+                                                </button>
+                                                <button type="button" class="btn btn-info btn-sm mb-1" id="btnDownload" data-bind="event:{click: $parent.downloadExcel}">
+                                                    <i class="mdi mdi-download md-14 ml-1"></i>
+                                                    <span class="align-middle">Export Data</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="dvNewTemplates" data-bind="foreach: templates">
+                                        <div class="form-row">
+                                            <div class="form-group col-6">
+                                                <label class="form-label">ฟังก์ชั่น</label>
+                                                <input type="text" class="form-control" readonly data-bind="attr:{value: function_name, id: 'txt_function_name_'+$index()}">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label class="form-label">รายงาน</label>
+                                                <input type="text" class="form-control" readonly data-bind="attr:{value: report_name, id: 'txt_template_report_name_'+$index()}">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <label class="form-label">รายงานย่อย</label>
+                                                <input type="text" class="form-control" data-bind="value: report_desc, id: 'txt_report_desc_'+$index(), textInput: report_desc">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <label class="form-label">เทมเพลต</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" data-bind="value: template_name, id: 'txt_report_template_'+$index()" readonly>
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-danger btn-sm" id="btnRemove" data-bind="event:{click: $parent.removeTemplate}">
+                                                            <i class="mdi md-14 ml-1"></i>
+                                                            <span class="align-middle">Remove</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <button type="button" class="btn btn-primary btn-sm mb-1" data-bind="event:{click: $parent.saveTemplate}">
+                                                    <i class="mdi mdi-content-save md-14 ml-1"></i>
+                                                    <span class="align-middle">Save</span>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary btn-sm mb-1" id="btnUpload" data-bind="event:{click: $parent.uploadTemplate}" data-toggle="modal" data-target="#modal-upload">
+                                                    <i class="mdi mdi-upload md-14 ml-1"></i>
+                                                    <span class="align-middle">Upload Template</span>
+                                                </button>
+                                                <button type="button" class="btn btn-default btn-sm mb-1" id="btnCancel" data-bind="event:{click: $parent.cancelTemplate}">
+                                                    <i class="mdi mdi-exit-to-app md-14 ml-1"></i>
+                                                    <span class="align-middle">Cancel</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group col">
+                                                <button type="button" class="btn btn-success btn-sm mb-1" id="btnRawData" data-bind="event:{click: $parent.downloadExcelSample}">
+                                                    <i class="mdi mdi-download md-14 ml-1"></i>
+                                                    <span class="align-middle">Sample Data</span>
+                                                </button>
+                                                <button type="button" class="btn btn-info btn-sm mb-1" id="btnDownload" data-bind="event:{click: $parent.downloadExcel}">
+                                                    <i class="mdi mdi-download md-14 ml-1"></i>
+                                                    <span class="align-middle">Export Data</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="dvOverlayOne" class="overlay">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="accordionTwo" class="accordion">
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseTwo"
+                           aria-expanded="false" aria-controls="collapseTwo">
+                            รายละเอียดตัวแปร
+                        </a>
+                    </div>
+                    <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionTwo">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-12">
+                                    <table id="dtParams" class="table table-striped" style="width:100%"></table>
+                                    <table id="dtNewEditParams" class="table table-striped" style="max-width:100%"></table>
+                                    <div id="dvOverlayTwo" class="overlay">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="accordionThree" class="accordion">
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <a href="javascript:void(0)" class="accordion-toggle" data-toggle="collapse" data-target="#collapseThree"
+                           aria-expanded="false" aria-controls="collapseThree">
+                            รายละเอียดคอลัมน์
+                        </a>
+                    </div>
+                    <div id="collapseThree" class="collapse show" aria-labelledby="headingThree" data-parent="#accordionThree">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-12">
+                                    <table id="dtColumns" class="table table-striped" style="width:100%"></table>
+                                    <table id="dtNewEditColumns" class="table table-striped" style="width:100%"></table>
+                                    <div id="dvOverlayThree" class="overlay">
+                                        <div class="loader-wrap">
+                                            <div class="bar-loader">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal modal-default" id="modal-columns">
+    <div id="dvOverlayColumns" class="overlay">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-dialog modal-md">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Select Columns
+                    <br>
+                    <small class="text-muted">select columns for function</small>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <table id="dtColumnList" class="table table-striped" style="width:100%"></table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSaveColumns" class="btn btn-primary">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal modal-default" id="modal-upload">
+    <div class="modal-dialog modal-md">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Upload file
+                    <br>
+                    <small class="text-muted">upload file for function</small>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="col-12">
+                    <input type="file" id="file" name="file" accept=".xlsx" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light waves-effect" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="UploadTemplate()">Upload File</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="modal-confirm-delete-column" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Confirm delete?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="confirm-delete-column">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Content End -->
+<script>
+    $(function () {
+        $("#tree_left_menu.hamburg-icon").on("click", function (e) {
+            $(this).toggleClass('active');
+            $('#left-panel').toggle('slide');
+
+            let rightPanel = $('#right-panel');
+            if (rightPanel.hasClass('col-md-8')) {
+                rightPanel.removeClass('col-md-8 col-lg-8');
+                rightPanel.addClass('col-md col-lg');
+            } else {
+                rightPanel.removeClass('col-md col-lg');
+                rightPanel.addClass('col-md-8 col-lg-8');
+            }
+        });
+    });
+
+    var dtParams = null;
+    var dtNewEditParams = null;
+    var dtColumns = null;
+    var dtEditColumns = null;
+    var dtColumnList = null;
+    var mode = 0;
+
+    var data = [];
+    var functionModel = {
+        functions: ko.observableArray([]),
+        newTemplate: function (data, event) {
+            mode = 1;
+            functionModel.functions([]);
+            templateModel.templates([]);
+            newTemplateModel.templates(data);
+            var request = {
+                schema_name: data.schema_name,
+                function_name: data.function_name
+            };
+            LoadFunctionParameters(request);
+            LoadColumnParameters(request);
+            $("#btnRawData, #btnUpload, #btnDownload").hide();
+        },
+    }
+
+    var templateModel = {
+        templates: ko.observableArray([]),
+        editTemplate: function (data, event) {
+            mode = 2;
+            //console.log(data);
+            functionModel.functions([]);
+            templateModel.templates([]);
+            newTemplateModel.templates(data);
+            var request = {
+                p_template_report_mapping_id: data.template_report_mapping_id
+            };
+            LoadParameterMappingEditMode(request);
+            LoadColumnMappingEditMode(request);
+            $("#btnRawData, #btnUpload, #btnDownload").show();
+        },
+        copyTemplate: function (data, event) {
+            mode = 4;
+            CopyTemplateReportMapping(data)
+        },
+        deleteTemplate: function (data, event) {
+            mode = 5;
+            RemoveTemplateReportMapping(data);
+        },
+        resetTemplate: function (data, event) {
+            mode = 5;
+            ResetTemplateReportMapping(data);
+        },
+
+        downloadExcelSample: function (data, event) {
+            $('#dvParamsOverlay').show();
+            //console.log(data);
+            var jqxhr = $.post("/AutoReport/DownloadTemplateReportMapping", { request: data, limit: 100 })
+                .done(function (result) {
+                    //console.log(result);
+                    if (result.status) {
+                        toastr["success"](result.message);
+                        if (result.url != "")
+                            window.open('@Url.Action("DownloadFile", "AutoReport")'+'?path=' + result.url, '_blank');
+                        else
+                            toastr["warning"]("Data not found.");
+                    } else {
+                        toastr["error"](result.message);
+                        console.log(result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvParamsOverlay').hide();
+                    //console.log( "finished" );
+                });
+        },
+        downloadExcel: function (data, event) {
+            $('#dvParamsOverlay').show();
+            //console.log(data);
+            var jqxhr = $.post("/AutoReport/DownloadTemplateReportMapping", data)
+                .done(function (result) {
+                    if (result.status) {
+                        toastr["success"](result.message);
+                        if (result.url != "")
+                            window.open('@Url.Action("DownloadFile", "AutoReport")'+'?path=' + result.url, '_blank');
+                        else
+                            toastr["warning"]("Data not found.");
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvParamsOverlay').hide();
+                    //console.log( "finished" );
+                });
+            //window.location = '@Url.Action("DownloadTemplateReportMapping", "AutoReport")' + '?template_report_mapping_id=' + data.template_report_mapping_id;
+        },
+    }
+
+    var newTemplateModel = {
+        templates: ko.observableArray([]),
+        saveTemplate: function (data, event) {
+            //console.log(event);
+            //console.log(data);
+            
+            $('#dvParamsOverlay').show();
+            //var data = newTemplateModel.templates();
+            //console.log(data);
+            var jqxhr = $.post("/AutoReport/SaveTemplateReportMapping", data)
+                .done(function (result) {
+                    if (result.status) {
+                        var rows = result.data;
+                        LoadTreeView();
+                        if (mode == 1) {
+                            mode = 2;
+                            functionModel.functions([]);
+                            templateModel.templates([]);
+                            newTemplateModel.templates(rows);
+                            var request = {
+                                p_template_report_mapping_id: rows.template_report_mapping_id
+                            };
+                            LoadParameterMappingEditMode(request);
+                            LoadColumnMappingEditMode(request);
+                            $("#btnRawData, #btnUpload, #btnDownload").show();
+                        }
+                        toastr["success"](result.message);
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvParamsOverlay').hide();
+                    //console.log( "finished" );
+                });
+        },
+        downloadExcelSample: function (data, event) {
+            $('#dvParamsOverlay').show();
+            //console.log(data);
+            var jqxhr = $.post("/AutoReport/DownloadTemplateReportMapping", { request:data, limit: 100 })
+                .done(function (result) {
+                    //console.log(result);
+                    if (result.status) {
+                        toastr["success"](result.message);
+                        if (result.url != "")
+                            window.open('@Url.Action("DownloadFile", "AutoReport")'+'?path=' + result.url, '_blank');
+                        else
+                            toastr["warning"]("Data not found.");
+                    } else {
+                        toastr["error"](result.message);
+                        console.log(result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvParamsOverlay').hide();
+                    //console.log( "finished" );
+                });
+        },
+        downloadExcel: function (data, event) {
+            $('#dvParamsOverlay').show();
+            //console.log(data);
+            var jqxhr = $.post("/AutoReport/DownloadTemplateReportMapping", data)
+                .done(function (result) {
+                    if (result.status) {
+                        toastr["success"](result.message);
+                        if (result.url != "")
+                            window.open('@Url.Action("DownloadFile", "AutoReport")'+'?path=' + result.url, '_blank');
+                        else
+                            toastr["warning"]("Data not found.");
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvParamsOverlay').hide();
+                    //console.log( "finished" );
+                });
+            //window.location = '@Url.Action("DownloadTemplateReportMapping", "AutoReport")' + '?template_report_mapping_id=' + data.template_report_mapping_id;
+        },
+        uploadTemplate: function (data, event) {
+
+        },
+        removeTemplate: function (data, event) {
+            $('#dvParamsOverlay').show();
+            //console.log(data);
+            var jqxhr = $.post("/AutoReport/RemoveTemplate", data)
+                .done(function (result) {
+                    if (result.status) {
+                        toastr["success"](result.message);
+                        console.log(result.data);
+                        newTemplateModel.templates(result.data);
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    $('#dvParamsOverlay').hide();
+                    //console.log( "finished" );
+                });
+            //window.location = '@Url.Action("DownloadWithTemplateReportMapping", "AutoReport")' + '?template_report_mapping_id=' + data.template_report_mapping_id;
+        },
+        cancelTemplate: function (data, event) {
+            mode = 0;
+            if (data.template_report_mapping_id) {
+                functionModel.functions([]);
+                templateModel.templates(data);
+                newTemplateModel.templates([]);
+                var request = {
+                    p_template_report_mapping_id: data.template_report_mapping_id
+                };
+                LoadParameterMappingViewMode(request);
+                LoadColumnMappingViewMode(request);
+            }
+            else {
+                functionModel.functions(data);
+                templateModel.templates([]);
+                newTemplateModel.templates([]);
+                var request = {
+                    schema_name: data.schema_name,
+                    function_name: data.function_name
+                };
+                LoadFunctionParameters(request);
+                LoadColumnParameters(request);
+            }
+        }
+    }
+
+    var paramsModel = {
+        parameters: ko.observableArray([])
+    }
+
+    var columnsModel = {
+        columns: ko.observableArray([])
+    }
+
+    var sourceParamsModel = {
+        parameters: ko.observableArray([])
+    }
+
+    var sourceColumnsModel = {
+        columns: ko.observableArray([])
+    }
+
+    ko.applyBindings(functionModel, document.getElementById("dvFunctions"));
+    ko.applyBindings(templateModel, document.getElementById("dvTemplates"));
+    ko.applyBindings(newTemplateModel, document.getElementById("dvNewTemplates"));
+
+    //ko.applyBindings(paramsModel, document.getElementById("dvParameters"));
+    //ko.applyBindings(sourceParamsModel, document.getElementById("dvSourceParameters"));
+
+    //ko.applyBindings(columnsModel, document.getElementById("dvColumns"));
+    //ko.applyBindings(sourceColumnsModel, document.getElementById("dvSourceColumns"));
+
+    $(document).ready(function () {
+        LoadTreeView();
+    });
+
+    //$('#btnAdd').bind('click', function () {
+    //    mode = 1;
+    //});
+
+    //$('#btnEdit').bind('click', function () {
+    //    var list = $('#tree').treeview('getSelected');
+    //    console.log(list);
+    //    $('#btnEdit').hide();
+    //    $('#btnClear').show();
+    //    if (list && list.length > 0) {
+    //        var data = list[0].data;
+    //        mode = 2;
+    //        functionModel.functions([]);
+    //        templateModel.templates([]);
+    //        newTemplateModel.templates(data);
+    //        var request = {
+    //            p_template_report_mapping_id: data.template_report_mapping_id
+    //        };
+    //        LoadParameterMapping(request);
+    //        LoadColumnMapping(request);
+    //    }
+    //});
+
+    //$('#btnCopy').bind('click', function () {
+    //    mode = 4;
+    //});
+
+    //$('#btnDelete').bind('click', function () {
+    //    mode = 5;
+    //});
+
+    //$('#btnClear').bind('click', function () {
+    //    var list = $('#tree').treeview('getSelected');
+    //    console.log(list);
+    //    $('#btnEdit').show();
+    //    $('#btnClear').hide();
+    //    if (list && list.length > 0) {
+    //        var data = list[0].data;
+    //        mode = 0;
+    //        functionModel.functions([]);
+    //        templateModel.templates(data);
+    //        newTemplateModel.templates([]);
+    //        var request = {
+    //            p_template_report_mapping_id: data.template_report_mapping_id
+    //        };
+    //        LoadParameterMapping(request);
+    //        LoadColumnMapping(request);
+    //    }
+    //});
+
+    $('#btnSaveColumns').bind('click', function () {
+        AddNewColumns();
+    })
+
+    function displayDataTypeFamiliarName(data, type, row, meta) {
+        //console.log(row.parameter_udt_name);
+        //console.log(row.udt_name);
+        var udt = (row.parameter_udt_name ?? row.udt_name);
+        if (data == null) {
+            return "";
+        } else if (data.toLowerCase().startsWith("timestamp")) {
+            return "Date & Time";
+        } else if(data.toLowerCase().startsWith("time")) {
+            return "Time";
+        } else if (["character varying", "varchar"].includes(data.toLowerCase())) {
+            return "Text";
+        } else if (data.toLowerCase() == "array" && udt != null && udt.startsWith("_int")) {
+            return "Number (multiple)";
+        } else if (data.toLowerCase() == "array" && udt != null && (udt == "_varchar" || udt == "_text")) {
+            return "Text (multiple)";
+        } else {
+            return data;
+        }
+    }
+
+    function LoadTreeView() {
+        $('#dvTreeOverlay').show();
+        var jqxhr = $.post("/AutoReport/LoadSourceTree")
+        //var jqxhr = $.post("/AutoReport/LoadReportsCustomization")
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    data = result.data;
+                    debugger
+                    $('#tree').treeview({
+                        showBorder: false,
+                        expandIcon: 'icon-arrow-right-circle',
+                        collapseIcon: 'icon-arrow-down-circle',
+                        data: data,
+                        //leverls: 0,
+                        showTags: true,
+                        showData: true,
+                        onNodeSelected: function (event, data) {
+                            
+                            //mode = 0;
+                            if (data.data.template_report_mapping_id) {
+                                functionModel.functions([]);
+                                templateModel.templates(data.data);
+                                newTemplateModel.templates([]);
+                                var request = {
+                                    p_template_report_mapping_id: data.data.template_report_mapping_id
+                                };
+                                LoadParameterMappingViewMode(request);
+                                LoadColumnMappingViewMode(request);
+                            }
+                            else {
+                                functionModel.functions(data.data);
+                                templateModel.templates([]);
+                                newTemplateModel.templates([]);
+                                var request = {
+                                    schema_name: data.data.schema_name,
+                                    function_name: data.data.function_name
+                                };
+                                LoadFunctionParameters(request);
+                                LoadColumnParameters(request);
+                            }
+                        },
+                        onNodeUnselected: function () {
+                            mode = 0;
+                            //console.log("onNodeUnselected");
+                            functionModel.functions([]);
+                            templateModel.templates([]);
+                            newTemplateModel.templates([]);
+                            if (dtParams) {
+                                dtParams.clear().draw();
+                            }
+                            if (dtColumns) {
+                                dtColumns.clear().draw();
+                            }
+                            if (dtNewEditParams)
+                                dtNewEditParams.clear();
+                            if (dtEditColumns)
+                                dtEditColumns.clear();
+                            $('#dtParams, #dtParams_wrapper').hide();
+                            $('#dtColumns, #dtColumns_wrapper').hide();
+                            $('#dtNewEditParams, #dtNewEditParams_wrapper').hide();
+                            $('#dtNewEditColumns, #dtNewEditColumns_wrapper').hide();
+                        },
+                        onAddButtonClicked: function (event, item) {
+                            //console.log('add button click');
+                            mode = 1;
+                            var data = item.data;
+                            //console.log(event);
+                            //console.log(data);
+
+                            functionModel.functions([]);
+                            templateModel.templates([]);
+                            newTemplateModel.templates(data);
+                            var request = {
+                                schema_name: data.schema_name,
+                                function_name: data.function_name
+                            };
+                            LoadFunctionParameters(request);
+                            LoadColumnParameters(request);
+                        },
+                        onEditButtonClicked: function (event, item) {
+                            mode = 2;
+                            //console.log('edit button click');
+                            //var list = $('#tree').treeview('getSelected');
+                            //console.log(list);
+                            //$('#btnEdit').hide();
+                            //$('#btnClear').show();
+                            //if (list && list.length > 0) {
+                            var data = item.data;
+                            functionModel.functions([]);
+                            templateModel.templates([]);
+                            newTemplateModel.templates(data);
+                            var request = {
+                                p_template_report_mapping_id: data.template_report_mapping_id
+                            };
+                            LoadParameterMappingEditMode(request);
+                            LoadColumnMappingEditMode(request);
+                            //}
+                        },
+                        onCopyButtonClicked: function (event, item) {
+                            //console.log('copy button click');
+                            mode = 4;
+                            var data = item.data;
+                            CopyTemplateReportMapping(data)
+                        },
+                        onRemoveButtonClicked: function (event, item) {
+                            //console.log('remove button click');
+                            mode = 5;
+                            var data = item.data;
+                            RemoveTemplateReportMapping(data);
+                        },
+                    });
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvTreeOverlay').hide();
+            });
+    }
+
+    function CopyTemplateReportMapping(request = null) {
+        $('#dvColumnsOverlay').show();
+        var jqxhr = $.post("/AutoReport/CopyTemplateReportMapping", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    LoadTreeView();
+                    toastr["success"]("Copy data successful.");
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvColumnsOverlay').hide();
+            });
+    }
+
+    function RemoveTemplateReportMapping(request = null) {
+        $('#dvColumnsOverlay').show();
+        var jqxhr = $.post("/AutoReport/DeleteTemplateReportMapping", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    LoadTreeView();
+                    functionModel.functions([]);
+                    templateModel.templates([]);
+                    newTemplateModel.templates([]);
+                    if (dtParams)
+                        dtParams.clear();
+                    if (dtColumns)
+                        dtColumns.clear();
+                    if (dtNewEditParams)
+                        dtNewEditParams.clear();
+                    if (dtEditColumns)
+                        dtEditColumns.clear();
+                    $('#dtParams, #dtParams_wrapper').hide();
+                    $('#dtColumns, #dtColumns_wrapper').hide();
+                    $('#dtNewEditParams, #dtNewEditParams_wrapper').hide();
+                    $('#dtNewEditColumns, #dtNewEditColumns_wrapper').hide();
+                    toastr["success"]("Delete data successful.");
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvColumnsOverlay').hide();
+            });
+    }
+
+    function ResetTemplateReportMapping(request = null) {
+        $('#dvColumnsOverlay').show();
+        var jqxhr = $.post("/AutoReport/ResetTemplateReportMapping", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    if (dtParams)
+                        dtParams.clear().draw();
+                    if (dtColumns)
+                        dtColumns.clear().draw();
+
+                    //if (dtNewEditParams)
+                    //    dtNewEditParams.clear();
+                    //if (dtEditColumns)
+                    //    dtEditColumns.clear();
+
+                    var req = {
+                        p_template_report_mapping_id: request.template_report_mapping_id
+                    };
+                    LoadParameterMappingViewMode(req);
+                    LoadColumnMappingViewMode(req);
+                    toastr["success"]("Reset data successful.");
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvColumnsOverlay').hide();
+            });
+    }
+
+
+    function LoadFunctionParameters(request = null) {
+        $('#dvParamsOverlay').show();
+        var jqxhr = $.post("/AutoReport/LoadFunctionParameters", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    $('#dtParams').show();
+                    $('#dtNewEditParams, #dtNewEditParams_wrapper').hide();
+                    paramsModel.parameters([]);
+                    sourceParamsModel.parameters(result.data);
+                    dtParams = $('#dtParams').DataTable({
+                        searching: false,
+                        paging: false,
+                        ordering: false,
+                        info: false,
+                        data: result.data,
+                        columnDefs: [
+                            {
+                                autoWidth: false, width: 30, orderable: false,
+                                targets: '_all'
+                            },
+                        ],
+                        columns: [
+                            { "data": "parameter_name", "name": "parameter_name", "title": "ชื่อตัวแปร" },
+                            {
+                                "data": "data_type", "name": "data_type", "title": "ชนิดตัวแปร",
+                                render: displayDataTypeFamiliarName
+                            },
+                            { data: null, render: () => null, visible: false }
+                        ],
+                        destroy: true
+                    });
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvParamsOverlay').hide();
+            });
+    }
+
+    function SaveParameters() {
+        $('#dvParamsOverlay').show();
+        var header = newTemplateModel.templates();
+        //console.log(header);
+
+        var items = [];
+
+        $.each(dtNewEditParams.rows().data(), function (index, data) {
+            if (data.data_type_name == "Array") {
+                var _data = {
+                    data_type_name: data.data_type_name,
+                    is_active: data.is_active,
+                    ordinal_position: data.ordinal_position,
+                    parameter_data_type_id: data.parameter_data_type_id,
+                    parameter_default_value: $('#p_arr_txt_' + index).val()?.toString() ?? $(`input[id ^="pRow_arr"][id $="${index}"]`).tagsinput('items')?.toString(),
+                    parameter_name: data.parameter_name,
+                    parameter_source_column: data.parameter_source_column,
+                    parameter_source_id: data.parameter_source_id,
+                    parameter_source_query: data.parameter_source_query,
+                    parameter_type_id: data.parameter_type_id,
+                    parameter_type_name: data.parameter_type_name,
+                    parameter_udt_name: data.parameter_udt_name,
+                    report_desc: data.report_desc,
+                    template_parameter_mapping_id: data.template_parameter_mapping_id,
+                    template_report_mapping_id: data.template_report_mapping_id
+                };
+                items.push(_data);
+            }
+            else {
+                items.push(data);
+            }
+
+        });
+
+        //console.log(items);
+        var request = {
+            header: header,
+            list: items
+        }
+
+        var jqxhr = $.post("/AutoReport/SaveTemplateParameterMapping", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+
+                    toastr["success"]("Save data successful.");
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvParamsOverlay').hide();
+            });
+    }
+
+    function LoadColumnParameters(request = null) {
+        $('#dvColumnsOverlay').show();
+        var jqxhr = $.post("/AutoReport/LoadColumnParameters", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    $('#dtColumns').show();
+                    $('#dtNewEditColumns, #dtNewEditColumns_wrapper').hide();
+                    columnsModel.columns([]);
+                    sourceColumnsModel.columns(result.data);
+
+                    dtColumns = $('#dtColumns').DataTable({
+                        searching: false,
+                        paging: false,
+                        ordering: false,
+                        info: false,
+                        scrollX: '40vw',
+                        scrollY: '60vh',
+                        data: result.data,
+                        columnDefs: [
+                            {
+                                //autoWidth: false,
+                                //width: 30,
+                                orderable: false,
+                                targets: '_all'
+                            }
+                        ],
+                        columns: [
+                            { data: null, render: () => null, visible: false },
+                            { data: null, render: () => null, visible: false },
+                            { "data": "parameter_name", "name": "parameter_name", "title": "Column Name" },
+                            { data: null, render: () => null, visible: false},
+                            {
+                                "data": "data_type", "name": "data_type_name", "title": "Type",
+                                render: displayDataTypeFamiliarName
+                            },
+                            { data: null, render: () => null, visible: false },
+                            { data: null, render: () => null, visible: false },
+                        ],
+                        destroy: true
+                    });
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvColumnsOverlay').hide();
+            });
+    }
+
+    function LoadColumnSelection(request = null) {
+        $('#dvColumnsOverlay').show();
+        var jqxhr = $.post("/AutoReport/LoadColumnSelection", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+
+                    dtColumnList = $('#dtColumnList').DataTable({
+                        searching: true,
+                        paging: false,
+                        ordering: false,
+                        info: false,
+                        data: result.data,
+                        columnDefs: [
+                            {
+                                autoWidth: false,
+                                orderable: false,
+                                targets: '_all'
+                            }
+                        ],
+                        columns: [
+                            {
+                                "data": null, "name": null, "title": "เลือก", "width": 5,
+                                "render": function (data, type, row, meta) {
+                                    return '<input type="checkbox" class="form-check-input"/>';
+                                }
+                            },
+                            {
+                                "data": "column_name", "name": "column_name", "title": "ชื่อ", "width": 15, className: "text-nowrap",
+                                render: function (data, type, row, meta) {
+                                    if (data == null || data === '') {
+                                        return '<span class="text-muted">(empty)</span>'
+                                    } else {
+                                        return data;
+                                    }
+                                }
+                            },
+                            //{ "data": "column_display", "name": "column_display", "title": "ชื่อแสดงหน้าจอ", "autoWidth": false, "width": 30, "orderable": false },
+                            {
+                                "data": "column_data_type", "name": "column_data_type", "title": "ชนิด", "width": 40, className: "text-nowrap",
+                                render: displayDataTypeFamiliarName
+                            },
+                        ],
+                        destroy: true
+                    });
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvColumnsOverlay').hide();
+            });
+    }
+
+    function RemoveTemplateColumnMapping(request = null) {
+        $('#dvColumnsOverlay').show();
+        let param = { request }
+        $.post("/AutoReport/RemoveTemplateColumnMapping", param)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    //dtEditColumns.row('.selected').remove().draw();
+
+                    let row = dtEditColumns.$('input[type="checkbox"]:checked').parents('tr');
+                    dtEditColumns.rows(row).remove().draw();
+                    toastr["success"](result.message);
+
+                    //$.each($('#dtNewEditColumns tr td:first-child'), function (index, val) {
+                    //    $(this).html(index + 1)
+                    //});
+
+                    UpdateRowReorder();
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvColumnsOverlay').hide();
+            });
+    }
+
+    function AddNewTemplateReportMapping() {
+        var item = newTemplateModel.templates();
+        //console.log(item);
+    }
+
+    function AddNewColumns() {
+        var rows = [];
+        index = dtEditColumns.rows().count();
+        dtColumnList.$('input[type="checkbox"]:checked').each(function () {
+            var data = dtColumnList.row($(this).parents('tr')).data();
+            data.column_sorting = index;
+            //rows.push(data);
+            dtEditColumns.row.add(data).draw();
+            index++;
+        });
+
+        //$.each($('#dtNewEditColumns tr td:first-child'), function (index, val) {
+        //    $(this).html(index + 1)
+        //});
+
+        UpdateRowReorder();
+        dtEditColumns.columns.adjust().draw(); // Redraw the DataTable
+        //$('#dtNewEditColumns tbody tr i.icon-trash').unbind('click');
+
+        //$('#dtNewEditColumns tbody').on('click', 'tr', function (e) {
+        //    //var data = dtNewEditColumns.row(this).data();
+
+        //    dtEditColumns.rows('.selected').nodes().to$().removeClass('selected');
+        //    $(this).toggleClass('selected');
+        //});
+
+        //$('#dtNewEditColumns tbody tr').on('click', 'i.icon-trash', function (e) {
+        //    var data = dtEditColumns.row($(this).parents('tr')).data();
+        //    //console.log(data);
+        //    RemoveTemplateColumnMapping(data);
+        //});
+
+        $('#modal-columns').modal('hide');
+    }
+
+    function SaveAddNewColumns() {
+        $('#dvColumnsOverlay').show();
+        var items = [];
+        $.each(dtEditColumns.rows().data(), function (index, data) {
+            data.column_name = $('#col_name_' + index).val() ?? '';
+            data.column_display = $('#label_' + index).val();
+            data.footer = $('#footer_row_' + index).val();
+            data.default_value = $('#default_value_' + index).val();
+            items.push(data);
+        });
+
+        //console.log(items);
+        var request = {
+            items: items,
+        }
+        var jqxhr = $.post("/AutoReport/SaveAddNewTemplateColumnMapping", request)
+            .done(function (result) {
+                //console.log(result);
+                if (result.status) {
+                    //functionModel.functions([]);
+                    //templateModel.templates(result.data);
+                    //newTemplateModel.templates([]);
+                    toastr["success"]("Save data successful.");
+                } else {
+                    toastr["error"](result.message);
+                }
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                //console.log( "finished" );
+                $('#dvColumnsOverlay').hide();
+            });
+    }
+
+    function UpdateRowReorder() {
+        if (dtEditColumns.rows().count() > 0) {
+            $.each($('#dtNewEditColumns tr td:nth-child(2)'), function (index, val) {
+                var order = index + 1;
+                $(this).html(order)
+                var data = dtEditColumns.rows(index).data()[0];
+                data.column_sorting = order;
+                //$('#dtNewEditColumns').dataTable().fnUpdate(data, index, undefined, false);
+                //console.log(data);
+            });
+        }
+        //$('#dtNewEditColumns').dataTable().columns.adjust().draw(); // Redraw the DataTable
+    }
+
+    function UploadTemplate() {
+        var input = document.getElementById('file');
+        var files = input.files;
+        if (files.length == 0) {
+            toastr["warning"]("Please select file.");
+            return
+        }
+        var formData = new FormData();
+        var template = newTemplateModel.templates();
+
+        for (var i = 0; i != files.length; i++) {
+            formData.append("files", files[i]);
+        }
+        formData.append("template_id", template.template_report_mapping_id);
+
+        $.ajax(
+            {
+                url: "/AutoReport/UploadFile",
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: "POST",
+                success: function (result) {
+                    //console.log(result.data);
+                    if (result.status) {
+                        newTemplateModel.templates(result.data);
+                        $('#modal-upload').modal('hide');
+                        $('#file').val('');
+                        toastr["success"](result.message);
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                }
+            }
+        );
+    }
+</script>

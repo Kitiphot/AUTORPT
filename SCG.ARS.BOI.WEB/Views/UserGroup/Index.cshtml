@@ -1,0 +1,241 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListUserMasterViewModel
+@{
+    ViewData["Title"] = "";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .ui-th-column, .ui-jqgrid .ui-jqgrid-htable th.ui-th-column {
+            border-right-width: 0.5px;
+            border-right-color: lightgray;
+            border-right-style: solid;
+            overflow: hidden;
+            text-align: center;
+            white-space: nowrap;
+            background: #1E90FF;
+        }
+
+
+        /* Set jqgrid auto resize to current web page */
+        .ui-jqgrid {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100% !important;
+        }
+
+            .ui-jqgrid > .ui-jqgrid-view {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                overflow: auto;
+                width: auto !important;
+            }
+
+                .ui-jqgrid > .ui-jqgrid-view,
+                .ui-jqgrid > .ui-jqgrid-view > .ui-jqgrid-bdiv {
+                    flex: 1;
+                    width: auto !important;
+                }
+
+                    .ui-jqgrid > .ui-jqgrid-pager,
+                    .ui-jqgrid > .ui-jqgrid-view > .ui-jqgrid-hdiv {
+                        flex: 0 0 auto;
+                        width: auto !important;
+                    }
+         /*enable scrollbar*/ 
+        .ui-jqgrid-bdiv {
+            overflow: auto
+        }
+
+        .ui-common-table {            
+            width: 100% !important;
+        }
+
+        .ui-jqgrid .ui-jqgrid-hbox {            
+            padding-right: 0px !important;
+        }
+        
+        #pager_left {
+            width: 40% !important;
+        }
+        #pager_center {
+            width: 0px !important;
+        }
+        #add_dxGridMainData, #edit_dxGridMainData, #del_dxGridMainData, #search_dxGridMainData {
+            width: 15px;
+        }
+        /*######### end #########*/
+
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.ajax({
+                url: "/UserGroup/GetDataPermission",
+                type: 'GET',
+                success: function (data) {
+                    //console.log(data);
+                    $.each(data.permission, function (key, entry) {
+                        if (entry.fullControl_Flag == true) {
+                            GetMainData(true, true, true);
+                        }
+                        else {
+                            GetMainData(false, false, false);
+                        }
+                    })
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            })
+        });
+        function GetMainData(bAdd, bEdit, bDelete) {
+            intTemplate = {
+                width: 20, template: "integer", editable: true
+            };
+            $("#dxGridMainData").jqGrid({
+                url: "/UserGroup/GetUserGroup",
+                datatype: 'json',
+                mtype: 'GET',
+                colNames: ["User Group", "Description", "Create By", "Create Date", "Update By", "Update Date"],
+                colModel: [
+                    { name: "userGroup_Name", index: "userGroup_Name", align: "left", template: intTemplate, key: true, editable: true, editrules: { required: true }, search: true, searchoptions: { sopt: ['eq', 'cn'] } },
+                    { name: "userGroup_Desc", index: "userGroup_Desc", align: "left", template: intTemplate, editable: true, editrules: { required: true }, search: true, searchoptions: { sopt: ['eq', 'cn'] } },
+                    { name: "createUser_Code", align: "center", template: intTemplate, editable: true, search: false },
+                    { name: "create_DateTime", align: "center", template: intTemplate, editable: true, search: false, formatter: 'date', formatoptions: { srcformat: "ISO8601Long", newformat: "d/M/Y H:i:s" } },
+                    { name: "updateUser_Code", align: "center", template: intTemplate, editable: true, search: false },
+                    { name: "update_DateTime", align: "center", template: intTemplate, editable: true, search: false, formatter: 'date', formatoptions: { srcformat: "ISO8601Long", newformat: "d/M/Y H:i:s" } }
+                ],
+                height: "100%",
+                rowNum: 50,
+                viewrecords: true,
+                caption: "Users Group Info.",
+                emptyrecords: "No records",
+                pager: jQuery("#pager"),
+                jsonReader:
+                {
+                    root: "rows",
+                    page: "page",
+                    total: "total",
+                    records: "records",
+                    repeatitems: false,
+                    Id: "0"
+                },
+                autowidth: true
+            }).navGrid('#pager',
+                {
+                    edit: bEdit,
+                    add: bAdd,
+                    del: bDelete,
+                    search: true,
+                    refresh: true,
+                    closeAfterSearch: true
+                },
+                {
+                    // edit option
+                    zIndex: 0,
+                    beforeShowForm: function (formid) {
+                        $("#userGroup_Name", formid).attr("disabled", "true");
+                        $("#userGroup_Name", formid).attr('style', 'background-color: lightgrey;');
+                        $("#createUser_Code", formid).attr("disabled", "true");
+                        $("#createUser_Code", formid).attr('style', 'background-color: lightgrey;');
+                        $("#create_DateTime", formid).attr("disabled", "true");
+                        $("#create_DateTime", formid).attr('style', 'background-color: lightgrey;');
+                        $("#updateUser_Code", formid).attr("disabled", "true");
+                        $("#updateUser_Code", formid).attr('style', 'background-color: lightgrey;');
+                        $("#update_DateTime", formid).attr("disabled", "true");
+                        $("#update_DateTime", formid).attr('style', 'background-color: lightgrey;');
+                    },
+                    url: '/UserGroup/EditUserGroup',
+                    closeOnEscape: true,
+                    closeAfterEdit: true,
+                    recreateForm: true,
+                    afterComplete: function (response) {
+                        if (response.responseText) {
+                            alert(response.responseText);
+                        }
+                    }
+                },
+                {
+                    // add option
+                    zIndex: 0,
+                    beforeShowForm: function (formid) {
+                        $("#createUser_Code", formid).attr("disabled", "true");
+                        $("#createUser_Code", formid).attr('style', 'background-color: lightgrey;');
+                        $("#create_DateTime", formid).attr("disabled", "true");
+                        $("#create_DateTime", formid).attr('style', 'background-color: lightgrey;');
+                        $("#updateUser_Code", formid).attr("disabled", "true");
+                        $("#updateUser_Code", formid).attr('style', 'background-color: lightgrey;');
+                        $("#update_DateTime", formid).attr("disabled", "true");
+                        $("#update_DateTime", formid).attr('style', 'background-color: lightgrey;');
+                    },
+                    url: '/UserGroup/AddUserGroup',
+                    closeOnEscape: true,
+                    closeAfterAdd: true,
+                    afterComplete: function (response) {
+                        if (response.responseJSON) {
+                            if (response.responseJSON == "Saved Successfully") {
+                                alert("Saved Successfully");
+                            }
+                            else {
+                                var message = "";
+                                for (var i = 0; i < response.responseJSON.length; i++) {
+                                    message += response.responseJSON[i];
+                                    message += "\n";
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    // delete option
+                    zIndex: 0,
+                    url: "/UserGroup/DeleteUserGroup",
+                    closeOnEscape: true,
+                    closeAfterDelete: true,
+                    recreateForm: true,
+                    msg: "Do you want to delete this user group?",
+                    afterComplete: function (response) {
+                        if (response.responseText) {
+                            alert(response.responseText);
+                        }
+                    }
+                }
+            );
+        }
+
+    </script>
+</head>
+<body>
+    <section class="content-header">
+        <h1>
+            @ViewData["Title"]
+        </h1>
+    </section>
+    <!-- Main content -->
+    <section class="content container-fluid">
+        <div class="row">
+            <!-- left column -->
+            <div class="col-lg-12">
+                <!-- general form elements -->
+                <div class="box box-primary" style="height:100%; margin-top:-20px">
+                    <div class="box-body">
+                        <div class="text-left">
+                            <h2 class="display-2" style="margin-top:0">User Group Master</h2>
+                        </div>
+                        <div class="box box-primary">
+                            <table id="dxGridMainData" style="font-size:12px;width: 100%;"></table>
+                            <div id="pager"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
+    </section>
+</body>
+</html>

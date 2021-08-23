@@ -1,0 +1,481 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Nice Theme </title>
+    <link rel="shortcut icon" href="~/assets/images/favicon.png" type="image/x-icon" />
+
+    <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+    <link href="~/assets/vendor/data-table/css/jquery.dataTables.min.css" />
+    <link href="~/assets/vendor/data-table/css/buttons.dataTables.min.css" />
+    <link href="~/assets/vendor/data-table/css/dataTables.bootstrap.min.css" />
+    <!-- ================== BEGIN PAGE LEVEL END ================== -->
+    <!-- ================== BEGIN BASE JS ================== -->
+    <script src="~/assets/vendor/jQuery/js/jquery-3.2.1.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    @*<script src="~/assets/vendor/chartjs/js/annotation.js"></script>*@
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/0.5.5/chartjs-plugin-annotation.js"></script>*@
+    <script src="~/assets/vendor/data-table/js/jquery.dataTables.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/dataTables.buttons.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/buttons.flash.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/jszip.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/pdfmake.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/vfs_fonts.js"></script>
+    <script src="~/assets/vendor/data-table/js/buttons.html5.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/buttons.print.min.js"></script>
+    <script src="~/assets/vendor/data-table/js/dataTables.bootstrap.min.js"></script>
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>*@
+    <!-- ================== END BASE JS ================== -->
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        var column = [
+            { "data": "scgl_po_id", "name": "scgl_po_id", "title": "SCGL PO ID", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "service_group", "name": "service_group", "title": "Service Group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "document_status", "name": "document_status", "title": "Document Status", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_status", "name": "customer_status", "title": "Customer Status", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "importer", "name": "importer", "title": "Importer", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "bu", "name": "bu", "title": "BU", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "contact_name", "name": "contact_name", "title": "Contact Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pr_received_date", "name": "pr_received_date", "title": "PR Received Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "pr_no", "name": "pr_no", "title": "PR No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "plan_condition_date", "name": "plan_condition_date", "title": "Plan Condition Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mode", "name": "mode", "title": "Mode", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_no", "name": "po_no", "title": "PO No./ Ship Noti No.", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_date", "name": "po_date", "title": "PO Date/Ship Noti Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "supplier_date", "name": "supplier_date", "title": "PO Sent to Supplier Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "order_cofirm_date", "name": "order_cofirm_date", "title": "Order Confirm Received/ Supplier Acknowledge Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "currency", "name": "currency", "title": "Currency", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_amount", "name": "po_amount", "title": "PO Amount", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_balance", "name": "po_balance", "title": "PO Payment Remaining Balance", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "plan_etd_date", "name": "plan_etd_date", "title": "Plan ETD", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_type", "name": "po_type", "title": "PO Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "product_type", "name": "product_type", "title": "Product Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "supplier", "name": "supplier", "title": "Supplier", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "payment_term", "name": "payment_term", "title": "Payment Term", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "incoterms", "name": "incoterms", "title": "Incoterms", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "forwarder", "name": "forwarder", "title": "Forwarder", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "po_remark", "name": "po_remark", "title": "PO Remark", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "payment_remark", "name": "payment_remark", "title": "Payment Remark", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "privilege_type", "name": "privilege_type", "title": "Privilege Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "license", "name": "license", "title": "License/Permission", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "tolerance", "name": "tolerance", "title": "Tolerance PO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "terminated", "name": "terminated", "title": "Terminated PO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "created_by", "name": "created_by", "title": "Created by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "created_date", "name": "created_date", "title": "Created Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "updated_by", "name": "updated_by", "title": "Updated by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "updated_date", "name": "updated_date", "title": "Updated Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "locked_by", "name": "locked_by", "title": "Locked by", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "locked_date", "name": "locked_date", "title": "Locked Date", "autoWidth": true, "className": "text-nowrap" }
+        ];
+
+        $(document).ready(function () {
+            //Report Type
+            init_datepicker();
+            var type = "Barite";
+            document.getElementById('reporttype').value = type;
+            //var warehouse = document.getElementById('cboWarehouse').value;
+            //$("#cboWarehouse").on("change", function () {
+            //    GetCustomer(document.getElementById('cboWarehouse').value);
+            //});
+
+
+
+            //$('#cboCustomer').on("change", function (element, checked) {
+            //    var brands = $('#cboCustomer option:selected');
+            //    selected = [];
+            //    $(brands).each(function (index, brand) {
+            //        selected.push([$(this).val()]);
+            //        console.log(selected);
+            //    });
+            //});
+
+            //var isRtl = $('html').attr('dir') === 'rtl';
+            //$(function () {
+            //    $('#daterange-tr01').datepicker({
+            //        format: "M - yyyy",
+            //        viewMode: 1,
+            //        minViewMode: "months",
+            //        orientation: isRtl ? 'auto right' : 'auto left'
+            //    });
+            //});
+
+            function init_datepicker() {
+                //var start = moment().startOf('month');
+                //var end = moment().endOf('month');
+                var start = moment();
+                var end = moment();
+
+                function cb(start, end) {
+                    if (start.isSame(end, 'months')) {
+                        $('#daterange-tr01').html(start.format('MMM DD, YYYY'));
+                    } else {
+                        $('#daterange-tr01').html(start.format('MMM DD, YYYY') + '-' + end.format('MMM DD, YYYY'));
+                    }
+                }
+
+                $('#daterange-tr01').daterangepicker({
+                    startDate: start,
+                    endDate: end,
+                    ranges: datepicker_ranges,
+                    //ranges: {
+                    //    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    //    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    //},
+                    format: "MMM DD, YYYY",
+                    //viewMode: "months",
+                    //minViewMode: "months",
+                }, cb);
+
+                cb(start, end);
+            }
+
+            //Search();
+
+        });
+    </script>
+
+    <script>
+        function Search() {
+
+            //Monthly chart
+            //GetMonthlyChartTable(getRequest());
+            //Monthly Table
+            alert("Before detail");
+            DrawTableDetail(getRequest());
+            alert("After detail");
+
+            var sectionMonthlyTable = document.getElementById('PODetail');
+            sectionMonthlyTable.style.visibility = 'hidden';
+            //var sectionwarehouse = document.getElementById('sectionwarehouse');
+            //sectionwarehouse.style.visibility = 'hidden';
+            //var sectionwarehouse = document.getElementById('sectioncustomer');
+            //sectionwarehouse.style.visibility = 'hidden';
+            var paramDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var paramEndDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+            //var sectionRPTILB001Text = document.getElementById('RPTILB001Text');
+            //sectionRPTILB001Text.innerText = "สรุปการจัดเที่ยวประจำเดือน" + getMonthName(paramDate.getMonth() + 1);
+
+            //var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+            var dayName = days[paramDate.getDay()];
+            var sectionreportHeader = document.getElementById('reportHeader');
+            sectionreportHeader.innerText = paramDate.getDate() + ' ' + getMonthName(paramDate.getMonth() + 1) + ' ' + paramDate.getFullYear()
+                                  + ' - ' + paramEndDate.getDate() + ' ' + getMonthName(paramEndDate.getMonth() + 1) + ' ' + paramEndDate.getFullYear();
+
+            ko.applyBindings(new ViewModel());
+        }
+
+        function getRequest() {
+            //var reporttype = document.getElementById('reporttype').value;
+            //var customer = document.getElementById('cboCustomer').value;
+            var startDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var endDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+            if (!customer) {
+                customer = null;
+            }
+            var request = {
+                selectStartDate: startDate,
+                selectEndDate: endDate//,
+                //reportType: reporttype,
+                //selectCustomer: customer
+            };
+            return request;
+        }
+
+        //function GetMonthlyChartTable(request) {
+
+        //    //Placeholder for input parameters
+        //    var sectionDetailTable = document.getElementById('PODetail');
+        //    var currentdate = request.selectStartDate.getDate();
+        //    var currentmonth = $('#daterange-tr01').data('daterangepicker').endDate._d.getMonth() + 1;
+        //    var currentmonthname = getMonthName(request.selectStartDate.getMonth() + 1);
+        //    var currentyear = request.selectStartDate.getFullYear();
+        //    //request.selectStartDate = request.selectStartDate.toISOString();
+        //    //request.selectEndDate = request.selectEndDate.toISOString();
+
+        //}
+
+        function drawTable(request) {
+            $('#PODetailOverlay').show();
+            //$("#dtList").DataTable().destroy();
+            var jqxhr = $.post("/Report/RPTILB001_Report")
+                .done(function (result) {
+                    console.log(result);
+                    //if (result.status) {
+                    if (table == null) {
+                        GenerateDatatable(result.data, column);
+                    }
+                    else {
+                        //GenerateDatatable(result.data, column);
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                    console.log(result.data);
+                    //} else {
+                    //toastr["error"](result.message);
+                    //}
+                })
+                .fail(function (e) {
+                    console.log(e);
+                }).always(function () {
+                    $('#PODetailOverlay').hide();
+                    //console.log( "finished" );
+                });
+        }
+
+        function DrawTableDetail(request) {
+
+            request.selectStartDate = request.selectStartDate.toISOString();
+            request.selectEndDate = request.selectEndDate.toISOString();
+            var currentmonth = $('#daterange-tr01').data('daterangepicker').startDate._d.getMonth() + 1;
+            var currentmonthname = getMonthName(currentmonth);
+            var currentdate = $('#daterange-tr01').data('daterangepicker').startDate._d.getDate();
+            var currentyear = $('#daterange-tr01').data('daterangepicker').startDate._d.getFullYear();
+            //ESC Text
+            var sectionPODetailText= document.getElementById('PODetailText');
+            //if (currentdate != null) sectionPODetailText.innerText = "รายละเอียดการจัดเที่ยว ประจำวันที่ 1 กรกฎาคม";// + currentmonthname;
+            if (currentdate != null) sectionPODetailText.innerText = "รายละเอียดการจัดเที่ยว ประจำเดือน" + currentmonthname;
+            drawTable(request);
+
+        }
+
+        function GenerateDatatable(data, columns) {
+            //table = $("#dtList").DataTable().destroy();
+            table = $('#dtList').DataTable({
+                dom: 'lTf<"html5buttons"B > gtip',
+                buttons: [
+                    'copy', 'excel'
+                ],
+                fixedHeader: true,
+                scrollX: true,
+                ordering: false,
+                responsive: true,
+                pageLength: 10,
+                filter: true, // this is for disable filter (search box)
+                //"orderMulti": false, // for disable multiple column at once
+                data: data,
+                columns: columns
+            });
+
+            //$('#dtList tbody').on('click', 'tr', function () {
+            //    var data = table.row(this).data();
+            //    //console.log(data);
+            //    $(this).toggleClass('selected');
+            //});
+        }
+
+        function RefreshData(selectyear, selectmonth, selectdate) {
+
+            //Monthly chart
+            //GetMonthlyChartTable(selectmonth);
+            //Monthly Table
+            DrawTableDetail(getRequest(), selectyear, selectmonth, selectdate);
+
+            var currentmonthname = getMonthName(selectmonth);
+            //var sectionMonthlyChartText = document.getElementById('DailyShipmentStatusText');
+            //sectionMonthlyChartText.innerText = "สรุปการจัดเที่ยวประจำเดือน " + currentmonthname;
+            var sectionPOCDCDetailText = document.getElementById('POCDCDetailText');
+            sectionPOCDCDetailText.innerText = "รายละเอียดเดือน " + currentmonthname;
+        }
+
+        function getMonthName(index) {
+            var month = new Array();
+            month[0] = "มกราคม";
+            month[1] = "กุมภาพันธ์";
+            month[2] = "มีนาคม";
+            month[3] = "เมษายน";
+            month[4] = "พฤษภาคม";
+            month[5] = "มิถุนายน";
+            month[6] = "กรกฎาคม";
+            month[7] = "สิงหาคม";
+            month[8] = "กันยายน";
+            month[9] = "ตุลาคม";
+            month[10] = "พฤศจิกายน";
+            month[11] = "ธันวาคม";
+            return month[index - 1];
+        }
+
+        function isEmpty(obj) {
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key))
+                    return false;
+            }
+            return true;
+        }
+
+        function downloadPDF(canvas,filename) {
+            var newCanvas = document.querySelector(canvas);
+            var filename = document.getElementById(filename);
+
+            //create image from dummy canvas
+            var newCanvasImg = newCanvas.toDataURL("image/png", 1.0);
+
+            //creates PDF from img
+            var doc = new jsPDF('landscape');
+            doc.addImage(newCanvasImg, 'JPEG', 10, 10, 280, 70);
+            doc.save(filename.innerText);
+        }
+
+
+        function ViewModel() {
+            var self = this;
+            self.summary = ko.observableArray([]);
+
+            //selectedSchema =  ko.observable("wh");
+
+            //self.onSelectSchema = function (item, event) {
+
+            //$('#dvOverlay').show();
+            var startDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var endDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+            var currentmonth = endDate.getMonth() + 1;
+            var currentyear = startDate.getFullYear();
+            var currentDay = endDate.getDate();
+            var businessGroup = document.getElementById('cboBusiness').value;
+            var fleet = document.getElementById('cboFleet').value;
+            var shippingPointCode = document.getElementById('cboShippingPoint').value;
+            var regionCode = document.getElementById('cboShiptoRegion').value;
+            var orderTypeCode = document.getElementById('cboOrderType').value;
+            var equipmentCode = document.getElementById('cboTruckType').value;
+            var planner = document.getElementById('cboPlannerName').value;
+            var Matfrg = document.getElementById('cboMatfrg').value;
+
+            var request = {
+                selectDaySearch: currentDay,
+                selectMonth: currentDay,
+                selectYear: currentyear,
+                selectBussinessGroup: businessGroup,
+                selectFleet: fleet,
+                selectShippingPointCode: shippingPointCode,
+                selectRegionCode: regionCode,
+                selectOrderTypeCode: orderTypeCode,
+                selectEquipmentCode: equipmentCode,
+                selectPlannerName: planner,
+                selectMatfrg: Matfrg
+            };
+
+
+            var jqxhr = $.post("/ReportChart/RPTLPC001_ShipmentSummary")
+                .done(function (result) {
+                    console.log(result);
+                    self.summary(result.data);
+                })
+                .fail(function (e) {
+                    console.log(e);
+                })
+                .always(function () {
+                    //$('#dvOverlay').hide();
+                    //console.log( "finished" );
+                });
+            //}
+        }
+
+
+
+        //$('#cboWarehouse').onchange = function () { GetCustomer(document.getElementById('cboWarehouse').value) }
+
+    </script>
+</head>
+<body>
+    <input type="hidden" id="reporttype" />
+    <!-- Content Start -->
+    <div class="content-wrapper">
+        @{
+            await Html.RenderPartialAsync("_Common_ILB_Summarize");
+            await Html.RenderPartialAsync("_Common_ILB_Criteria_01");
+        }
+        <div class="row" id="PODetail">
+            <div class="col-12">
+                <article class="card mb-4">
+                    <div class="card-body">
+                        <div id="PODetailOverlay" class="overlay">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="card-title" id="PODetailText"></h4>
+                        <div class="table-responsive">
+                            <div class="dataTables_wrapper">
+                                <table id="dtList" class="table table-striped" style="width:100%"></table>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <!-- Content End -->
+
+    @section Styles{
+        <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+        <link href="~/assets/vendor/data-table/css/jquery.dataTables.min.css" />
+        <link href="~/assets/vendor/data-table/css/buttons.dataTables.min.css" />
+        <link href="~/assets/vendor/data-table/css/dataTables.bootstrap.min.css" />
+        <!-- ================== BEGIN PAGE LEVEL END ================== -->
+        <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css" />
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-daterangepicker/css/daterangepicker.css" />
+        <!-- ================== BEGIN PAGE LEVEL END ================== -->
+        <!-- ================== BEGIN PAGE LEVEL CSS START ================== -->
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-select/css/bootstrap-select.min.css" />
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-multiselect/css/bootstrap-multiselect.css" />
+        <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+        <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+        <!-- ================== BEGIN PAGE LEVEL END ================== -->
+    }
+
+    @section Scripts{
+
+        <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+        <script src="~/assets/vendor/data-table/js/jquery.dataTables.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/dataTables.buttons.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/buttons.flash.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/jszip.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/pdfmake.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/vfs_fonts.js"></script>
+        <script src="~/assets/vendor/data-table/js/buttons.html5.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/buttons.print.min.js"></script>
+        <script src="~/assets/vendor/data-table/js/dataTables.bootstrap.min.js"></script>
+        <!-- ================== END PAGE LEVEL JS ================== -->
+        <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+        <script src="~/assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-daterangepicker/js/moment.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-daterangepicker/js/daterangepicker.js"></script>
+        <script src="~/assets/vendor/minicolors/js/jquery.minicolors.js"></script>
+        <script src="~/assets/vendor/pignose-calender/js/pignose.calendar.full.min.js"></script>
+        <script src="~/assets/vendor/fullcalender/js/fullcalendar.min.js"></script>
+        <!-- ================== END PAGE LEVEL JS ================== -->
+        <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+        <script src="~/assets/vendor/bootstrap-select/js/bootstrap-select.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-multiselect/js/bootstrap-multiselect.min.js"></script>
+        <script src="~/assets/vendor/select2/js/select2.min.js"></script>
+        <script src="~/assets/vendor/bootstrap-tagsinput/js/bootstrap-tagsinput.js"></script>
+        <script src="~/assets/js/demo/selects-tags-demo.js"></script>
+        <!-- ================== END PAGE LEVEL JS ================== -->
+    }
+
+
+
+</body>
+</html>

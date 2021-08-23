@@ -1,0 +1,351 @@
+<style>
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+    }
+
+    tbody tr.odd.selected, tbody tr.even.selected {
+        background-color: #B0BED9;
+    }
+</style>
+
+<!-- Main content -->
+<section class="content container-fluid">
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <div class="box-title">
+                <span><h5 class="box-title pull-left">Schemas</h5><span>
+                @* <span><div id="searchCriteria" class="inline">
+                </div></span> *@
+            </div>
+            
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i class="fa fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div id="searchCriteria" class="form-group col-lg-4 pull-left input-group date">
+                @* <input type="text" class="form-control" data-inputmask="'alias': 'M - yyyy'" data-mask>
+                <div class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                </div> *@
+            </div>
+            <div id="dvOverlay" class="overlay">
+                <i class="fa fa-refresh fa-spin"></i>
+            </div>
+            <div class="datatTableList">
+                <table id="dtList" class="table table-striped" style="width:100%"></table>
+            </div>
+
+            <div class="datatTableList">
+                <table id="dtTableList" class="table table-striped" style="width:100%"></table>
+            </div>
+
+            <div class="datatTableList">
+                <table id="dtColumnList" class="table table-striped" style="width:100%"></table>
+            </div>
+
+            <!-- Upload Modal -->
+            <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title col-md-10" id="uploadModalTitle"><b>Import Excel Files</b></h4>
+                            <button type="button" id="btnCloseUploadModal" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="InputFile">File input</label>
+                            <input type="file" id="InputFile">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="btnImportFile">Import</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirm Modal -->
+            <div id="confirm" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirmation Dialog</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Would you like to confirm delete data?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="btnConfirmDelete" type="button" class="btn btn-danger" data-dismiss="modal">Delete</button>
+                            <button id="btnConfirmClose" type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script type="text/javascript">
+                //Date range as a button
+                param = null;
+                var startDate;
+                var endDate;
+                var importListData = null;
+                var table = null;
+                var data = null;
+                var date = new Date();
+
+                //function LoadData(page, action, data = null) {
+                //    $('#dvOverlay').show();
+                //    $.ajax({
+                //        url: "/" + page + "/" + action,
+                //        type: 'POST',
+                //        data: JSON.stringify(data),
+                //        dataType: "json",
+                //        traditional: true,
+                //        contentType: "application/json; charset=utf-8",
+                //        success: function (result) {
+                //            console.log(result.data);
+                //            console.log(result.responseText);
+                //            if (table == null)
+                //                GenerateDatatable(page, result.data, result.permission, columns, columnDefs);
+                //            else {
+                //                table.clear();
+                //                $.each(result.data, function (idx, obj) {
+                //                    //console.log(result.data);
+                //                    table.row.add(result.data[idx]);
+                //                });
+                //                table.draw();
+                //            }
+                //            $('#dvOverlay').hide();
+                //        },
+                //        error: function (error) {
+                //            $('#dvOverlay').hide();
+                //            console.log(error);
+                //        }
+                //    });
+                //}
+
+                function GenerateDatatable(page, data, permission, columns, columnDefs) {
+                    
+                    table = $('#dtList').DataTable({
+                        dom: '<"topbuttons"B>frt<"bottombuttons form-group">ip',
+                        buttons: [
+                            {
+                                text: 'Delete',
+                                className: 'btn btn-default',
+                                action: function (e, dt, node, config) {
+                                    alert('Button activated');
+                                }
+                            }],
+                        initComplete: function () {
+                            $(".bottombuttons").append("<div class='row col-md-12'>" +
+                                "<div class='form-group col-md-3'><button type='button' id='btnImport' class='btn btn-primary' data-toggle='modal' data-target='#uploadModal'>Import</button></div>" +
+                                "<div class='form-group col-md-3'><button type='button' id='btnDelete' class='btn btn-danger'>Delete</button></div>" +
+                                //"<div class='col-md-1'><button type='button' id='btnClear' class='btn btn-info'>Clear all</button></div>" +
+                                "<div class='form-group col-md-3'><button type='button' id='btnExport' class='btn btn-info'>Export To Excel</button></div>" +
+                                "</div>");
+                            $(".topbuttons").hide();
+                            $("#btnDelete").on('click', function (e) {
+                                var list = [];
+                                var rows = table.rows('.selected').data();
+                                for (i = 0; i < rows.length; i++) {
+                                    list.push(rows[i]);
+                                }
+                                if(list.length == 0){
+                                    toastr["warning"]("Please select record to delete.");
+                                    return false;
+                                }
+
+                                var $form = $(this).closest('form');
+                                e.preventDefault();
+                                $('#confirm').modal({
+                                    backdrop: 'static',
+                                    keyboard: false
+                                });
+
+                                $('#btnConfirmDelete').on('click', function (e) {
+                                    //$form.trigger('submit');
+                                    //console.log(e);
+                                    DeleteData(page, list);
+                                });
+                            });
+
+                            $("#btnClear").on('click', function (e) {
+                                table
+                                    .rows('.selected')
+                                    .nodes()
+                                    .to$()
+                                    .removeClass('selected');
+                            });
+                            
+                            $("#btnImportFile").on('click', function (e) {
+                                ImportExcel(page);
+                            });
+
+                            $("#btnExport").on('click', function (e) {
+                                //console.log(param);
+                                //console.log(page);
+                                ExportToExcel(page, param);
+                            });
+
+                            if (permission[0].fullControl_Flag == false) {
+                                $('#btnDelete').prop('disabled', true);                                
+                                $('#btnImport').prop('disabled', true);                                
+                            }
+                        },
+                        "scrollX": true,
+                        "responsive": true,
+                        "filter": true, // this is for disable filter (search box)
+                        "orderMulti": false, // for disable multiple column at once
+                        "pageLength": 50,
+                        "bLengthChange": false,
+                        "bSort": true,
+                        "data": data,
+                        "columnDefs": columnDefs,
+                        "columns": columns
+
+                    });
+
+                    $('#dtList tbody').on('click', 'tr', function () {
+                        var data = table.row(this).data();
+                        //console.log(data);
+                        $(this).toggleClass('selected');
+                    });
+                }
+
+                function DeleteData(page, list) {
+                    $('#dvOverlay').show();
+                    $.ajax({
+                        url: "/" + page + "/DeleteData",
+                        type: 'POST',
+                        data: JSON.stringify(list),
+                        dataType: "json",
+                        traditional: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (result) {
+                            //console.log(result);
+                            if (result.status){
+                                table.rows('.selected').remove().draw(false);
+                                toastr["success"](result.message);
+                            }else{
+                                toastr["error"](result.message);
+                            }
+                            $('#dvOverlay').hide();
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            $('#dvOverlay').hide();
+                        }
+                    });
+                }
+
+                function ExportToExcel(page, param=null) {
+                    $('#dvOverlay').show();
+                    $.ajax({
+                        url: "/" + page + "/ExportData?page="+page+"&param="+param,
+                        type: 'POST',
+                        //data: JSON.stringify({page,param}),
+                        dataType: "json",
+                        traditional: true,
+                        contentType: "application/json; charset=utf-8",
+                        success: function (result) {
+                            //console.log(result);
+                            window.location.href = result.url;
+                            $('#dvOverlay').hide();
+                        },
+                        error: function (error) {
+                            $('#dvOverlay').hide();
+                            console.log(error);
+                        }
+                    });
+                }
+
+                function ImportExcel(page) {
+                    var files = new FormData();
+                    var totalFiles = document.getElementById("InputFile").files.length;
+
+                    for (var i = 0; i < totalFiles; i++) {
+                        var file = document.getElementById("InputFile").files[i];
+                        //console.log(file);
+                        var ext = file.name.split('.').pop().toLowerCase();
+                        if ($.inArray(ext, ['xls', 'xlsx']) == -1) {
+                            //alert('invalid extension!');
+                            toastr["error"](ext + " extension is not allow to upload.");
+                            return;
+                        }
+                        files.append("files", file);
+                        //console.log(typeof(monthYear));
+                        if(typeof(monthYear) != "undefined")
+                            files.append("monthYear", monthYear.toISOString());
+                    }
+
+                    if(totalFiles > 0){
+                        $('#dvOverlay').show();
+                        $.ajax({
+                            url: "/" + page + "/ImportData",
+                            // headers: {
+                            //     'Accept': 'application/json',
+                            //     'Content-Type': 'application/json'
+                            // },
+                            type: "POST",
+                            contentType: false,
+                            data: files,
+                            //dataType: "json",
+                            cache: false,
+                            processData: false,
+                            async: true,
+                            xhr: function () {
+                                var xhr = new window.XMLHttpRequest();
+                                xhr.upload.addEventListener(
+                                    "progress",
+                                    function (evt) {
+                                        if (evt.lengthComputable) {
+                                            var progress = Math.round((evt.loaded / evt.total) * 100);
+                                            //this.progress(progress);
+                                            //console.log(progress);
+                                            $("#progress").css("width", progress + "%");
+                                        }
+                                    },
+                                    false
+                                );
+                                return xhr;
+                            }
+                        })
+                        .done(function (data, textStatus, jqXhr) {
+                            //console.log(data);
+                            //console.log(textStatus);
+                            //console.log(file);
+                            if (data.isSuccess) {
+                                toastr["success"]("upload file " + data.files[0].fileName + " success.");
+                            } else
+                                toastr["error"](data.message);
+                            $('#InputFile').val('');
+                            $('#btnCloseUploadModal').click();
+                            LoadData(page, param);
+                            $('#dvOverlay').hide();
+                        })
+                        .fail(function (jqXhr, textStatus, errorThrown) {
+                            //console.log(textStatus);
+                            toastr["error"]("upload file fail.");
+                            $('#InputFile').val('');
+                            $('#dvOverlay').hide();
+                        })
+                        .always(function () { });
+                    }
+                    else{
+                        toastr["error"]("Please select file.");
+                    }
+                }
+            </script>
+</section>

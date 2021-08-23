@@ -1,0 +1,298 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    ViewBag.Title = "Bidding";
+}
+@section Styles{
+    <style>
+        #view_report_table th, td {
+            border-left: 1px solid;
+            border-right: 1px solid;
+        }
+
+        table[aria-describedby="view_report_table_info"] thead th {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable td {
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+            }
+
+    </style>
+}
+
+
+@section Scripts{
+
+    <script src="~/assets/js/SKIC.js"></script>
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        $(document).ready(function () {
+            init_datepicker($('#daterange-99'), 'yesterday');
+
+            initCriteria()
+                .then(() => {
+                    Search();
+                })
+                .catch((error) => console.log('load criteria fail: ' + error));
+        });
+
+        function initCriteria() {
+            const loading = $('#criteria-loading-progress');
+            loading.show();
+
+            const promises = [
+                createCIPShiptoDropDownList('ddlShipto'),
+                createCarrierDropDownList('ddlCarrier', false)
+            ];
+
+            return Promise.all(promises).finally(() => { loading.hide(); });
+        }
+        function Search() {
+            DrawTableDetail();
+        }
+
+        function DrawTableDetail() {
+            const loading = $('#table-loading-progress');
+            loading.show();
+            
+
+            $.post('@Url.Action("RPTPKG006_OrientBiddingReport", "Report")', getCriteriaParam04())
+                .done(function (response) {
+                    var table;
+
+                    if ($.fn.dataTable.isDataTable('#view_report_table')) {
+                        table = $('#view_report_table').DataTable();
+                        table.clear();
+                        $.each(response.data, function (idx, obj) {
+                            table.row.add(response.data[idx]);
+                        });
+                        table.draw();
+                    } else {
+                        table = $("#view_report_table").DataTable({
+                            data: response.data,
+                            scrollX: true,
+                            responsive: true,
+                            dom: 'lTf<"html5buttons"B>gtip',
+                            pageLength: 10,
+                            buttons: [
+                                'copy',
+                                //'excel'
+                                {
+                                    extend: 'excel',
+                                    filename: 'Bidding ' + $('#daterange-99').html(),
+                                    title: null, // not add title on first row
+                                    exportOptions: {
+                                        columns: ':visible'
+                                    },
+                                }
+                            ],
+                            //ordering: false,
+                            order: [],
+                            columnDefs: [
+                                {
+                                    targets: '_all',
+                                    className: 'text-nowrap',
+                                    orderable: false
+                                },
+                            ],
+                            columns: [
+                                { "data": "ship_to" },
+                                { "data": "line_no", visible: false },
+                                { "data": "group_no", visible: false },
+                                { "data": "route_name" },
+                                { "data": "total_count" },
+                                { "data": "focus_count" },
+                                { "data": "other_count" },
+                                { "data": "other1" },
+                                { "data": "other2" },
+                                { "data": "other3" },
+                                { "data": "other4" },
+                                { "data": "other5" },
+                                { "data": "other6" },
+                                { "data": "other7" },
+                                { "data": "other8" },
+                                { "data": "other9" },
+                                { "data": "other10" },
+                                { "data": "other11" },
+                                { "data": "other12" },
+                                { "data": "other13" },
+                                { "data": "other14" },
+                                { "data": "other15" },
+                                { "data": "other16" },
+                                { "data": "other17" },
+                                { "data": "other18" },
+                                { "data": "other19" },
+                                { "data": "other20" },
+                                { "data": "other21" },
+                                { "data": "other22" },
+                                { "data": "other23" },
+                                { "data": "other24" },
+                                { "data": "other25" },
+                                { "data": "other26" },
+                                { "data": "other27" },
+                                { "data": "other28" },
+                                { "data": "other29" },
+                                { "data": "other30" },
+
+                            ],
+                            rowCallback: function (row, data, index) {
+                                if (data.group_no == '') {
+                                    $(row).css('background-color', '#bbb');
+                                    $(row).find('td:eq(0)').css('text-align', 'center');
+                                } else if (data.line_no == '') {
+                                    $(row).css('background-color', '#ddd');
+                                    $(row).find('td:eq(0)').css('text-align', 'center');
+                                }
+                            },
+                            "paging": false,
+                            "info": false,
+                        });
+                    }
+
+                    $('#focus').text($('#ddlCarrier option:selected').text());
+
+                    let lastIndex;
+                    //$.each(response.carrier, function (index, item) {
+                    response.carrier.forEach(function (item, index) {
+                        $('#carrier' + (index + 1)).text(item.dataDisplay);
+                        lastIndex = index;
+                    });
+
+                    //for (let i = lastIndex + 1; i < 30; i++) {
+                    //    table.column(7 + i).visible(false, false);
+                    //}
+
+                    // show columns 7 to the end (carrier 1 to 30)
+                    table.columns(Array.from(new Array(30), (x, i) => i + 7)).visible(true, false);
+
+                    // hide columns lastIndex + 1 to 30
+                    table.columns(Array.from(new Array(30 - lastIndex), (x, i) => i + 7 + lastIndex)).visible(false, false);
+
+
+                    table.columns.adjust().draw(false); // adjust column sizing and redraw
+                });
+
+
+            loading.hide();
+        }
+
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h4 class="card-title">Bidding</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="daterange-99">Date</label>
+                                <div class="col-sm-12">
+                                    <button id="daterange-99" class="btn btn-default dropdown-toggle md-btn-flat"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="ddlShipto">ปลายทาง</label>
+                                <div class="col-sm-12">
+                                    <select id="ddlShipto" class="form-control"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="ddlShipto">ผู้รับเหมาที่ bid ได้</label>
+                                <div class="col-sm-12">
+                                    <select id="ddlCarrier" class="form-control"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="wrapper">
+                                <button class="btn btn-primary submit-btn with-arrow rounded-border mr-2 mb-4" onclick="Search();">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="ShipmentStatusDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title" id="ShipmentStatusDetailText"></h4>
+                    @*<div class="table-responsive">
+                        <div class="dataTables_wrapper">*@
+                    <table class="table" id="view_report_table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>ปลายทาง</th>
+                                <th>line_no</th>
+                                <th>group_no</th>
+                                <th>Route</th>
+                                <th>ปริมาณงาน (เที่ยว)</th>
+                                <th id="focus">focused carrier</th>
+                                <th>อื่น ๆ</th>
+                                <th id="carrier1">carrier1</th>
+                                <th id="carrier2">carrier2</th>
+                                <th id="carrier3">carrier3</th>
+                                <th id="carrier4">carrier4</th>
+                                <th id="carrier5">carrier5</th>
+                                <th id="carrier6">carrier6</th>
+                                <th id="carrier7">carrier7</th>
+                                <th id="carrier8">carrier8</th>
+                                <th id="carrier9">carrier9</th>
+                                <th id="carrier10">carrier10</th>
+                                <th id="carrier11">carrier11</th>
+                                <th id="carrier12">carrier12</th>
+                                <th id="carrier13">carrier13</th>
+                                <th id="carrier14">carrier14</th>
+                                <th id="carrier15">carrier15</th>
+                                <th id="carrier16">carrier16</th>
+                                <th id="carrier17">carrier17</th>
+                                <th id="carrier18">carrier18</th>
+                                <th id="carrier19">carrier19</th>
+                                <th id="carrier20">carrier20</th>
+                                <th id="carrier21">carrier21</th>
+                                <th id="carrier22">carrier22</th>
+                                <th id="carrier23">carrier23</th>
+                                <th id="carrier24">carrier24</th>
+                                <th id="carrier25">carrier25</th>
+                                <th id="carrier26">carrier26</th>
+                                <th id="carrier27">carrier27</th>
+                                <th id="carrier28">carrier28</th>
+                                <th id="carrier29">carrier29</th>
+                                <th id="carrier30">carrier30</th>
+
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    @*</div>
+                        </div>*@
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,5 @@
+.cbFormat {
+    border-color: rgba(0,0,0,0.3);
+    height: calc(2.25rem + 5.75px) !important;
+    width:100%;
+}

@@ -1,0 +1,1107 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles {
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <style>
+        .center-middle {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        .status-delay {
+            color: rgb(192, 0, 0);
+        }
+
+        .status-in-time {
+            color: rgb(152, 220, 86);
+        }
+
+        .status-overdue {
+            color: rgb(255, 102, 0);
+        }
+
+        .status-near-time {
+            color: rgb(255, 192, 0);
+        }
+
+        .status-schedule {
+            color: rgb(191, 191, 191);
+        }
+
+        .table th {
+            text-align: center;
+        }
+    </style>
+}
+
+@section Scripts{
+    @*<script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+        <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+        <script src="~/assets/js/uiHelpers.js"></script>*@
+    <script src="~/assets/js/transportation.js"></script>
+
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_015';
+        var column = [
+            { "data": "hub_name", "name": "hub_name", "title": "กระจายสินค้า", "autoWidth": true, "className": "text-nowrap text-center" },
+            { "data": "all_order", "name": "all_order", "title": "ออเดอร์ทั้งหมด", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+            { "data": "at_origin", "name": "at_origin", "title": "อยู่คลังต้นทาง", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+            { "data": "inbound_cdc", "name": "inbound_cdc", "title": "อยู่ระหว่างโอนเข้า CDC", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+            { "data": "at_cdc", "name": "at_cdc", "title": "CDC", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+            { "data": "inbound_hub", "name": "inbound_hub", "title": "อย่ระหว่างโอนสินค้า", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+            { "data": "at_hub", "name": "at_hub", "title": "Hub/RDC", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+            { "data": "delivering", "name": "delivering", "title": "อยู่ระหว่างกระจายสินค้า", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+            { "data": "delivered", "name": "delivered", "title": "จัดส่งเสร็จแล้ว", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderInteger },
+        ];
+        var columnOtherType = [
+            { "data": "hub_name", "name": "hub_name", "title": "กระจายสินค้า", "autoWidth": true, "className": "text-nowrap text-left" },
+            { "data": "all_order", "name": "all_order", "title": "ออเดอร์ทั้งหมด", "autoWidth": true, "className": "text-nowrap text-left", "render": uiHelpers.renderInteger },
+            { "data": "at_origin", "name": "at_origin", "title": "อยู่คลังต้นทาง", "autoWidth": true, "className": "text-nowrap text-left", "render": uiHelpers.renderInteger },
+            { "data": "delivering", "name": "delivering", "title": "อยู่ระหว่างกระจายสินค้า", "autoWidth": true, "className": "text-nowrap text-left", "render": uiHelpers.renderInteger },
+            { "data": "delivered", "name": "delivered", "title": "จัดส่งเสร็จแล้ว", "autoWidth": true, "className": "text-nowrap text-left", "render": uiHelpers.renderInteger },
+        ];
+        var ship_status_column = [{ "data": "po_number", "name": "po_number", "title": "PO/Invoice", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "datetype", "name": "datetype1", "title": "Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "gi_customer_date", "name": "gi_customer_date", "title": "Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDateTimeNoSec },
+            { "data": "gi_customer_date", "name": "indicator1", "title": "", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "datetype", "name": "datetype2", "title": "Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "gr_cdc_date", "name": "gr_cdc_date", "title": "Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDateTimeNoSec },
+            { "data": "gr_cdc_date", "name": "indicator2", "title": "", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "datetype", "name": "datetype3", "title": "Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "gi_cdc_date", "name": "gi_cdc_date", "title": "Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDateTimeNoSec },
+            { "data": "gi_cdc_date", "name": "indicator3", "title": "", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "datetype", "name": "datetype4", "title": "Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "gr_rdc_date", "name": "gr_rdc_date", "title": "Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDateTimeNoSec },
+            { "data": "gr_rdc_date", "name": "indicator4", "title": "", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "datetype", "name": "datetype5", "title": "Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "gi_rdc_date", "name": "gi_rdc_date", "title": "Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDateTimeNoSec },
+            { "data": "gi_rdc_date", "name": "indicator5", "title": "", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "datetype", "name": "datetype6", "title": "Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "deliverydate", "name": "deliverydate", "title": "Date", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderDateTimeNoSec },
+            { "data": "deliverydate", "name": "indicator6", "title": "", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "delivery_number", "name": "delivery_number", "title": "DN", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipmentfirstmile", "name": "shipmentfirstmile", "title": "First mile", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipmentlinehual", "name": "shipmentlinehual", "title": "Line hual", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipmentlastmile", "name": "shipmentlastmile", "title": "Last mile", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_name", "name": "customer_name", "title": "Customer", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "matfrtgrpdesc", "name": "matfrtgrpdesc", "title": "Matfrg", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_name", "name": "origin_name", "title": "Origin", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_name", "name": "destination_name", "title": "Destination", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "orderdate", "name": "orderdate", "title": "Order Date", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "requesteddate", "name": "requesteddate", "title": "Requested Date", "autoWidth": true, "className": "text-nowrap" },
+];
+
+        function overrideFunction() {
+            getSelectDate = function () {
+                var selectDate = $('#datepicker').datepicker('getDate');
+                if (selectDate == null)
+                    selectDate = new Date();
+                return selectDate;
+            }
+
+            getCriteria = function (filter) {
+                var selectedDate = getSelectDate();
+                if (filter == null)
+                    filter = { day: null, month: null };
+
+                var criteria = {
+                    day: filter.day || selectedDate.getDate(),
+                    month: filter.month || selectedDate.getMonth() + 1,
+                    year: selectedDate.getFullYear(),
+                    delivery_by: $('#cboDeliveryBy').val(),
+                    destination_region: $('#cboDestinationRegion').val(),
+                    customer: $('#cboCustomer').val(),
+                    po_invoice: $('#txtPoInvoice').val(),
+                    date_type: 'Request'
+                };
+
+                return criteria;
+            };
+        }
+
+        function initialControl() {
+            uiHelpers.initDatepicker('#datepicker', null, null);
+            var ajax1 = uiHelpers.initCarrier('#cboDeliveryBy');
+            var ajax2 = uiHelpers.initCustomer('#cboCustomer', 'CDC', 'Customer');
+            var ajax3 = uiHelpers.initShiptoRegion('#cboDestinationRegion');
+            return Promise.all([ajax1, ajax2, ajax3]);
+        }
+
+        $(document).ready(function () {
+            //override default function
+            overrideFunction();
+            initialControl().then(() => {
+                getOrderMonitoringStatus();
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+        });
+
+        function getOrderMonitoringStatus() {
+            var controlID = '#oms-panel';
+            $(controlID + ' .section-loading').show();
+            var jqxhr = $.post('@Url.Action("OrderMonitoringStatus", "Transportation")', getCriteria())
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        var day = 1;
+                        for (rec of result.data) {
+                            setOrderStatus(controlID + ' .section-box-' + day++, rec);
+                        }
+                    }
+
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $(controlID + ' .section-loading').hide();
+                })
+                ;
+        }
+
+        function getOrderMonitoringSummary(sum) {
+            var controlID = '#OrderMonitoringSummary';
+            Object.keys(sum).forEach(field =>
+                $(controlID + ' .fld_' + field).text(sum[field])
+            );
+            @*var jqxhr = $.post('@Url.Action("OrderMonitoringSummary", "Transportation")', getCriteria())
+                .done(function (result) {
+                    if (uiHelpers.errorHandler(result)) {
+                        Object.keys(result.data).forEach(field =>
+                            $(controlID + ' .fld_' + field).text(result.data[field])
+                        );
+                    }
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $(controlID + ' .section-loading').hide();
+                })
+                ;*@
+        }
+
+        function getOrderMonitoringSummaryOtherType(sum) {
+            var controlID = '#OrderMonitoringSummaryOtherType';
+            Object.keys(sum).forEach(field =>
+                $(controlID + ' .fld_oth_' + field).text(sum[field])
+            );
+        }
+
+        function setOrderStatus(controlID, data) {
+            $(controlID + ' .total-order-qty').text(uiHelpers.displayInteger(data.total_qty));
+            $(controlID + ' .os-complete-qty').text(uiHelpers.displayInteger(data.complete_qty));
+            $(controlID + ' .os-onprocess-qty').text(uiHelpers.displayInteger(data.onprocess_qty));
+            $(controlID + ' .os-success').text(uiHelpers.displayInteger(data.success_qty));
+            $(controlID + ' .os-fail').text(uiHelpers.displayInteger(data.fail_qty));
+            $(controlID + ' .os-damage').text(uiHelpers.displayInteger(data.damage_qty));
+            var onprocess_percent = Math.round(data.onprocess_qty / data.total_qty * 100);
+            var complete_percent = 100 - onprocess_percent;
+            $(controlID + ' .os-complete-bg').css('width', complete_percent + '%');
+            $(controlID + ' .os-onprocess-bg').css('width', onprocess_percent + '%');
+            drawProgress(controlID, data.ontime_percent, data.complete_qty > 0);
+        }
+
+        function drawProgress(controlID, onTime) {
+            var canvas = $(controlID + ' .os-canvas')[0];
+            var context = canvas.getContext('2d');
+            var centerX = canvas.width / 2;
+            var centerY = canvas.height / 2;
+
+            var size = 80;
+            canvas.style.width = size + "px";
+            canvas.style.height = size + "px";
+
+            var scale = window.devicePixelRatio;
+            canvas.width = size * scale;
+            canvas.height = size * scale;
+
+            context.scale(scale, scale);
+
+            if (onTime != null) {
+                var radius = 30;
+
+                context.beginPath();
+                context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+                context.fillStyle = 'transparent';
+                context.fill();
+                context.lineWidth = 14;
+                context.strokeStyle = 'white';
+                context.stroke();
+
+                context.beginPath();
+                context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+                context.fillStyle = 'transparent';
+                context.fill();
+                context.lineWidth = 10;
+                context.strokeStyle = '#8497b0';
+                context.stroke();
+
+                var startAngle = Math.PI * 1.5;
+                context.beginPath();
+                if (onTime == 0)
+                    context.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+                else
+                    context.arc(centerX, centerY, radius, startAngle, startAngle + (Math.PI * 2 * (1 - (100 - onTime) / 100)), true);
+                context.fillStyle = 'transparent';
+                context.fill();
+                context.lineWidth = 10;
+                context.strokeStyle = '#ff5050';
+                context.stroke();
+
+                var percent = onTime + '%';
+                context.font = '16px serif';
+                context.fillStyle = 'black';
+                context.fillText(percent, centerX - context.measureText(percent).width / 2, centerY - 5);
+                context.font = '10px serif';
+                context.fillText("Ontime", centerX - context.measureText("Ontime").width / 2, centerY + 5);
+                context.fillText("Delivery", centerX - context.measureText("Delivery").width / 2, centerY + 15);
+            }
+            else {
+                context.font = '10px serif';
+                context.fillText("No", centerX - context.measureText("No").width / 2, centerY - 5);
+                context.fillText("Delivery", centerX - context.measureText("Delivery").width / 2, centerY + 5);
+                context.fillText("Complete", centerX - context.measureText("Complete").width / 2, centerY + 15);
+            }
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+            $('#datepicker').datepicker('setDate', dt);
+            $('#cboDeliveryBy').val(data.criteria.delivery_by).trigger('change');
+            $('#cboCustomer').val(data.criteria.customer).trigger('change');
+            $('#cboDestinationRegion').val(data.criteria.destination_region).trigger('change');
+            $('#txtPoInvoice').val(data.criteria.po_invoice);
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search);
+            $('#search-date').text(uiHelpers.displayDate(getSelectDate()));
+            $('#search-date-oth').text(uiHelpers.displayDate(getSelectDate()));
+
+            $('#OrderMonitoringSummary .section-loading').show();
+            var sum = {
+                all_order: 0,
+                at_cdc: 0,
+                at_hub: 0,
+                at_origin: 0,
+                delivered: 0,
+                delivering: 0,
+                inbound_cdc: 0,
+                inbound_hub: 0,
+            };
+            getOrderMonitoringSummary(sum)
+
+            $('#OrderMonitoringSummaryOtherType .section-loading').show();
+            var sumOtherType = {
+                all_order: 0,
+                at_origin: 0,
+                delivered: 0,
+                delivering: 0,
+            };
+            getOrderMonitoringSummaryOtherType(sumOtherType)
+
+            genTable(null);
+        }
+
+        function genTable(filter) {
+            if (filter == null) filter = {};
+            var data_date = new Date(new Date().getFullYear(), (filter.month || (getSelectDate().getMonth() + 1)) - 1, 1);
+
+            $.post("/Transportation/OrderMonitoringByHub", getCriteria(filter))
+                .done(function (result) {
+                    generateTableWithData('#OrderMonitoringByHub', { data: result.data, success: result.success },
+                        filter, null, column);
+
+                    generateTableWithData('#OrderMonitoringByHubOtherType', { data: result.dataOtherType, success: result.success },
+                        filter, null, columnOtherType);
+                })
+                .fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    var tb = $('#OrderMonitoringByHub .section-table-render').DataTable();
+                    var sum = {
+                        all_order: 0,
+                        at_cdc: 0,
+                        at_hub: 0,
+                        at_origin: 0,
+                        delivered: 0,
+                        delivering: 0,
+                        inbound_cdc: 0,
+                        inbound_hub: 0,
+                    };
+                    tb.rows().data().each((data, idx) => {
+                        sum.all_order += data.all_order;
+                        sum.at_cdc += data.at_cdc;
+                        sum.at_hub += data.at_hub;
+                        sum.at_origin += data.at_origin;
+                        sum.delivered += data.delivered;
+                        sum.delivering += data.delivering;
+                        sum.inbound_cdc += data.inbound_cdc;
+                        sum.inbound_hub += data.inbound_hub;
+                    });
+                    getOrderMonitoringSummary(sum);
+                    $('#OrderMonitoringSummary .section-loading').hide();
+
+                    var tbOth = $('#OrderMonitoringByHubOtherType .section-table-render').DataTable();
+                    var sumOtherType = {
+                        all_order: 0,
+                        at_origin: 0,
+                        delivered: 0,
+                        delivering: 0,
+                    };
+                    tbOth.rows().data().each((data, idx) => {
+                        sumOtherType.all_order += data.all_order;
+                        sumOtherType.at_origin += data.at_origin;
+                        sumOtherType.delivered += data.delivered;
+                        sumOtherType.delivering += data.delivering;
+                    });
+                    getOrderMonitoringSummaryOtherType(sumOtherType);
+
+                    $('#OrderMonitoringSummaryOtherType .section-loading').hide();
+                });
+
+            var post = generateTable('#OrderMonitoringShipmentStatus', '@Url.Action("OrderMonitoringShipment", "Transportation")',
+                filter, 'ข้อมูลการจัดส่งสินค้า', ship_status_column, shipmentStatus_createdRow);
+
+            post.always(function () {
+                setTimeout(function () { $('#OrderMonitoringShipmentStatus .section-table-render').DataTable().columns.adjust().draw(); }, 100);
+            });
+        }
+
+        var outCust, inCdc, outCdc, inRdc, outRdc, deliver
+
+        function shipmentStatus_createdRow(row, data, dataIndex) {
+            var tab = $('#OrderMonitoringShipmentStatus .section-table-render').DataTable();
+            var isPlan = $($(row).find('td')[1]).text() == 'Plan';
+            if (isPlan) {
+                $($(row).find('td')[0]).attr('rowspan', 2);
+                //<i class="fas fa-dot-circle"></i>
+                $($(row).find('td')[3]).attr('rowspan', 2);
+                $($(row).find('td')[6]).attr('rowspan', 2);
+                $($(row).find('td')[9]).attr('rowspan', 2);
+                $($(row).find('td')[12]).attr('rowspan', 2);
+                $($(row).find('td')[15]).attr('rowspan', 2);
+                $($(row).find('td')[18]).attr('rowspan', 2);
+                $($(row).find('td')[3]).attr('plan-date', data.gi_customer_date);
+                $($(row).find('td')[6]).attr('plan-date', data.gr_cdc_date);
+                $($(row).find('td')[9]).attr('plan-date', data.gi_cdc_date);
+                $($(row).find('td')[12]).attr('plan-date', data.gr_rdc_date);
+                $($(row).find('td')[15]).attr('plan-date', data.gi_rdc_date);
+                $($(row).find('td')[18]).attr('plan-date', data.deliverydate);
+
+                outCust = $($(row).find('td')[3]);
+                inCdc = $($(row).find('td')[6]);
+                outCdc = $($(row).find('td')[9]);
+                inRdc = $($(row).find('td')[12]);
+                outRdc = $($(row).find('td')[15]);
+                deliver = $($(row).find('td')[18]);
+
+                $($(row).find('td')[23]).attr('rowspan', 2);
+                $($(row).find('td')[24]).attr('rowspan', 2);
+                $($(row).find('td')[25]).attr('rowspan', 2);
+                $($(row).find('td')[26]).attr('rowspan', 2);
+                $($(row).find('td')[27]).attr('rowspan', 2);
+                $($(row).find('td')[28]).attr('rowspan', 2);
+            }
+            else {
+                $($(row).find('td')[28]).remove();
+                $($(row).find('td')[27]).remove();
+                $($(row).find('td')[26]).remove();
+                $($(row).find('td')[25]).remove();
+                $($(row).find('td')[24]).remove();
+                $($(row).find('td')[23]).remove();
+                $($(row).find('td')[18]).remove();
+                $($(row).find('td')[15]).remove();
+                $($(row).find('td')[12]).remove();
+                $($(row).find('td')[9]).remove();
+                $($(row).find('td')[6]).remove();
+                $($(row).find('td')[3]).remove();
+                $($(row).find('td')[0]).remove();
+
+                setStatusIcon(outCust, data.gi_customer_date);
+                setStatusIcon(inCdc, data.gr_cdc_date);
+                setStatusIcon(outCdc, data.gi_cdc_date);
+                setStatusIcon(inRdc, data.gr_rdc_date);
+                setStatusIcon(outRdc, data.gi_rdc_date);
+                setStatusIcon(deliver, data.deliverydate);
+            }
+        }
+
+        function setStatusIcon(cell, val) {
+            var plan = new Date(cell.attr('plan-date'));
+            var actual = new Date(val);
+            var size = '3x'; //lg, 2x, 3x, 4x
+            var now = new Date();
+            if (!plan instanceof Date || isNaN(plan.valueOf()))
+                plan = null;
+            if (!actual instanceof Date || isNaN(actual.valueOf()) || val == null)
+                actual = null;
+
+            cell.addClass('center-middle');
+            cell.html('<i class="fas fa-' + size + ' fa-dot-circle status-schedule"></i>');
+            if (plan == null && actual == null) {
+                cell.html('<i class="fas fa-' + size + ' fa-dot-circle status-schedule"></i>');
+                return;
+            }
+            if (actual == null && plan > now) {
+                cell.html('<i class="fas fa-' + size + ' fa-dot-circle status-schedule"></i>');
+                return;
+            }
+            if (actual == null && plan < now) {
+                cell.html('<i class="fas fa-' + size + ' fa-dot-circle status-delay"></i>')
+                return;
+            }
+            if (plan >= actual) {
+                cell.html('<i class="fas fa-' + size + ' fa-dot-circle status-in-time"></i>')
+                return;
+            }
+            if (plan < actual) {
+                cell.html('<i class="fas fa-' + size + ' fa-dot-circle status-overdue"></i>')
+                return;
+            }
+            //cell.html('<i class="fas fa-dot-circle status-near-time"></i>')
+        }
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Transportation</h1>
+            <h4 class="card-title">รายงานการติดตามสถานะการขนส่ง (Order Monitoring)</h4>
+        </div>
+    </div>
+    <div class="row" id="oms-panel">
+        <div class="col-12 card-statistics">
+            <div class="card" style="padding-left: 5px; padding-right: 5px; padding-bottom: 5px;">
+                <div class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="m-4">Order Status</h3>
+                <div class="row" style="padding-top: 5px;">
+                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                        <div class="card section-box-1">
+                            <div class="card-body-nopadding os-card-bg">
+                                <div class="row bottom-border">
+                                    <div class="col-12">
+                                        <div class="card-status-title os-text-center">Today-1</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-qty os-text-center">1,000</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-text os-text-center">Total</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-complete-qty">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text">
+                                                Complete
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-onprocess-qty os-text-right">
+                                                5
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text os-text-right">
+                                                On process
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="os-outter-bar">
+                                        <div class="os-inner-bar os-complete-bg" style="width: 99%;"></div>
+                                        <div class="os-inner-bar os-onprocess-bg" style="width: 1%;"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <canvas class="os-canvas" width="80" height="80">
+                                        </canvas>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Success
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-success">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Fail
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-fail">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                        <div class="row os-border" style="border-bottom: 1px; border-bottom-style: solid;">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Damage
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-damage">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                        <div class="card section-box-2">
+                            <div class="card-body-nopadding os-card-bg">
+                                <div class="row bottom-border">
+                                    <div class="col-12">
+                                        <div class="card-status-title os-text-center">Today</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-qty os-text-center">1,000</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-text os-text-center">Total</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-complete-qty">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text">
+                                                Complete
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-onprocess-qty os-text-right">
+                                                5
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text os-text-right">
+                                                On process
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="os-outter-bar">
+                                        <div class="os-inner-bar os-complete-bg" style="width: 99%;"></div>
+                                        <div class="os-inner-bar os-onprocess-bg" style="width: 1%;"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <canvas class="os-canvas" width="80" height="80">
+                                        </canvas>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Success
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-success">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Fail
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-fail">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                        <div class="row os-border" style="border-bottom: 1px; border-bottom-style: solid;">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Damage
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-damage">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                        <div class="card section-box-3">
+                            <div class="card-body-nopadding os-card-bg">
+                                <div class="row bottom-border">
+                                    <div class="col-12">
+                                        <div class="card-status-title os-text-center">Today+1</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-qty os-text-center">1,000</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-text os-text-center">Total</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-complete-qty">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text">
+                                                Complete
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-onprocess-qty os-text-right">
+                                                5
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text os-text-right">
+                                                On process
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="os-outter-bar">
+                                        <div class="os-inner-bar os-complete-bg" style="width: 99%;"></div>
+                                        <div class="os-inner-bar os-onprocess-bg" style="width: 1%;"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <canvas class="os-canvas" width="80" height="80">
+                                        </canvas>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Success
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-success">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Fail
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-fail">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                        <div class="row os-border" style="border-bottom: 1px; border-bottom-style: solid;">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Damage
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-damage">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                        <div class="card section-box-4">
+                            <div class="card-body-nopadding os-card-bg">
+                                <div class="row bottom-border">
+                                    <div class="col-12">
+                                        <div class="card-status-title os-text-center">Today+2</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-qty os-text-center">1,000</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="total-order-text os-text-center">Total</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-complete-qty">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text">
+                                                Complete
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-12 os-onprocess-qty os-text-right">
+                                                5
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 os-status-text os-text-right">
+                                                On process
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="os-outter-bar">
+                                        <div class="os-inner-bar os-complete-bg" style="width: 99%;"></div>
+                                        <div class="os-inner-bar os-onprocess-bg" style="width: 1%;"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <canvas class="os-canvas" width="80" height="80">
+                                        </canvas>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Success
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-success">
+                                                995
+                                            </div>
+                                        </div>
+                                        <div class="row os-border">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Fail
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-fail">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                        <div class="row os-border" style="border-bottom: 1px; border-bottom-style: solid;">
+                                            <div class="col-6 os-cell os-header-cell">
+                                                Damage
+                                            </div>
+                                            <div class="col-6 os-cell os-text-right os-damage">
+                                                &nbsp;
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <div class="card">
+                <h3 class="m-4">Filter</h3>
+                <div class="row m-4">
+                    <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                        Request Date
+                        <input type="text" class="form-control" id="datepicker" placeholder="Select date ... " style="text-align: center; width: 100%; line-height: 27px; padding: 0 !important;">
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                        Delivery By
+                        @Html.DropDownList("cboDeliveryBy", Enumerable.Empty<SelectListItem>(), "Delivery By", new { @id = "cboDeliveryBy", @style = "width: 100%" })
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                        Destination Region
+                        @Html.DropDownList("cboDestinationRegion", Enumerable.Empty<SelectListItem>(), "Destination Region", new { @id = "cboDestinationRegion", @style = "width: 100%" })
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                        Customer
+                        @Html.DropDownList("cboCustomer", Enumerable.Empty<SelectListItem>(), "Customer", new { @id = "cboCustomer", @style = "width: 100%" })
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                        PO/Invoice
+                        <input type="text" class="form-control" id="txtPoInvoice" placeholder="PO/Invoice" style="text-align: left; width: 100%; line-height: 27px; padding: 0 !important;">
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-2 mb-4" style="vertical-align:bottom;">
+                        <div id="search-button">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4 mb-4">
+        <div class="row mb-4">
+            <div class="col-12 card-statistics">
+                <div class="card" id="OrderMonitoringSummary">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-4">
+                        <h4>สรุปการจัดส่งสินค้า Crossdock สำหรับ order วันที่ <span id="search-date"></span></h4>
+                    </div>
+                    <div class="row m-2">
+                        <div class="col-12 col-sm-6 col-lg-6">
+                            <div class="row">
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">ออเดอร์ทั้งหมด</div>
+                                    <div class="os-text-center os-border-lrb fld_all_order">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">ต้นทาง</div>
+                                    <div class="os-text-center os-border-lrb fld_at_origin">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">อยู่ระหว่างโอนเข้า CDC</div>
+                                    <div class="os-text-center os-border-lrb fld_inbound_cdc">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">CDC</div>
+                                    <div class="os-text-center os-border-lrb fld_at_cdc">2,680</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-6">
+                            <div class="row">
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">อยู่ระหว่างโอนเข้า Hub/RDC</div>
+                                    <div class="os-text-center os-border-lrb fld_inbound_hub">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">Hub/RDC</div>
+                                    <div class="os-text-center os-border-lrb fld_at_hub">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">อยู่ระหว่างจัดส่งสินค้า</div>
+                                    <div class="os-text-center os-border-lrb fld_delivering">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                    <div class="os-header-cell os-text-center os-two-line-header">จัดส่งเสร็จแล้ว</div>
+                                    <div class="os-text-center os-border-lrb fld_delivered">2,680</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="OrderMonitoringByHub">
+            <div class="col-12">
+                <article class="card">
+                    <div class="card-body">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="card-title section-title"></h4>
+                        <div class="table-responsive">
+                            <div class="dataTables_wrapper">
+                                <table class="table table-striped section-table-render" style="width:100%"></table>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <div class="card mt-4 mb-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card" id="OrderMonitoringSummaryOtherType">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-4"><h4>สรุปการจัดส่งสินค้า Crossdock สำหรับ order วันที่ <span id="search-date-oth"></span></h4></div>
+                    <div class="row m-2">
+                        <div class="col-12 col-sm-12 col-lg-12">
+                            <div class="row">
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                                    <div class="os-header-cell os-text-center os-two-line-header">ออเดอร์ทั้งหมด</div>
+                                    <div class="os-text-center os-border-lrb fld_oth_all_order">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                                    <div class="os-header-cell os-text-center os-two-line-header">ต้นทาง</div>
+                                    <div class="os-text-center os-border-lrb fld_oth_at_origin">2,680</div>
+                                </div>
+                                @*<div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                        <div class="os-header-cell os-text-center os-two-line-header">อยู่ระหว่างโอนเข้า CDC</div>
+                                        <div class="os-text-center os-border-lrb fld_oth_inbound_cdc">2,680</div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                        <div class="os-header-cell os-text-center os-two-line-header">CDC</div>
+                                        <div class="os-text-center os-border-lrb fld_oth_at_cdc">2,680</div>
+                                    </div>*@
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                                    <div class="os-header-cell os-text-center os-two-line-header">อยู่ระหว่างจัดส่งสินค้า</div>
+                                    <div class="os-text-center os-border-lrb fld_oth_delivering">2,680</div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                                    <div class="os-header-cell os-text-center os-two-line-header">จัดส่งเสร็จแล้ว</div>
+                                    <div class="os-text-center os-border-lrb fld_oth_delivered">2,680</div>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="col-12 col-sm-6 col-lg-6">
+                                <div class="row">
+                                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                        <div class="os-header-cell os-text-center os-two-line-header">อยู่ระหว่างโอนเข้า Hub/RDC</div>
+                                        <div class="os-text-center os-border-lrb fld_oth_inbound_hub">2,680</div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                                        <div class="os-header-cell os-text-center os-two-line-header">Hub/RDC</div>
+                                        <div class="os-text-center os-border-lrb fld_oth_at_hub">2,680</div>
+                                    </div>
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="OrderMonitoringByHubOtherType">
+            <div class="col-12">
+                <article class="card">
+                    <div class="card-body">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="card-title section-title"></h4>
+                        <div class="table-responsive">
+                            <div class="dataTables_wrapper">
+                                <table class="table table-striped section-table-render" style="width:100%"></table>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="OrderMonitoringShipmentStatus">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table class="table table-striped section-table-render" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">PO/Invoice</th>
+                                        <th colspan="3" class="text-center">GI - WH's Customer</th>
+                                        <th colspan="3" class="text-center">GR - CDC</th>
+                                        <th colspan="3" class="text-center">GI - CDC</th>
+                                        <th colspan="3" class="text-center">GR - RDC/Hub</th>
+                                        <th colspan="3" class="text-center">GI - RDC/Hub</th>
+                                        <th colspan="3" class="text-center">Delivery</th>
+                                        <th rowspan="2">DN</th>
+                                        <th colspan="3" class="text-center">Shipment</th>
+                                        <th rowspan="2">Customer</th>
+                                        <th rowspan="2">Matfrg</th>
+                                        <th rowspan="2">Origin</th>
+                                        <th rowspan="2">Destination</th>
+                                        <th rowspan="2">Order Date</th>
+                                        <th rowspan="2">Requested Date</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>&nbsp;</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>&nbsp;</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>&nbsp;</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>&nbsp;</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>&nbsp;</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>&nbsp;</th>
+                                        <th>First mile</th>
+                                        <th>Last hual</th>
+                                        <th>Last mile</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

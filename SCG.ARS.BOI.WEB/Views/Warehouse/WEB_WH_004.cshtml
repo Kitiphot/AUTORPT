@@ -1,0 +1,878 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Index";
+}
+<script src="~/assets/js/warehouse.js"></script>
+<link href="~/assets/css/warehouse.css" rel="stylesheet" />
+<style>
+    #TodayReceiving_Table th, td {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+
+    #TodayReceiving_Table th {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .dataTables_wrapper .dataTable thead th {
+        padding: 5px 30px;
+    }
+
+    table[aria-describedby="TodayReceiving_Table_info"] thead th {
+        border: 1px #eee solid;
+        text-align: center;
+    }
+
+    .dataTables_wrapper .dataTable {
+        margin: 0 !important;
+    }
+
+    hr.myhrline {
+        margin: 0px;
+    }
+
+    h4, h5, h6, p {
+        margin: 2px;
+    }
+
+    div.card-body {
+        padding: 1% !important;
+    }
+</style>
+<script>
+    /*-----------------------*/
+    /*Initial on Webpage Load*/
+    /*-----------------------*/
+    var isFirstLoad = 1;
+    var table = null;
+    var selected_customer = [];
+    var selected_dc = [];
+    var screenID = 'WEB_WH_004';
+    var cdc_column = [
+        {
+            "data": "receiveddate", "name": "receiveddate", "title": "receiveddate", "autoWidth": true, "className": "text-nowrap",
+            "render": function (data, type, row, meta) {
+                return data == null ? "" : moment(new Date(data)).format("DD/MM/YYYY");
+            }
+        },
+        { "data": "statusid", "name": "statusid", "title": "statusid", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "statusname", "name": "statusname", "title": "statusname", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "po_invoice", "name": "po_invoice", "title": "po_invoice", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "rc", "name": "rc", "title": "rc", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "ean", "name": "ean", "title": "ean", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "suppliercode", "name": "suppliercode", "title": "suppliercode", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "suppliername", "name": "suppliername", "title": "suppliername", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "sku", "name": "sku", "title": "sku", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "productbarcode", "name": "productbarcode", "title": "productbarcode", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "productcode", "name": "productcode", "title": "productcode", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "productdescription", "name": "productdescription", "title": "productdescription", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "weight", "name": "weight", "title": "weight", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderInteger },
+        { "data": "volumn", "name": "volumn", "title": "volumn", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderInteger },
+        { "data": "qty_in_ewm", "name": "qty_in_ewm", "title": "qty_in_ewm", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderInteger },
+        { "data": "unit_code", "name": "unit_code", "title": "unit_code", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "uom", "name": "uom", "title": "uom", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "productgroupcode", "name": "productgroupcode", "title": "productgroupcode", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "productgroupname", "name": "productgroupname", "title": "productgroupname", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "doctype", "name": "doctype", "title": "doctype", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "docrefno", "name": "docrefno", "title": "docrefno", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "inbound", "name": "inbound", "title": "inbound", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "entiled", "name": "entiled", "title": "entiled", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "chargeunit", "name": "chargeunit", "title": "chargeunit", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "chargeitem", "name": "chargeitem", "title": "chargeitem", "autoWidth": true, "className": "text-nowrap" },
+        { "data": "customer_name", "name": "customer_name", "title": "customer_name", "autoWidth": true, "className": "text-nowrap" },
+        {
+            "data": "arrival_date", "name": "arrival_date", "title": "arrival_date", "autoWidth": true, "className": "text-nowrap",
+            "render": function (data, type, row, meta) {
+                return data == null ? "" : moment(new Date(data)).format("DD/MM/YYYY");
+            }
+        }
+    ];
+    var esc_column = [
+        {
+            "data": "receiveddate", "name": "receiveddate", "title": "receiveddate", "autoWidth": true,
+            "render": function (data, type, row, meta) {
+                return data == null ? "" : moment(new Date(data)).format("DD/MM/YYYY");
+            }
+        },
+        { "data": "statusid", "name": "statusid", "title": "statusid", "autoWidth": true },
+        { "data": "statusname", "name": "statusname", "title": "statusname", "autoWidth": true },
+        { "data": "po_invoice", "name": "po_invoice", "title": "po_invoice", "autoWidth": true },
+        { "data": "rc", "name": "rc", "title": "rc", "autoWidth": true },
+        { "data": "ean", "name": "ean", "title": "ean", "autoWidth": true },
+        { "data": "suppliercode", "name": "suppliercode", "title": "suppliercode", "autoWidth": true },
+        { "data": "suppliername", "name": "suppliername", "title": "suppliername", "autoWidth": true },
+        { "data": "sku", "name": "sku", "title": "sku", "autoWidth": true },
+        { "data": "productbarcode", "name": "productbarcode", "title": "productbarcode", "autoWidth": true },
+        { "data": "productcode", "name": "productcode", "title": "productcode", "autoWidth": true },
+        { "data": "productdescription", "name": "productdescription", "title": "productdescription", "autoWidth": true },
+        { "data": "weight", "name": "weight", "title": "weight", "autoWidth": true },
+        { "data": "volumn", "name": "volumn", "title": "volumn", "autoWidth": true },
+        { "data": "qty_in_ewm", "name": "qty_in_ewm", "title": "qty_in_ewm", "autoWidth": true },
+        { "data": "unit_code", "name": "unit_code", "title": "unit_code", "autoWidth": true },
+        { "data": "uom", "name": "uom", "title": "uom", "autoWidth": true },
+        { "data": "productgroupcode", "name": "productgroupcode", "title": "productgroupcode", "autoWidth": true },
+        { "data": "productgroupname", "name": "productgroupname", "title": "productgroupname", "autoWidth": true },
+        { "data": "doctype", "name": "doctype", "title": "doctype", "autoWidth": true },
+        { "data": "docrefno", "name": "docrefno", "title": "docrefno", "autoWidth": true },
+        { "data": "inbound", "name": "inbound", "title": "inbound", "autoWidth": true },
+        { "data": "entiled", "name": "entiled", "title": "entiled", "autoWidth": true },
+        { "data": "chargeunit", "name": "chargeunit", "title": "chargeunit", "autoWidth": true },
+        { "data": "license_plate", "name": "license_plate", "title": "license_plate", "autoWidth": true },
+        { "data": "batch_no", "name": "batch_no", "title": "batch_no", "autoWidth": true },
+        { "data": "lot_no", "name": "lot_no", "title": "lot_no", "autoWidth": true },
+        { "data": "receive_package_name", "name": "receive_package_name", "title": "receive_package_name", "autoWidth": true },
+        { "data": "actual_weight", "name": "actual_weight", "title": "actual_weight", "autoWidth": true }
+    ];
+    function GetDateDisplay() {
+        var tmpStartDate = $('#daterange-01').data('daterangepicker').startDate._d;
+        var tmpEndDate = $('#daterange-01').data('daterangepicker').endDate._d;
+        var StartDate = tmpStartDate.getDate() + "/" + (tmpStartDate.getMonth() + 1) + "/" + tmpStartDate.getFullYear();
+        var EndDate = tmpEndDate.getDate() + "/" + (tmpEndDate.getMonth() + 1) + "/" + tmpEndDate.getFullYear();
+        DateDis = {
+            StartDate: StartDate,
+            EndDate: EndDate
+        }
+        return DateDis;
+    }
+    function initialSearchCriteria() {
+        var ajax = [];
+        $('#CriteriaOveray').show();
+        ajax.push(GetCustomer('CDC'));
+        ajax.push(GetDC('CDC'));
+        var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').hide(); });
+        return result;
+    }
+
+    $(document).ready(function () {
+        //Report Type
+        var type = "Barite";
+        init_datepicker_twin_criteria();
+        document.getElementById('reporttype').value = type;
+
+        $('#cboDC').on("change", function (element, checked) {
+            GetCustomer('CDC', $('#cboDC').select2('data').map(x => x.id));
+        });
+
+        initialControl().then(() => {
+            //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+            uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+        });
+
+
+        //Search();
+
+    });
+
+
+    function init_datepicker() {
+
+    }
+</script>
+
+<script>
+    function Search() {
+        uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+
+
+        GetSummary(getRequest());
+
+        GetCompareChart(getRequest());
+        //Monthly Table
+        DrawTableDetail(getRequest());
+
+        GetReceivedByTimeChart(getRequest());
+        $('#SectionTodayCompareReceived').show();
+        $('#SectionYesterdayCompareReceived').show();
+        $('#SectionPieChartReceivedBytime').show();
+        $('#SectionBarChartReceivedBytime').show();
+
+    }
+
+
+    function getRequest() {
+        var customer = $('#cboCustomer').select2('data').map(x => x.id);;
+        var dc = $('#cboDC').select2('data').map(x => x.id);;
+        var tmpStartDate = $('#daterange-01').data('daterangepicker').startDate._d;
+        var tmpEndDate = $('#daterange-01').data('daterangepicker').endDate._d;
+        var tmpPackStartDate = $('#daterange-02').data('daterangepicker').startDate._d;
+        var tmpPackEndDate = $('#daterange-02').data('daterangepicker').endDate._d;
+        var startDate = tmpStartDate.getFullYear() + "/" + (tmpStartDate.getMonth() + 1) + "/" + tmpStartDate.getDate();
+        var endDate = tmpEndDate.getFullYear() + "/" + (tmpEndDate.getMonth() + 1) + "/" + tmpEndDate.getDate();
+        var CountBy = document.getElementById('cboCountBy').value;
+        var cboCountBy = document.getElementById('cboCountBy');
+        var CountByName = cboCountBy.options[cboCountBy.selectedIndex].text;
+        if (!customer) {
+            customer = null;
+        }
+        if (!dc) {
+            dc = null;
+        }
+        if (!CountBy) {
+            CountBy = null;
+        }
+        var request = {
+            selectStartDate: startDate,
+            selectEndDate: endDate,
+            selectDc: dc,
+            selectCustomer: customer,
+            CountBy: CountBy,
+            CountByName: CountByName
+        };
+        //alert(request.selectDc);
+        //alert(request.selectCustomer);
+        return request;
+    }
+
+    function GetCompareChart(request) {
+        $('#barChartTodayReceiving').remove();
+        $('#barChartTodayReceivingContainer').append('<canvas id="barChartTodayReceiving"><canvas>');
+        $('#barChartYesterdayReceiving').remove();
+        $('#barChartYesterdayReceivingContainer').append('<canvas id="barChartYesterdayReceiving"><canvas>');
+        //Placeholder for input parametersป
+        var sectionCompareChart = document.getElementById('CompareReceiving');
+
+        var sectionreportHeader = document.getElementById('TodayReceivingDate');
+        var DateDis = GetDateDisplay();
+        sectionreportHeader.innerText = DateDis.StartDate + " - " + DateDis.EndDate;
+
+        //let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds()
+        //console.log(formatted_date)
+        var cboCountBy = document.getElementById('cboCountBy');
+        $.ajax({
+            url: '@Url.Action("RPTCDC001_TodayReceivingChart", "Warehouse")',
+            type: 'POST',
+            data: request,
+            dataType: 'Json'
+        }).done(function (response) {
+            //Populate chart data and show the modal
+            //PopulateDataShipmentStatus(response, reporttype);
+
+            var ctx = document.getElementById("barChartTodayReceiving").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'horizontalBar',
+                data: response,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                            //ticks: {
+                            //    min: 60
+                            //},
+                            scaleLabel: {
+                                display: true,
+                                labelString: cboCountBy.options[cboCountBy.selectedIndex].text
+                            }
+                        }],
+                        yAxes: [{
+                            stacked: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Customer"
+                            }
+                        }]
+                    },
+                    elements: {
+                        rectangle: {
+                            borderWidth: 1,
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: 'Receiving Today'
+                    }
+                }
+            });
+            var canvas = document.getElementById('barChartTodayReceiving');
+            canvas.onclick = function (evt) {
+                var activePoints = myChart.getElementsAtEvent(evt);
+                if (activePoints[0]) {
+                    var chartData = activePoints[0]['_chart'].config.data;
+                    var idx = activePoints[0]['_index'];
+
+                    var label = chartData.labels[idx];
+                    var value = chartData.datasets[0].data[idx];
+
+                    var url = label + " value=" + value;
+                    //alert(url);
+                }
+                currentmonth = new Date(label).getMonth() + 1;
+                currentyear = new Date(label).getFullYear();
+                currentdate = new Date(label).getDate();
+                customer = document.getElementById('cboCustomer').value;
+                //alert("month:" + currentmonth + "year:" + currentyear + "customer:" + customer);
+                DrawTableDetail(getRequest());
+            };
+        }).fail(function (error) {
+            console.log(error);
+        }).always(function () {
+            $('#SectionTodayCompareReceived').hide();
+            //console.log( "finished" );
+        });
+
+        var table = $("#TodayReceiving_Table").DataTable().destroy();
+        var table = $("#TodayReceiving_Table").DataTable({
+            "ajax": ({
+                url: '@Url.Action("RPTCDC001_ReceivedSummaryTable", "Warehouse")',
+                type: 'POST',
+                data: request,
+                dataType: 'Json'
+            }),
+            scrollX: true,//
+            //ordering: false,//
+            "bSort": true,
+            order: [],
+            responsive: true,
+            searching: false,
+            paging: false,
+            lengthChange: false,
+            pageLength: 10,
+            fixedColumns: {
+                heightMatch: 'none'
+            },
+            columns: [
+                { "data": "customer_name", className: "text-nowrap"},
+                { "data": "total_qty_today", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                { "data": "received_qty_today", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                { "data": "putaway_qty_today", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                { "data": "outstanding_qty_today", className: "text-nowrap", "render": uiHelpers.renderInteger},
+                //{ "data": "putaway_percent", className: "text-nowrap" },
+                {
+                    "data": "putaway_percent", className: "text-nowrap",
+                    "render": function (data, type, row, meta) {
+                        return parseFloat(data).toFixed(2);
+                    }
+                },
+
+            ]
+        });
+    }
+
+    function GetReceivedByTimeChart(request) {
+        $('#barChartReceivedByTime').remove();
+        $('#barChartReceivedByTimeContainer').append('<canvas id="barChartReceivedByTime"><canvas>');
+
+        //Placeholder for input parameters
+        //request.selectStartDate = request.selectStartDate.toISOString();
+        //request.selectEndDate = request.selectEndDate.toISOString();
+        var cboCountBy = document.getElementById('cboCountBy');
+        $.ajax({
+            url: '@Url.Action("RPTCDC001_ReceivedByTimeBarChart", "Warehouse")',
+            type: 'POST',
+            data: request,
+            dataType: 'Json'
+        }).done(function (response) {
+            var ctx = document.getElementById("barChartReceivedByTime").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: response,
+                options: {
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                            gridLines: {
+                                display: false,
+                            }
+                            ,
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Time"
+                            }
+                        }],
+                        yAxes: [{
+                            stacked: true,
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            type: 'linear',
+                            scaleLabel: {
+                                display: true,
+                                labelString: cboCountBy.options[cboCountBy.selectedIndex].text
+                            }
+                        }]
+                    },
+                    elements: {
+                        line: {
+                            fill: false
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom"
+                    },
+                    title: {
+                        display: true,
+                        text: "การรับสินค้าตามช่วงเวลา"
+                    }
+                }
+            });
+            var canvas = document.getElementById('barChartReceivedByTime');
+            canvas.onclick = function (evt) {
+                var activePoints = myChart.getElementsAtEvent(evt);
+                if (activePoints[0]) {
+                    var chartData = activePoints[0]['_chart'].config.data;
+                    var idx = activePoints[0]['_index'];
+
+                    var label = chartData.labels[idx];
+                    var value = chartData.datasets[0].data[idx];
+
+                    var url = label + " value=" + value;
+                    //alert(url);
+                }
+                currentmonth = new Date(label).getMonth()+1;
+                currentyear = new Date(label).getFullYear();
+                currentdate = new Date(label).getDate();
+                customer = document.getElementById('cboCustomer').value;
+                //alert("month:" + currentmonth + "year:" + currentyear + "customer:" + customer);
+                DrawTableDetail(getRequest());
+            };
+
+        }).fail(function (error) {
+            console.log(error);
+        }).always(function () {
+            $('#SectionBarChartReceivedBytime').hide();
+            //console.log( "finished" );
+        });
+
+        $('#pieChartReceivedByTime').remove();
+        $('#pieChartReceivedByTimeContainer').append('<canvas id="pieChartReceivedByTime"><canvas>');
+
+            $.ajax({
+            url: '@Url.Action("RPTCDC001_ReceivedByTimePieChart", "Warehouse")',
+            type: 'POST',
+            data: request,
+            dataType: 'Json'
+        }).done(function (response) {
+            var ctx = document.getElementById("pieChartReceivedByTime").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'pie',
+                data: response,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "right"
+                    },
+                    title: {
+                        display: true,
+                        text: "สัดส่วนการรับสินค้าเข้าคลังตามช่วงเวลา "
+                    }
+                }
+            });
+            var canvas = document.getElementById('pieChartReceivedByTime');
+            canvas.onclick = function (evt) {
+                var activePoints = myChart.getElementsAtEvent(evt);
+                if (activePoints[0]) {
+                    var chartData = activePoints[0]['_chart'].config.data;
+                    var idx = activePoints[0]['_index'];
+
+                    var label = chartData.labels[idx];
+                    var value = chartData.datasets[0].data[idx];
+
+                    var url = label + " value=" + value;
+                    //alert(url);
+                }
+                currentmonth = new Date(label).getMonth()+1;
+                currentyear = new Date(label).getFullYear();
+                currentdate = new Date(label).getDate();
+                customer = document.getElementById('cboCustomer').value;
+                //alert("month:" + currentmonth + "year:" + currentyear + "customer:" + customer);
+                DrawTableDetail(getRequest());
+            };
+
+        }).fail(function (error) {
+            console.log(error);
+        }).always(function () {
+            $('#SectionPieChartReceivedBytime').hide();
+            //console.log( "finished" );
+        });
+
+    }
+
+    function DrawTableDetail(request) {
+
+        //ESC Text
+        var sectionReceivingDetailText = document.getElementById('ReceivingDetailText');
+        var DateDis = GetDateDisplay();
+        sectionReceivingDetailText.innerText = "รายละเอียดยอดสินค้าขารับประจำวันที่ " + DateDis.StartDate + "-" + DateDis.EndDate;
+        $('#SectionReceivingDetail').show();
+        var jqxhr = $.post("/Warehouse/RPTCDC001_RecivingReport", request)
+            .done(function (result) {
+                //if (result.status) {
+                if (table == null) {
+                    GenerateDatatable(result.data, cdc_column);
+                }
+                else {
+                    table.clear();
+                    $.each(result.data, function (idx, obj) {
+                        table.row.add(result.data[idx]);
+                    });
+                    table.draw();
+                }
+                //} else {
+                //toastr["error"](result.message);
+                //}
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function (e) {
+                $('#SectionReceivingDetail').hide();
+            });
+
+    }
+
+    function isEmpty(obj) {
+        for (var key in obj) {
+            if (obj.hasOwnProperty(key))
+                return false;
+        }
+        return true;
+    }
+
+    var isRtl = $('html').attr('dir') === 'rtl';
+    $(function () {
+        $('#datepicker-base').datepicker({
+            format: "mm-yyyy",
+            viewMode: "months",
+            minViewMode: "months",
+            orientation: isRtl ? 'auto right' : 'auto left'
+        });
+    });
+
+</script>
+
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Warehouse</h1>
+    <h4 class="card-title">รายการรับสินค้า (Receiving Report)</h4>
+
+    @{
+        await Html.RenderPartialAsync("_Common_WH_Criteria_05");
+    }
+
+    <div class="row" style="margin-top:2%;">
+        <div class="col-12 card-statistics">
+            <div class="row" id="div_summary" data-bind="foreach: summary">
+                <div id="SectionSummaryCompareReceive" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                    <div class="card">
+                        <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        @*<h5>CDC วังน้อย</h5>*@
+                                        <h5 data-bind="text:dc_name"></h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <p data-bind="text:$parent.xAxisLabel">Order</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="myhrline" />
+                            <div class="row ">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <h4 data-bind="text: formatCurrency(total_order)"></h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-center">
+                                        <h6>Total</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <h4 data-bind="text: formatCurrency(received_order)">1000</h4>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <h4 data-bind="text: formatCurrency(outstanding_order)">2000</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-start">
+                                        <p style="text-align:left">Receiving Done</p>
+                                    </div>
+                                </div>
+                                <div class="col align-items-center">
+                                    <div class="d-flex justify-content-end">
+                                        <p style="text-align:right">Receiving OutStanding</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col align-items-center">
+
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-info" role="progressbar" data-bind="attr: {'aria-valuenow': formatCurrency((total_order/received_order)*100),} , style: {width:(received_order/total_order)*100+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-bar bg-danger" role="progressbar" data-bind="attr: {'aria-valuenow': formatCurrency(100-((total_order/received_order)*100)),} ,style: {width:100-((received_order/total_order)*100)+'%'}"
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">สรุปการรับสินค้าเข้าคลัง ประจำวันที่ <span id="TodayReceivingDate"></span></h4>
+                    <div class="row" id="CompareReceiving">
+                        @*//Today Receiving*@
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div id="SectionTodayCompareReceived" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="TodayReceivingText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartTodayReceiving','TodayReceivingText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barChartTodayReceivingLayout">
+                                    <div id="barChartTodayReceivingContainer" class="chart-container" style="position: relative; height:30vh;">
+                                        <canvas id="barChartTodayReceiving"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*Yesterday Receiving*@
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body" style="padding-bottom:2%;padding-top:2%;padding-left:5%;padding-right:5%">
+                                    <h4 class="card-title" id="TodayReceivingDetailText"></h4>
+                                    <div>
+                                        <div class="dataTables_wrapper">
+                                            @*<table id="dtList" class="table table-striped" style="width:100%"></table>*@
+                                            <table class="table table-striped" id="TodayReceiving_Table" cellspacing="0" width="100%">
+                                                <thead>
+                                                    <tr>
+
+                                                        <th rowspan="2" tyle="text-align:center">Customer</th>
+                                                        <th rowspan="2" style="text-align:center">Plan</th>
+                                                        <th colspan="2" scope="colgroup" style="text-align:center">Status</th>
+                                                        <th rowspan="2" style="text-align:center;">
+                                                            <div>Receiving</div><div>Outstanding</div>
+                                                        </th>
+                                                        <th rowspan="2" style="text-align:center">
+                                                            <div>% Receiving</div><div>Done</div>
+                                                        </th>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <th style="text-align:center">Received</th>
+                                                        <th style="text-align:center">Putaway</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">สรุปการรับสินค้าเข้าคลังตามช่วงเวลา</h4>
+                    <div class="row" id="ReceivedByTime">
+                        @*//Today Receiving*@
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div id="SectionBarChartReceivedBytime" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="barChartReceivedByTimeText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#barChartReceivedByTime','barChartReceivedByTimeText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="barChartReceivedByTimeLayout">
+                                    <div id="barChartReceivedByTimeContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="barChartReceivedByTime"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*Yesterday Receiving*@
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div id="SectionPieChartReceivedBytime" class="overlay">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title" id="pieChartReceivedByTimeText"></h4>
+                                    <div class="d-flex align-items-center">
+                                        <div class="wrapper">
+                                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#pieChartReceivedByTime','pieChartReceivedByTimeText'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                                <i class="icon-share-alt mr-1"></i>Download PDF
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<canvas id="MeSeStatusCanvas"></canvas>*@
+                                <div class="card-body" id="pieChartReceivedByTimeLayout">
+                                    <div id="pieChartReceivedByTimeContainer" class="chart-container" style="position: relative; height:40vh;">
+                                        <canvas id="pieChartReceivedByTime"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="ReceivingDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div id="SectionReceivingDetail" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title" id="ReceivingDetailText"></h4>
+                    <div>
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->
+
+
+<script>
+
+    var model = {
+        summary: ko.observableArray([]),
+        xAxisLabel: ko.observable()
+    }
+
+    ko.applyBindings(model, document.getElementById("div_summary"));
+
+    function GetSummary(request) {
+        $('#SectionSummaryCompareReceive').show();
+        //var A = document.getElementById('SomeID');
+        //A.innerText = "PCs.";
+
+        var jqxhr = $.post("/Warehouse/RPTCDC001_ReceivedSummary", request)
+            .done(function (result) {
+
+                model.summary(result.datalist);
+                model.xAxisLabel(result.xAxislabelString);
+
+                //var CountByText = document.getElementById('CountByText');
+                //CountByText.innerText = "PCs.";
+            })
+            .fail(function (e) {
+                console.log(e);
+            })
+            .always(function () {
+                $('#SectionSummaryCompareReceive').hide();
+
+                //console.log( "finished" );
+            });
+    }
+    var formatCurrency = function (amount) {
+        if (!amount) {
+            return "0";
+        }
+        amount += '';
+        x = amount.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        }
+        return "" + x1 + x2;
+    }
+
+</script>

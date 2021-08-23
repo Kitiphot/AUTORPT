@@ -1,0 +1,86 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div id="CriteriaOveray" class="overlay">
+                <div class="loader-wrap">
+                    <div class="bar-loader">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+                <div class="form-row">
+                    <div class="form-group col-lg-3" id="cbBusiness">
+                        <label for="cboBusiness">Business</label>
+                        @Html.DropDownListFor(m => m.Business, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboBusiness", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3" id="cbMatfrg">
+                        <label for="cboMatfrg">Matfrg</label>
+                        @Html.DropDownListFor(m => m.Matfrg, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboMatfrg", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3" id="cbFleet">
+                        <label for="cboFleet">Fleet</label>
+                        @Html.DropDownListFor(m => m.Fleet, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboFleet", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+
+                    <div class="form-group col-lg-3" id="cbShippingPoint">
+                        <label for="cboShippingPoint">Shipping Point</label>
+                        @Html.DropDownListFor(m => m.Shipping_Point, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboShippingPoint", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                @*</div>*@
+                @*<div class="form-row">*@
+
+                    <div class="form-group col-lg-3" id="cbShiptoRegion">
+                        <label for="cboShiptoRegion">Shipto Region</label>
+                        @Html.DropDownListFor(m => m.Shipto_Region, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboShiptoRegion", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3" id="cbCustomer">
+                        <label for="cboCustomer">Customer</label>
+                        @Html.DropDownListFor(m => m.CustomerTransport, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboCustomer", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3" id="cbTruckType">
+                        <label for="cboTruckType">Truck Type</label>
+                        @Html.DropDownListFor(m => m.Truck_Type, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboTruckType", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3" id="cbOrderType">
+                        <label for="cboOrderType">Order Type</label>
+                        @Html.DropDownListFor(m => m.Order_Type, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboOrderType", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                @*</div>*@
+                @*<div class="form-row">*@
+                    <div class="form-group col-lg-3" id="cbOrderDate">
+                        <label for="daterange-4" id="criteriaDate">Shipment Date</label>
+                        <input type="text" class="form-control cbFormat" id="monthpicker" placeholder="Select Month ... ">
+                    </div>
+                    <div class="form-group col-lg-3" id="cbPlannerName">
+                        <label for="cboPlannerName">Planner Name</label>
+                        @Html.DropDownListFor(m => m.Planner_Name, Enumerable.Empty<SelectListItem>(), null, new { @id = "cboPlannerName", multiple = "multiple", @style = "width: 100%" })
+                    </div>
+                    <div class="form-group col-lg-3 pb-0">
+                        <div class="row pt-2">
+                            <div class="col-5">
+                                <div id="search-button">
+                                </div>
+                            </div>
+
+                            <div class="col-5 pt-4">
+                                <button type="button" class="btn btn-warning btn-block" onclick="clearCriteria()">Clear</button>
+                            </div>
+                            <div class="col-2 pt-4">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @*<div class="row d-flex align-items-center">
+                </div>*@
+
+            </div>
+        </div>
+    </div>
+</div>

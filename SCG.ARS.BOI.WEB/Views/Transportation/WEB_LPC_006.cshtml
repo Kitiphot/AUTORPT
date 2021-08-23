@@ -1,0 +1,807 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles {
+    <link rel="stylesheet" href="~/assets/css/transportation.css" />
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    @*<link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.3.2/css/fixedColumns.dataTables.min.css">*@
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedcolumns/3.3.2/css/fixedColumns.dataTables.min.css">
+    <style>
+        .card-body-nopadding {
+            flex: 1 1 auto;
+            padding: 1rem 1.81rem;
+        }
+
+        .card-dn-title {
+            font-weight: bold;
+        }
+
+        .text-right {
+            text-align: end;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .min_r_l_padding {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .no_r_l_padding {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .outter-bar {
+            width: 50px;
+            text-align: center;
+        }
+
+        .inner-bar {
+            height: 20px;
+            display: inline-block;
+        }
+
+        .total-row {
+            font-weight: bold;
+        }
+
+        .red-cell {
+            background-color: rgb(255, 199, 206);
+        }
+
+        .green-cell {
+            background-color: rgb(198, 236, 206);
+        }
+
+        .dataTables_wrapper .dataTable thead th {
+            padding: 5px 30px;
+        }
+
+        .select2-search__field {
+            width: 100% !important;
+        }
+
+        div.DTFC_LeftBodyWrapper {
+            background-color: white;
+        }
+
+        div.DTFC_LeftFootWrapper {
+            background-color: white;
+        }
+
+        div.DTFC_LeftBodyLiner {
+            overflow-y: hidden;
+        }
+
+        .text-weight-bold {
+            font-weight: bold;
+        }
+
+    </style>
+}
+
+@section Scripts{
+    @*<script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+        <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+        <script src="~/assets/js/uiHelpers.js"></script>*@
+    <script src="~/assets/js/transportation.js"></script>
+    @*<link rel="stylesheet" href="~/assets/css/transportation.css">*@
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/fixedcolumns/3.3.2/js/dataTables.fixedColumns.min.js"></script>
+
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_006';
+        var submitCriteria;
+        var summary_table = [];
+        var plan_actual_column = [
+            { "data": "carrier_name", "name": "carrier_name", "title": "ผู้รับเหมา", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "acc_plan_percent", "name": "acc_plan_percent", "title": "% Plan สะสม", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderPercent },
+            { "data": "acc_actual_percent", "name": "acc_actual_percent", "title": "% Actual สะสม", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderPercent },
+            { "data": "plan", "name": "plan", "title": "Plan", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "actual", "name": "actual", "title": "Actual", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+            { "data": "plan_percent", "name": "plan_percent", "title": "% Plan", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderPercent },
+            { "data": "actual_percent", "name": "actual_percent", "title": "% Actual", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderPercent },
+            { "data": "diff_percent", "name": "diff_percent_graph", "title": "", "autoWidth": true, "className": "text-nowrap no_r_l_padding" },
+            { "data": "diff_percent", "name": "diff_percent", "title": "Diff", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderPercent },
+            { "data": "add", "name": "add", "title": "Add", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderInteger },
+        ];
+        var detail_column = [
+            { "data": "load_id", "name": "load_id", "title": "เลข Shipment", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "carrier_code", "name": "carrier_code", "title": "รหัสผู้รับเหมา", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "carrier_name", "name": "carrier_name", "title": "ชื่อผู้รับเหมา", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shiptoname", "name": "shiptoname", "title": "ชื่อปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipto_amphur", "name": "shipto_amphur", "title": "อำเภอปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shipto_province", "name": "shipto_province", "title": "จังหวัดปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "shiptoregioncode", "name": "shiptoregioncode", "title": "รหัสภาคปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "total_distance", "name": "total_distance", "title": "ระยะทาง", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderN1 },
+            { "data": "charge_amount", "name": "charge_amount", "title": "Charge Amount", "autoWidth": true, "className": "text-nowrap text-right", "render": uiHelpers.renderN2 },
+            { "data": "sapshippingpointdescription", "name": "sapshippingpointdescription", "title": "Shipping Point", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "distance_group", "name": "distance_group", "title": "Distance Group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "bussiness_group", "name": "bussiness_group", "title": "Business Group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mat_freight", "name": "mat_freight", "title": "Material Freight group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "order_doc_type", "name": "order_doc_type", "title": "Order Type", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "fleet_name", "name": "fleet_name", "title": "Fleet Name", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "truck_name", "name": "truck_name", "title": "Truck Name", "autoWidth": true, "className": "text-nowrap" }
+        ];
+        var isFirstRow = true;
+
+        function setCriteria(data) {
+            @*if (data == null) return;
+            var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+            $('#monthpicker').datepicker('setDate', dt);
+            $('#cboBusiness').val(data.criteria.business).trigger('change');
+            $('#cboFleet').val(data.criteria.fleet).trigger('change');
+            $('#cboCustomer').val(data.criteria.customer).trigger('change');
+            $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change');
+            $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change');
+            $('#cboMatfrg').val(data.criteria.matGroup).trigger('change');
+            $('#cboOrderType').val(data.criteria.orderType).trigger('change');
+            $('#cboTruckType').val(data.criteria.truckType).trigger('change');
+            $('#cboPlannerName').val(data.criteria.plannerName).trigger('change');*@
+
+            $('#CriteriaOveray').fadeIn("xslow");
+            if (data == null) return;
+            var dt = new Date(data.criteria.orderStartDate);
+            $('#monthpicker').datepicker('setDate', dt);
+            var ajax = [];
+            ajax.push(uiHelpers.initBusiness('#cboBusiness', [], [], [], [], []).always(() => { $('#cboBusiness').val(data.criteria.business).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg', [], [], data.criteria.business, [], [], []).always(() => { $('#cboMatfrg').val(data.criteria.matGroup).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initFleet('#cboFleet', [], [], data.criteria.business, data.criteria.matGroup, [], []).always(() => { $('#cboFleet').val(data.criteria.fleet).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, []).always(() => { $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change.select2'); }));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion', [], [], data.criteria.business, data.criteria.fleet, data.criteria.matGroup, data.criteria.shippingPoint).always(() => { $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change.select2'); }));
+            @*ajax.push($('#cboCustomer').val(data.criteria.customer).trigger('change.select2'));*@
+            ajax.push(uiHelpers.setSelectedCriteria('#cboCustomer', '/Report/GetCustomerTransport', data.criteria.customer));
+            ajax.push($('#cboOrderType').val(data.criteria.orderType).trigger('change.select2'));
+            ajax.push($('#cboTruckType').val(data.criteria.truckType).trigger('change.select2'));
+            ajax.push($('#cboPlannerName').val(data.criteria.plannerName).trigger('change.select2'));
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray').fadeOut("xslow"); });
+        }
+
+        function initialSearchCriteria() {
+            var ajax = [];
+            $('#CriteriaOveray').fadeIn("xslow");
+            $('#CriteriaOveray_Raw').fadeIn("xslow");
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness'));
+            ajax.push(uiHelpers.initFleet('#cboFleet'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName'));
+            uiHelpers.initMonthYearpicker('#monthpicker');
+            init_datepicker_criteria_one_month();
+            var result = Promise.all(ajax).finally(() => { });
+            return result;
+        }
+
+        function getCriteria(filter) {
+
+            var date = moment(getSelectDate());
+            var startDate;
+            var endDate;
+            if (date != null) {
+                //var tmpStartDate = date.startOf('month').format('YYYY/MM/DD');
+                //var tmpEndDate = date.endDate._d;
+                startDate = date.startOf('month').format('YYYY/MM/DD');
+                endDate = date.endOf('month').format('YYYY/MM/DD');
+            }
+
+            if (filter == null)
+                filter = {
+                    day: null, month: null, filter_group: null, carrier: null, product_group: null, aging: null, plannerName: getPlannerName(),
+                    orderStartDate: startDate, orderEndDate: endDate
+                };
+            else {
+                filter = {
+                    day: null || filter.day, month: null || filter.month, filter_group: null || filter.filter_group, carrier: null || filter.carrier,
+                    product_group: null || filter.product_group, aging_lpc: null || filter.aging_lpc, plannerName: null || filter.plannerName,
+                    status: null || filter.status, orderStartDate: null || filter.orderStartDate,
+                    orderEndDate: null || filter.orderEndDate
+                };
+            }
+
+            var criteria = {
+                orderStartDate: filter.orderStartDate,
+                orderEndDate: filter.orderEndDate,
+                business: getBusiness_m(),
+                fleet: getFleet_m(),
+                customer: getCustomer_m(),
+                shippingPoint: getShippingPoint_m(),
+                shipToRegion: getShiptoRegion_m(),
+                orderType: getOrderType_m(),
+                truckType: getTruckType_m(),
+                plannerName: filter.plannerName,
+                status: filter.status,
+                matGroup: getMatfrg_m(),
+                carrier: filter.carrier,
+                aging_lpc: filter.aging_lpc,
+                product_group: filter.product_group,
+                filter_group: filter.filter_group
+            };
+            console.log(criteria);
+
+            return criteria;
+        }
+
+        function getSubmitCriteria(filter) {
+            filter = {
+                carrier: null || filter.carrier, aging_lpc: null || filter.aging_lpc, status: null || filter.status,
+                filter_group: null || filter.filter_group,
+                orderStartDate: null || filter.orderStartDate, orderEndDate: null || filter.orderEndDate
+            };
+            $('#ModalTransactionDate').text(moment(filter.orderStartDate, 'DD/MM/YYYY').format('DD/MM/YYYY') + '-' + moment(filter.orderEndDate, 'DD/MM/YYYY').format('DD/MM/YYYY'));
+            return {
+                ...submitCriteria,
+                orderStartDate: filter.orderStartDate,
+                orderEndDate: filter.orderEndDate,
+                status: filter.status,
+                aging_lpc: filter.aging_lpc,
+                filter_group: filter.filter_group,
+                carrier: filter.carrier
+            }
+        }
+
+        var isRtl = $('html').attr('dir') === 'rtl';
+        $(function () {
+            $('#datepicker-99').datepicker({
+                format: "mm-yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                orientation: isRtl ? 'auto right' : 'auto left'
+            });
+        });
+
+
+        // ============================>
+        // ==== Raw Data Function =====>
+        // ============================>
+
+        function searchRawdata() {
+
+            genTable(null);
+        }
+
+        function initialSearchCriteria_Rawdata() {
+            var ajax = [];
+
+            ajax.push(uiHelpers.initCustomerTransportAjax('#cboCustomer_Raw'));
+            ajax.push(uiHelpers.initBusiness('#cboBusiness_Raw'));
+            ajax.push(uiHelpers.initFleet('#cboFleet_Raw'));
+            ajax.push(uiHelpers.initShippingPoint('#cboShippingPoint_Raw'));
+            ajax.push(uiHelpers.initShiptoRegion('#cboShiptoRegion_Raw'));
+            ajax.push(uiHelpers.initMatfrg('#cboMatfrg_Raw'));
+            ajax.push(uiHelpers.initOrderType('#cboOrderType_Raw'));
+            ajax.push(uiHelpers.initTruckType('#cboTruckType_Raw'));
+            ajax.push(uiHelpers.initPlannerName('#cboPlannerName_Raw'));
+            uiHelpers.initMonthYearpicker('#monthpicker_Raw');
+            init_datepicker_criteria_one_month();
+            var result = Promise.all(ajax).finally(() => { $('#CriteriaOveray_Raw').fadeOut("xslow"); });//$('#CriteriaOveray_Raw').hide(); });
+            return result;
+        }
+
+        function Search() {
+
+
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search);
+            submitCriteria = getCriteria();
+            $("#daypicker").datepicker('setStartDate', moment(getSelectDate()).startOf('month').startOf('day').toDate());
+            $("#daypicker").datepicker('setEndDate', moment(getSelectDate()).endOf('month').startOf('day').toDate());
+
+            var today = new Date();
+            var queryDay = today;
+            if (getSelectDate().getFullYear() == today.getFullYear() && getSelectDate().getMonth() == today.getMonth()) {
+                queryDay = moment().startOf('day').toDate();
+            }
+            else {
+                queryDay = moment(getSelectDate()).endOf('month').startOf('day').toDate();
+            }
+            $("#daypicker").datepicker('setDate', queryDay);
+            var date = moment(submitCriteria.orderStartDate, 'YYYY/MM/DD')._d;
+            var monthyear = uiHelpers.displayFullMonthYear(date);
+            $('#LoadMonthlyOverlay').show();
+            $('#LoadByCarrier' + ' .section-loading').show();
+            $.post("/Transportation/LoadByCarrier", submitCriteria)
+                .done(function (result) {
+                    generateGraph_SC_WT('#LoadByCarrier', { data: result.result, dataTable: result.dataTable,countData : result.countData },
+                        'bar', '', '', "Count of load by carrier and distance group ประจำเดือน" + monthyear, "Count of load by carrier and distance group ประจำเดือน" + monthyear, "top",
+                        function (activePoint) {
+                            //var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                            var startDate = submitCriteria.orderStartDate;
+                            var endDate = submitCriteria.orderEndDate;
+                            debugger;
+                            var carrier = activePoint._model.label;
+                            var distince_group = activePoint._model.datasetLabel;
+                            var filter = { carrier: carrier, filter_group: distince_group, orderStartDate: startDate, orderEndDate: endDate };
+                            genTableModal(filter);
+                        },
+                        function () {
+                            var ctx = this.chart.ctx;
+                            ctx.font = this.scale.font;
+                            ctx.fillStyle = this.scale.textColor
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "bottom";
+
+                            this.datasets.forEach(function (dataset) {
+                                dataset.bars.forEach(function (bar) {
+                                    ctx.fillText(bar.value, bar.x, bar.y - 5);
+                                });
+                            })
+                },
+                100);
+                }).fail(uiHelpers.postFailHandler)
+                .always(function (e) {
+                    $('#LoadByCarrier' + ' .section-loading').hide();
+                    $('#LoadMonthlyOverlay').hide();
+                });
+        }
+
+
+    function generateTable(controlID, serviceUrl, filter, title, column, created_row_callback, column_def = []) {
+        $(controlID + ' .section-loading').show();
+        $(controlID + ' .section-title').text(title);
+        var jqxhr = $.post(serviceUrl, submitCriteria)
+            .done(function (result) {
+                if (uiHelpers.errorHandler(result)) {
+                    if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                        $(controlID + ' .section-table-render').DataTable({
+                            dom: 'lTf<"html5buttons"B > gtip',
+                            buttons: [
+                                'copy', 'excel'
+                            ],
+                            //fixedHeader: true,
+                            scrollX: true,
+                            ordering: false,
+                            responsive: true,
+                            scrollY: '40vh',
+                            pageLength: 10,
+                            filter: true,
+                            data: result.data,
+                            columns: column,
+                            createdRow: created_row_callback,
+                            columnDefs: column_def
+                        });
+                    }
+                    else {
+                        var table = $(controlID + ' .section-table-render').DataTable();
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                }
+                else {
+                    if (!$.fn.DataTable.isDataTable(controlID + ' .section-table-render')) {
+                        //create empty table
+                        $(controlID + ' .section-table-render').DataTable({
+                            dom: 'lTf<"html5buttons"B > gtip',
+                            buttons: [
+                                'copy', 'excel'
+                            ],
+                            fixedHeader: true,
+                            scrollX: true,
+                            ordering: false,
+                            responsive: true,
+                            pageLength: 10,
+                            filter: true,
+                            columns: column
+                        });
+                    }
+                    else {
+                        //empty
+                        var table = $(controlID + ' .section-table-render').DataTable();
+                        table.clear();
+                        table.draw();
+                    }
+                }
+                $(controlID + ' .section-table-render').DataTable().columns.adjust().draw();
+            })
+            .fail(uiHelpers.postFailHandler)
+            .always(function () {
+                $(controlID + ' .section-loading').hide();
+            });
+        return jqxhr;
+    }
+
+
+        function genTableModal(filter) {
+            $('#modals-transaction').modal('show');
+            generateTableLeadModal_SC('#LoadModal', '@Url.Action("LoadDetail", "Transportation")',
+                filter, null, detail_column);
+        }
+
+        function genTable(filter) {
+            if (filter == null) filter = {};
+            var data_date = new Date(new Date().getFullYear(), (filter.month || (getSelectDate_Raw().getMonth() + 1)) - 1, 1);
+
+            generateTable_SC('#ReportDetail', '@Url.Action("LoadDetail", "Transportation")',
+                filter, 'รายละเอียดสัดส่วนจัดงาน ประจำเดือน ' + uiHelpers.displayFullMonth(data_date), detail_column, createdRow_Detail);
+        }
+
+        function createdRow(row, data, dataIndex) {
+            var tab = $('#LoadByDay .section-table-render').DataTable();
+            if (isFirstRow) {
+                maxVal = data.max_diff_percent;
+                minVal = Math.abs(data.min_diff_percent);
+                isFirstRow = false;
+            }
+            $($(row).find('td')[7]).empty();
+            if (data.diff_percent < 0) {
+                var bar_size = Math.round(Math.abs(data.diff_percent) / minVal * 50);
+                $($(row).find('td')[7]).append('<div class="outter-bar"><div class="inner-bar" style="width: ' + (50 - bar_size) + '%;"/><div class="inner-bar" style="border:0;border-right:1px;border-right-style:solid;width: ' + bar_size + '%; background: red;"/><div class="inner-bar" style="width: 50%;border:0;"/></div>')
+            }
+            else if (data.diff_percent > 0) {
+                var bar_size = Math.round(Math.abs(data.diff_percent) / maxVal * 50);
+                $($(row).find('td')[7]).append('<div class="outter-bar"><div class="inner-bar" style="width: 50%;border:0;border-right:1px;border-right-style:solid;"/><div class="inner-bar" style="width: ' + bar_size + '%; background: orange;"/><div class="inner-bar" style="width: ' + (50 - bar_size) + '%;border:0;"/></div>')
+            }
+            else {
+                $($(row).find('td')[7]).append('<div class="outter-bar"><div class="inner-bar" style="width: 50%;border:0;border-right:1px;border-right-style:solid;"/><div class="inner-bar" style="width: 50%;border:0;"/></div>')
+            }
+
+            if (data.carrier_name == 'รวม') {
+                $(row).addClass('total-row');
+            }
+
+            if (data.diff_percent < 0) {
+                $($(row).find('td')[9]).addClass('red-cell');
+            }
+            else if (data.diff_percent > 0) {
+                $($(row).find('td')[9]).addClass('green-cell');
+            }
+        }
+
+        function createdRow_Detail(row, data, dataIndex) {
+            if (data.load_id == 'Total') {
+                $(row).addClass('total-row');
+            }
+        }
+
+        function getLoadByDay(date) {
+            isFirstRow = true;
+            var maxVal = 100, minVal = 100;
+            var date = moment(submitCriteria.orderStartDate, 'YYYY/MM/DD')._d;
+            generateTable('#LoadByDay', '@Url.Action("LoadByDay", "Transportation")',
+                { orderStartDate: date }, 'สรุป สัดส่วนการจัดงานประจำเดือน' + uiHelpers.displayFullMonthYear(date), plan_actual_column, createdRow
+                );
+        }
+
+        $(document).ready(function () {
+
+            initialControl().then(() => {
+                var dayPicker = uiHelpers.initDaypicker('#daypicker', moment().startOf('month').startOf('day').toDate(), moment().endOf('month').startOf('day').toDate());
+                dayPicker.on("changeDate", function (e) {
+                    getLoadByDay(moment(e.date).format('YYYY/MM/DD'));
+                });
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+                initialSearchCriteria_Rawdata();
+            });
+            initialSearchCriteria_Rawdata();
+
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            });
+            comboOnchange();
+        });
+    </script>
+}
+
+<div class="content-wrapper">
+
+    <h1>Transportation</h1>
+    <h4 class="card-title">รายงานสัดส่วนการจัดงาน</h4>
+    <ul class="nav filled-tabs">
+        <li class="nav-item">
+            <a class="nav-link active show" data-toggle="tab" href="#filled-dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#filled-rawdata">Raw Data</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active show" id="filled-dashboard">
+            @{
+                await Html.RenderPartialAsync("_Common_Transportation_Criteria_07");
+            }
+            <div class="row">
+                <div class="col-12 card-statistics">
+                    <div>
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="LoadByDay">
+                <div class="col-12">
+                    <article class="card mb-4">
+                        <div class="card-body">
+                            <div class="overlay section-loading">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="card-title section-title"></h4>
+                            <div class="table-responsive">
+                                <div class="dataTables_wrapper">
+                                    <table class="table table-striped section-table-render" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" class="text-center">ผู้รับเหมา</th>
+                                                <th colspan="2" class="text-center">สะสม</th>
+                                                <th colspan="2" class="text-center">วันที่</th>
+                                                <th class="text-center">
+                                                    <input type="text" class="form-control" id="daypicker" placeholder="Select day ... " style="text-align: center; width: 100%; line-height: 27px; padding: 0 !important;">
+                                                </th>
+                                                <th colspan="4" class="text-center">&nbsp;</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-center">%Plan สะสม</th>
+                                                <th class="text-center">%Actual สะสม</th>
+                                                <th class="text-center">Plan</th>
+                                                <th class="text-center">Actual</th>
+                                                <th class="text-center">%Plan</th>
+                                                <th class="text-center">%Actual</th>
+                                                <th class="text-center">&nbsp;</th>
+                                                <th class="text-center">Diff</th>
+                                                <th class="text-center">Add</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="row" id="LoadByCarrier">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex align-items-center justify-content-between">
+                            <h4 class="card-title report-title"></h4>
+                            <div class="report-filename" style="display: none;"></div>
+                            <div class="d-flex align-items-center">
+                                <div class="wrapper">
+                                    <a href="#" id="downloadPdf" onclick="downloadPDF('#PendingDocReturnByYear'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                        <i class="icon-share-alt mr-1"></i>Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0 pb-0 report-frame" style="overflow-x:auto;">
+                            <div class="chart-container report-container" style="height: 50vh">
+
+                            </div>
+                        </div>
+                        <div class="row m-2" id="RPTLPC006DataTable">
+                            <div class="col-12">
+                                <article class="card mb-4">
+                                    <div class="card-body pt-0 pb-0" style="overflow-x: auto;">
+                                        <div id="LoadMonthlyOverlay" class="overlay">
+                                            <div class="loader-wrap">
+                                                <div class="bar-loader">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h4 class="card-title" id="WaitingListMonthlyText"></h4>
+                                        <div class="table-responsive">
+                                            <div class="dataTables_wrapper">
+                                                <table id="LoadMonthlyDataTable" class="table" style="width:100%">
+                                                    <thead id="header_summary">
+                                                        <tr id="header_detail">
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="detail_summary">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="filled-rawdata">
+            @{
+                await Html.RenderPartialAsync("_Common_Transportation_Criteria_Rawdata_07");
+            }
+            <div class="row" id="ReportDetail">
+                <div class="col-12">
+                    <article class="card mb-4">
+                        <div class="card-body">
+                            <div class="overlay section-loading">
+                                <div class="loader-wrap">
+                                    <div class="bar-loader">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h4 class="card-title section-title"></h4>
+                            <div class="table-responsive">
+                                <div class="dataTables_wrapper">
+                                    <table class="table table-striped section-table-render" style="width:100%"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-default" id="modals-transaction">
+    <div class="modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;margin:auto">
+        <form class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    รายงานสัดส่วนการจัดงาน ระหว่างวันที่ <span id="ModalTransactionDate"></span>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col">
+                        <div class="row" id="LoadModal">
+                            <div class="col-12">
+                                <div class="overlay section-loading">
+                                    <div class="loader-wrap">
+                                        <div class="bar-loader">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4 class="card-title section-title"></h4>
+                                <div class="table">
+                                    <div class="dataTables_wrapper">
+                                        <table class="table table-striped section-table-render" style="width:100%"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">Close</button>
+                @*<button type="button" class="btn btn-primary" onclick="SaveStock()">Save</button>*@
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function genTableSummary(header, data, table_id, header_id, detail_id, header_text, table_index) {
+        //var thead = document.getElementById("header_summary");
+        var tr = document.getElementById(header_id);
+        var tbody = document.getElementById(detail_id);
+        //var tfoot = document.getElementById(footer_id);
+        var thRowType = document.createElement("th");
+        thRowType.innerText = header_text;
+        thRowType.className = "BlankRow text-nowrap";
+        tr.appendChild(thRowType);
+
+        if (summary_table[table_index] == null) {
+
+            $.each(header, function (index, dataHeader) {
+                var th = document.createElement("th");
+                th.innerText = dataHeader;
+                th.className = "text-center text-nowrap";
+                tr.appendChild(th);
+            });
+
+            var sum_footer = [];
+            $.each(data, function (index, dataRowType) {
+                var tr_detail = document.createElement("tr");
+                var td = document.createElement("td");
+                td.innerText = dataRowType.rowType;
+                td.className = "text-nowrap text-left";
+                tr_detail.appendChild(td);
+
+                $.each(dataRowType.qty, function (index, dataQty) {
+                    var td_qty = document.createElement("td");
+                    td_qty.innerText = dataQty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "%";
+                    td_qty.className = "text-nowrap text-right";
+                    tr_detail.appendChild(td_qty);
+
+                    if (sum_footer[index] == null)
+                        sum_footer.push(0);
+
+                    sum_footer[index] += dataQty;
+                });
+                tbody.appendChild(tr_detail);
+            });
+
+            var tr_footer = document.createElement("tr");
+            var td = document.createElement("td");
+            td.innerText = "Total";
+            td.className = "text-nowrap text-left text-weight-bold";
+            tr_footer.appendChild(td);
+            for (var i = 0; i < sum_footer.length; i++) {
+                var td = document.createElement("td");
+                td.innerText = sum_footer[i].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "%";
+                td.className = "text-nowrap text-right text-weight-bold";
+                tr_footer.appendChild(td);
+            }
+            //tfoot.appendChild(tr_footer);
+            tbody.appendChild(tr_footer);
+
+            summary_table[table_index] = $(table_id).DataTable({
+                responsive: true,
+                bSort: false,
+                paging: false,
+                "dom": 'lrtip',
+                "info": false,
+                scrollX: true,
+                scrollCollapse: true,
+                fixedColumns: {
+                    leftColumns: 1,
+                }
+            });
+
+        }
+        else {
+            $('#' + header_id).html('');
+            $('#' + detail_id).html('');
+            tr.appendChild(thRowType);
+
+            $.each(header, function (index, dataHeader) {
+                var th = document.createElement("th");
+                th.innerText = dataHeader;
+                th.className = "text-center text-nowrap";
+                tr.appendChild(th);
+            });
+
+            $.each(data, function (index, dataRowType) {
+                var tr_detail = document.createElement("tr");
+                var td = document.createElement("td");
+                td.innerText = dataRowType.rowType;
+                td.className = "text-nowrap text-left";
+                tr_detail.appendChild(td);
+
+                $.each(dataRowType.dqty, function (index, dataQty) {
+                    var td_qty = document.createElement("td");
+                    td_qty.innerText = dataQty + '%';
+                    td_qty.className = "text-nowrap text-right";
+                    tr_detail.appendChild(td_qty);
+                });
+
+                tbody.appendChild(tr_detail);
+            });
+
+
+        }
+
+    }</script>

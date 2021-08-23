@@ -1,0 +1,367 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@section OverrideStyles{
+    <link rel="stylesheet" href="~/assets/css/transportation.css"/>
+    <link rel="stylesheet" href="~/assets/vendor/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css" />
+    <style>
+        .dt-body-left {
+            text-align: left;
+        }
+        .dt-body-right {
+            text-align: right;
+        }
+        .dt-body-center {
+            text-align: center;
+        }
+    </style>
+}
+
+@section Scripts{
+    @*<script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>*@
+    <script src="~/assets/js/transportation.js"></script>
+
+    <script type="text/javascript">
+        var screenID = 'WEB_LPC_002';
+        var column = [{ "data": "delivery_number", "name": "delivery_number", "title": "DN", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "order_number", "name": "order_number", "title": "SO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "order_date", "name": "order_date", "title": "Order Date", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderDate },
+            { "data": "po_number", "name": "po_number", "title": "PO", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_code", "name": "customer_code", "title": "รหัสลูกค้า", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "customer_name", "name": "customer_name", "title": "ชื่อลูกค้า", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_code", "name": "origin_code", "title": "รหัสต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "origin_name", "name": "origin_name", "title": "ชื่อต้นทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_code", "name": "destination_code", "title": "รหัสปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_name", "name": "destination_name", "title": "ชื่อปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "amphur_name", "name": "amphur_name", "title": "อำเภอ", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "province_name", "name": "province_name", "title": "จังหวัด", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_region", "name": "destination_region", "title": "รหัสภาคปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "destination_postal_code", "name": "destination_postal_code", "title": "รหัสไปรษณีย์ปลายทาง", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "mat_freight_grp", "name": "mat_freight_grp", "title": "Mat Freight group", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "request_delivery_date", "name": "request_delivery_date", "title": "Request Date", "autoWidth": true, "className": "text-nowrap text-center", "render": uiHelpers.renderDate },
+            { "data": "incoterm", "name": "incoterm", "title": "incoterm", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "item_number", "name": "item_number", "title": "เลขMaterial", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "item_desc", "name": "item_desc", "title": "รายละเอียดMaterial", "autoWidth": true, "className": "text-nowrap" },
+            { "data": "item_quantity", "name": "item_quantity", "title": "จำนวนMaterial", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderInteger },
+            { "data": "item_weight", "name": "item_weight", "title": "น้ำหนักMaterial", "autoWidth": true, "className": "text-nowrap", "render": uiHelpers.renderN2 }];
+        var column_def = [
+            { className: "dt-body-right", "targets": [19, 20] }
+        ];
+        function Search() {
+            //คำสั่งสร้างปุ่ม searchx
+
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getCriteria, Search);
+
+            generateSummary('#NotShipmentSummary', '@Url.Action("NotShipmentStatus", "Transportation")');
+
+            generateGraph('#NotShipmentByMonth', '@Url.Action("NotShipmentMonthly", "Transportation")',
+                'bar', "Order Create Date", 'DN', "Daily Not Shipment " + uiHelpers.displayMonthYear(getSelectDate()),
+                'สรุป Not Shipment ประจำเดือน' + uiHelpers.displayFullMonth(getSelectDate()), null,
+                function (activePoint) {
+                    //var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                    var day = activePoint._chart.data.labels.indexOf(activePoint._model.label) + 1;
+                    var filter = { day: day };
+                    genTable(filter);
+                });
+
+            generateGraph('#NotShipmentByYear', '@Url.Action("NotShipmentYearly", "Transportation")',
+                'bar', null, null, "Not Shipment: " + uiHelpers.displayFullYear(getSelectDate()),
+                null, null,
+                function (activePoint) {
+                    var value = activePoint._chart.data.datasets[activePoint._datasetIndex].data[activePoint._index];
+                    var month = activePoint._chart.data.labels.indexOf(activePoint._model.label) + 1;
+                    var filter = { month: month };
+                    genTable(filter);
+                });
+
+            genTable(null);
+        }
+
+        function genTable(filter) {
+            if (filter == null) filter = {};
+            var data_date = new Date(new Date().getFullYear(), (filter.month || (getSelectDate().getMonth() + 1)) - 1, 1);
+                    generateTable('#NotShipmentDetail', '@Url.Action("NotShipmentDetail", "Transportation")',
+                        filter, 'รายละเอียด Not Shipment ประจำเดือน' + uiHelpers.displayFullMonth(data_date), column);
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            var dt = new Date(data.criteria.year, data.criteria.month - 1, data.criteria.day || 1);
+            $('#monthpicker').datepicker('setDate', dt);
+            $('#cboBusiness').val(data.criteria.business).trigger('change');
+            $('#cboFleet').val(data.criteria.fleet).trigger('change');
+            $('#cboShippingPoint').val(data.criteria.shippingPoint).trigger('change');
+            $('#cboShiptoRegion').val(data.criteria.shipToRegion).trigger('change');
+            $('#cboMatfrg').val(data.criteria.matGroup).trigger('change');
+            $('#cboOrderType').val(data.criteria.orderType).trigger('change');
+            $('#cboTruckType').val(data.criteria.truckType).trigger('change');
+            $('#cboPlannerName').val(data.criteria.plannerName).trigger('change');
+        }
+
+        $(document).ready(function () {
+            initialControl().then(() => {
+                //ต้องทำหลังจากที่ initial control เสร็จ (พวก dropdown ที่ดึงค่ามาจาก database)
+                uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+            });
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+            });
+        });
+    </script>
+}
+
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h1>Transportation</h1>
+            <h4 class="card-title">รายงาน Not Shipment <span id="reportHeader"></span></h4>
+        </div>
+    </div>
+    @{
+        await Html.RenderPartialAsync("_Common_Transportation_Criteria_07");
+    }
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <div>
+                &nbsp;
+            </div>
+        </div>
+    </div>
+    <div class="row" id="NotShipmentSummary">
+        <div class="col-12 card-statistics">
+            <div class="row">
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body-nopadding">
+                            <div class="card-dn-title">DN ค้างจัด Shipment</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-dark btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-docs md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Day -3</h6>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-default w-100" role="progressbar" aria-valuenow="100"
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="mr-2">
+                                    <h5 class="section-box-1">-</h5>
+                                </div>
+                                <div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body-nopadding">
+                            <div class="card-dn-title">&nbsp;</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-danger btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-calendar md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Day -2</h6>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-danger w-75" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="mr-2">
+                                    <h5 class="section-box-2">-</h5>
+                                </div>
+                                <div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body-nopadding">
+                            <div class="card-dn-title">&nbsp;</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-warning btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-basket md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Day -1</h6>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-warning w-50" role="progressbar" aria-valuenow="25"
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="mr-2">
+                                    <h5 class="section-box-3">-</h5>
+                                </div>
+                                <div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="card">
+                        <div class="overlay section-loading">
+                            <div class="loader-wrap">
+                                <div class="bar-loader">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body-nopadding">
+                            <div class="card-dn-title">&nbsp;</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn btn-primary btn-rounded px-3 py-3 mr-2">
+                                    <i class="icon-wallet md-18"></i>
+                                </div>
+                                <div class="mr-2">
+                                    <h6 class="card-title">Today</h6>
+                                    <div class="progress progress-xs">
+                                        <div class="progress-bar bg-primary w-25" role="progressbar" aria-valuenow="25"
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="mr-2">
+                                    <h5 class="section-box-4">-</h5>
+                                </div>
+                                <div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="NotShipmentByMonth">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title"></h4>
+                    <div class="report-filename" style="display: none;"></div>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="downloadPDF('#NotShipmentByMonth'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="NotShipmentByYear">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title report-title"></h4>
+                    <div class="report-filename" style="display: none;"></div>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="downloadPDF('#NotShipmentByYear'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container report-container">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="NotShipmentDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title section-title"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table class="table table-striped section-table-render" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

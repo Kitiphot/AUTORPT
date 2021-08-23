@@ -1,0 +1,578 @@
+﻿@using SCG.ARS.BOI.WEB.ViewModels
+@model TemplateTriggerViewModel
+
+@if (Model.Trigger.IsNew)
+{
+    ViewBag.Title = "Add Trigger";
+}
+else
+{
+    ViewBag.Title = "Edit Trigger";
+}
+
+<div class="content-wrapper">
+    <div id="dvOverlay" class="overlay">
+        <div class="loader-wrap">
+            <div class="bar-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-12 d-flex align-items-center justify-content-between">
+            @if (Model.Trigger.IsNew)
+            {
+                <h4 class="mb-2">Add Template Trigger</h4>
+            }
+            else
+            {
+                <h4 class="mb-2">Edit Template Trigger</h4>
+            }
+            <div class="d-flex align-items-center">
+                <div class="wrapper">
+                    <button class="btn btn-default" id="btn-cancel">Discard Changes</button>
+                    @if (!Model.Trigger.IsNew)
+                    {
+                        <button class="btn btn-danger" id="btn-delete">Delete</button>
+                    }
+                    <button class="btn btn-primary" id="btn-save">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <form class="mail-compose-container" id="form" novalidate="novalidate" data-select2-id="form" method="post" enctype="multipart/form-data">
+                        @if (Model.Trigger.IsNew)
+                        {
+                            <input type="hidden" name="trigger[isNew]" value="true" />
+                            <input type="hidden" name="trigger[templateSchedulerName]" value="@Model.Trigger.TemplateSchedulerName" />
+                            <input type="hidden" name="trigger[triggerGroup]" id="triggerGroup" value="@Model.Trigger.TriggerGroup" />
+                            <input type="hidden" name="trigger[job]" value="@Model.Trigger.Job" />
+                            <input type="hidden" name="trigger[type]" value="@Model.Trigger.Type">
+                            <input type="hidden" name="trigger[misfireInstruction]" value="@Model.Trigger.MisfireInstruction">
+                            <input type="hidden" name="trigger[priority]" value="@Model.Trigger.Priority">
+                            <input type="hidden" name="trigger[cron.timeZone]" value="@Model.Trigger.Cron.TimeZone">
+                        }
+                        else
+                        {
+                            <input type="hidden" name="trigger[templateTriggerId]" value="@Model.Trigger.TemplateTriggerId" />
+                            <input type="hidden" name="trigger[templateSchedulerName]" value="@Model.Trigger.TemplateSchedulerName" />
+                            <input type="hidden" name="trigger[triggerGroup]" id="triggerGroup" value="@Model.Trigger.TriggerGroup" />
+                            <input type="hidden" name="trigger[oldTriggerName]" value="@Model.Trigger.OldTriggerName" />
+                            <input type="hidden" name="trigger[oldTriggerGroup]" value="@Model.Trigger.OldTriggerGroup" />
+                            <input type="hidden" name="trigger[job]" value="@Model.Trigger.Job" />
+                            <input type="hidden" name="trigger[type]" value="@Model.Trigger.Type">
+                            <input type="hidden" name="trigger[misfireInstruction]" value="@Model.Trigger.MisfireInstruction">
+                            <input type="hidden" name="trigger[priority]" value="@Model.Trigger.Priority">
+                            <input type="hidden" name="trigger[cron.timeZone]" value="@Model.Trigger.Cron.TimeZone">
+                        }
+                        <div class="form-group">
+                            <div class="form-labels to">
+                                <label>To:</label>
+                                @Html.TextBoxFor(m => m.Trigger.TemplateTo, new { @class = "form-control", @id = "template_to", @name = "trigger[templateTo]" })
+                                <a href="javascript:void(0)"><i class="mdi mdi-chevron-down md-18 float-right"></i></a>
+                            </div>
+                            <div class="form-labels" style="display:none">
+                                <label>cc:</label>
+                                @Html.TextBoxFor(m => m.Trigger.TemplateCc, new { @class = "form-control", @id = "template_cc", @name = "trigger[templateCc]" })
+                            </div>
+                            <div class="form-labels" style="display:none">
+                                <label>bcc:</label>
+                                @Html.TextBoxFor(m => m.Trigger.TemplateBcc, new { @class = "form-control", @id = "template_bcc", @name = "trigger[TemplateBcc]" })
+                            </div>
+                        </div>
+                        <div class="form-labels from">
+                            <label>From:</label>
+                            @Html.TextBoxFor(m => m.Trigger.TemplateFrom, new { @class = "form-control", @id = "template_from", @name = "trigger[templateFrom]" })
+                        </div>
+                        <div class="compose-body">
+                            <div class="form-labels subject mb-2">
+                                @Html.TextBoxFor(m => m.Trigger.TemplateSubject, new { @class = "form-control", @placeholder = "Subject", @id = "template_subject", @name = "trigger[subject]" })
+                            </div>
+                            <div class="form-group  mb-3">
+                                <label>Attachment:</label>
+                                @Html.ListBoxFor(m => m.Trigger.EmailAttachments,
+                              new MultiSelectList(Model.Trigger.TemplateReportMapping, "template_report_mapping_id", "report_desc"), new { @id = "lstAttachments", @name = "trigger[EmailAttachments]", multiple = "multiple", @style = "width: 100%" })
+                            </div>
+                            <div class="form-group no-border-b">
+                                @*<div class="summernote">
+                                        Type your mail here
+                                    </div>*@
+                                @Html.TextAreaFor(m => m.Trigger.TemplateBody, new { @class = "form-control", @id = "template_body", @name = "trigger[body]", @rows = "10" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Schedule Name:</label>
+                            @Html.TextBoxFor(m => m.Trigger.TriggerName, new { @class = "form-control", @id = "template_trigger_name", @name = "trigger[triggerName]" })
+                        </div>
+                        <div class="form-group">
+                            <label>Description:</label>
+                            @Html.TextBoxFor(m => m.Trigger.Description, new { @class = "form-control", @id = "template_description", @name = "trigger[description]" })
+                        </div>
+                        <div class="form-group d-none">
+                            <label>Cron Expression <a href="http://cronmaker.com" target="_blank"><i class="external alternate icon"></i>http://cronmaker.com</a></label>
+                            @Html.TextBoxFor(m => m.Trigger.Cron.Expression, new { @class = "form-control", @placeholder = "Cron Expression", @id = "cron-expression", @name = "trigger[cron.expression]" })
+                            <div style="float: right; cursor:pointer; display: none" id="next-cron-dates"><i class="eye icon"></i></div>
+                            <p id="cron-desc"></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Schedule:</label>
+                            @Html.HiddenFor(m => m.Trigger.TabNumber, new { @id = "hddTabNumber", @name = "trigger[tabnumber]" })
+                            <div class="tab-panel">
+                                <ul class="nav nav-tabs">
+                                    <li class="nav-item">
+                                        <a class="nav-link @(Model.Trigger.TabNumber == 1 ?"active":"")" data-toggle="tab" href="#daily" data-value="1">Daily</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(Model.Trigger.TabNumber == 2 ?"active":"")" data-toggle="tab" href="#weekly" data-value="2">Weekly</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(Model.Trigger.TabNumber == 3 ?"active":"")" data-toggle="tab" href="#monthly" data-value="3">Monthly</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane @(Model.Trigger.TabNumber == 1 ?"active":"")" id="daily" name="trigger[tab.minute]">
+                                        <div class="row">
+                                            <div class="form-group col-sm-12 col-md-12">
+                                                <fieldset class="form-group d-inline mr-3">
+                                                    <div class="form-check">
+                                                        <label class="custom-radio primary-radio inline">
+                                                            @*@Html.RadioButtonFor(m=>m.Trigger.DailyType, Model.Trigger.DailyType, new { @checked=(Model.Trigger.DailyType == 1)})*@
+                                                            <input class="form-check-input mt-2" type="radio" name="trigger[dailytype]" value="1" @(Model.Trigger.DailyType.Equals(1) ? "checked": string.Empty)>
+                                                            Every
+                                                            <i class="input-helper"></i>
+                                                        </label>
+                                                        <input id="txtDailyMinute" class="ml-2 mr-2 text-right" type="number" min="1" max="59" name="trigger[minutes]" value="@Model.Trigger.Minutes"> Minute
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <label class="custom-radio primary-radio">
+                                                            @*@Html.RadioButtonFor(m => m.Trigger.DailyType, Model.Trigger.DailyType, new { @checked = (Model.Trigger.DailyType == 2) })*@
+                                                            <input class="form-check-input" type="radio" name="trigger[dailytype]" value="2" @(Model.Trigger.DailyType.Equals(2) ? "checked": string.Empty)>
+                                                            Every
+                                                            <i class="input-helper"></i>
+                                                        </label>
+                                                        <input id="txtDailyyHour" class="ml-2 mr-2 text-right" type="number" min="1" max="23" name="trigger[hours]" value="@Model.Trigger.Hours"> Hour
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <label class="custom-radio primary-radio">
+                                                            @*@Html.RadioButtonFor(m => m.Trigger.DailyType, Model.Trigger.DailyType, new { @checked = (Model.Trigger.DailyType == 3) })*@
+                                                            <input class="form-check-input" type="radio" name="trigger[dailytype]" value="3" @(Model.Trigger.DailyType.Equals(3) ? "checked": string.Empty)>
+                                                            Specific Time
+                                                            <i class="input-helper"></i>
+                                                        </label>
+                                                        <input id="txtDailyTime" class="ml-2 mr-2 text-right" type="time" name="trigger[dailytime]" value="@Model.Trigger.DailyTime">
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane @(Model.Trigger.TabNumber == 2 ?"active":"")" id="weekly" name="trigger[tab.weekly]">
+                                        <div class="row">
+                                            <div class="form-group col-sm-12 col-md-12">
+                                                <label><b>Days of Week</b></label>
+                                                <div class="form-group">
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.monday]" value="True" @(Model.Trigger.Daily.DaysOfWeek.Monday ? "checked": string.Empty)> Monday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.tuesday]" value="True" @(Model.Trigger.Daily.DaysOfWeek.Tuesday ? "checked": string.Empty)> Tuesday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.wednesday]" value="True" @(Model.Trigger.Daily.DaysOfWeek.Wednesday ? "checked": string.Empty)> Wednesday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.thursday]" value="True" @(Model.Trigger.Daily.DaysOfWeek.Thursday ? "checked": string.Empty)> Thursday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.friday]" value="True" @(Model.Trigger.Daily.DaysOfWeek.Friday ? "checked": string.Empty)> Friday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.saturday]" value="True" @(Model.Trigger.Daily.DaysOfWeek.Saturday ? "checked": string.Empty)> Saturday
+                                                    </label>
+                                                    <label class="checkbox-inline">
+                                                        <input type="checkbox" name="trigger[daily.daysOfWeek.sunday]" value="True" @(Model.Trigger.Daily.DaysOfWeek.Sunday ? "checked": string.Empty)> Sunday
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-sm-12 col-md-12">
+                                                <label class="checkbox-inline">Time: <input id="txtWeeklyTime" name="trigger[weeklytime]" class="ml-2 mr-2 text-right" type="time" value="@Model.Trigger.WeeklyTime"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane @(Model.Trigger.TabNumber == 3 ?"active":"")" id="monthly" name="trigger[tab.monthly]">
+                                        <div class="row">
+                                            <div class="form-group col-sm-6 col-md-6">
+                                                <label>Dates:</label>
+                                                @Html.ListBoxFor(m => m.Trigger.SelectedDates, Model.Trigger.Dates, new { @id = "lstDays", @name = "trigger[selecteddates]", multiple = "multiple", @style = "width:100%" })
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-sm-6 col-md-6">
+                                                <label class="checkbox-inline">
+                                                    <input type="checkbox" id = "chkEndOfMonth" name="trigger[endofmonth]" class = "mr-2" value="True" @(Model.Trigger.EndOfMonth ? "checked" : string.Empty)>
+                                                    End of Month
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-sm-4 col-md-4">
+                                                <label class="checkbox-inline">Time: <input id="txtMonthlyTime" name="trigger[monthlytime]" class="ml-2 mr-2 text-right" type="time" value="@Model.Trigger.MonthlyTime"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-inline">
+                            <div class="row">
+                                <div class="form-group col-sm-4 col-md-4">
+                                    <label>Start Date (UTC):</label>
+                                    @Html.TextBoxFor(m => m.Trigger.StartTimeUtc, "", new { @id = "dtStartDate", @class = "form-control", @name = "trigger[startTimeUtc]" })
+                                </div>
+                                <div class="form-group col-sm-4 col-md-4">
+                                    <label>End Date (UTC):</label>
+                                    @Html.TextBoxFor(m => m.Trigger.EndTimeUtc, "", new { @id = "dtEndDate", @class = "form-control", @name = "trigger[endTimeUtc]" })
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation Dialog</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Would you like to confirm delete data?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btnConfirmDelete" type="button" class="btn btn-danger approve" data-dismiss="modal">Delete</button>
+                <button id="btnConfirmClose" type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var urlParams = new URLSearchParams(window.location.search);
+    const
+        $triggerGroup = $('#triggerGroup').val(),
+        $triggerName = $('#template_trigger_name').val();
+    $(function () {
+        $('.summernote').summernote({
+            disableResizeEditor: true
+        });
+
+        $(".to > a").on("click", function () {
+            $(this).children().toggleClass('mdi-chevron-down').toggleClass("mdi-chevron-up");
+            $(this).parent().siblings().slideToggle();
+        });
+
+        $('#dtStartDate, #dtEndDate').datepicker({
+            autoclose: true,
+            minViewMode: 0,
+            format: 'dd/mm/yyyy',
+        }).on('changeDate', function (selected) {
+
+        });
+
+        $('#template_to, #template_cc, #template_bcc').tagsinput({ delimiterRegex: /[;,]+/});
+    });
+
+    //$("input[name='trigger[dailytype]'][value='@Model.Trigger.DailyType']").prop('checked', true);
+
+    $("a.nav-link").click(function () {
+        var value = $(this).data("value");
+        console.log(value);
+        $("#hddTabNumber").val(value);
+    });
+
+    //$('#ddlAttachements').select2().select2("val", [1, 2, 3, 4, 5, 6, 290]);
+    $('#lstAttachments').select2();
+    $('#lstDays').select2();
+    //$('#dvMonthly').datepicker({
+    //    multidate: true
+    //});
+
+    //$('#btn-delete').click(function () {
+    //    $('#delete-dialog .confirm-item').text($triggerGroup + '.' + $triggerName);
+    //    deleteItem({ name: $triggerName, group: $triggerGroup }, $('#trigger-properties'),
+    //        '{{ActionUrl "Delete"}}', '{{ActionUrl ""}}');
+    //});
+
+    $("#btn-cancel").on('click', function (e) {
+        $('#dvOverlay').show();
+        document.location = "/TemplateTrigger/Index?Page=" + urlParams.get('page');
+    });
+
+    $("#btn-delete").on('click', function (e) {
+        var $form = $(this).closest('form');
+        e.preventDefault();
+        $('#confirm').modal({
+            backdrop: 'static',
+            keyboard: false,
+            duration: 250,
+            onApprove: function () {
+
+                $('#dvOverlay').show();
+                console.log($triggerGroup);
+                console.log($triggerName);
+
+                //$.ajax({
+                //    type: 'POST', url: '/TemplateTrigger/Delete',
+                //    data: JSON.stringify(key),
+                //    contentType: 'application/json', cache: false,
+                //    success: function () {
+                //        document.location = redirUrl;
+                //    },
+                //    error: function (e) {
+                //        $('#dvOverlay').hide();
+                //        prependErrorMessage(e, msgParent);
+                //    }
+                //});
+                $('#dvOverlay').hide();
+            }
+        }
+        );
+    });
+
+    $("#btnConfirmDelete").on('click', function (e) {
+        e.preventDefault();
+
+        $('#dvOverlay').show();
+        //console.log($triggerGroup);
+        //console.log($triggerName);
+
+        $.ajax({
+            type: 'POST', url: '/TemplateTrigger/Delete',
+            data: JSON.stringify({ name: $triggerName, group: $triggerGroup }),
+            contentType: 'application/json', cache: false,
+            success: function (result) {
+                if (result.success)
+                    document.location = redirUrl;
+                else {
+                    $('#dvOverlay').hide();
+                    console.log(result.errors);
+                    $.each(result.errors, function (index, item) {
+                        toastr["error"](item.field + ": " + item.reason);
+                    });
+                }
+            },
+            error: function (e) {
+                $('#dvOverlay').hide();
+                //prependErrorMessage(e, msgParent);
+            }
+        });
+
+    });
+
+    $('#btn-save').click(function () {
+
+        //if ($('#job-data-map .type-col .ui.dropdown.disabled').length > 0) return; // type change in progress
+
+        //$('#dimmer').dimmer('show');
+
+        //$('#job-data-map').jobDataMapPrepareForm();
+
+        const formData = new FormData($('#form')[0]);
+
+        $('#dvOverlay').show();
+        $.ajax({
+            type: 'POST', enctype: 'multipart/form-data', url: '/TemplateTrigger/Save',
+            data: formData, processData: false, contentType: false, dataType: "json", cache: false,
+            success: function (result) {
+                //if (processValidationResponse(data)) {
+                if (result.success)
+                    document.location = '/TemplateTrigger/Index?page=' + urlParams.get('page');
+                else {
+                    $('#dvOverlay').hide();
+                    console.log(result.errors);
+                    $.each(result.errors, function (index, item) {
+                        toastr["error"](item.field +": "+ item.reason);
+                    });
+                }
+                //} else {
+                //    $('#dimmer').dimmer('hide');
+                //}
+
+
+            },
+            error: function (e) {
+                //$('#dimmer').dimmer('hide');
+                //prependErrorMessage(e, $('#trigger-properties'));
+                toastr["error"](result.message);
+                $('#dvOverlay').hide();
+            }
+        });
+    });
+
+    //initCronLiveDescription('/TemplateTrigger/Cron', $('#cron-expression'), $('#cron-desc'), $('#next-cron-dates'));
+
+    function initCronLiveDescription(url, $cronInput, $cronDesc, $nextCronDates) {
+        function describeCron() {
+            $.ajax({
+                type: 'POST', url: url, timeout: 5000,
+                data: $cronInput.val(), contentType: 'text/plain', dataType: 'json',
+                success: function (data) {
+                    $cronDesc.text(data.Description);
+                    var nextHtml = data.Next.join('<br>');
+                    if (nextHtml === '') $nextCronDates.hide(); else {
+                        $nextCronDates.show();
+                        $nextCronDates.popup({ html: '<div class="header">Scheduled dates</div><div class="content">' + nextHtml + '</div>' });
+                    }
+                },
+                error: function (e) { $cronDesc.text('Error occured.'); }
+            });
+        }
+        var cronDescTimer;
+        $cronInput.on('input', function (e) {
+            window.clearTimeout(cronDescTimer);
+            searchcronDescTimerTimer = window.setTimeout(function () {
+                cronDescTimer = null;
+                describeCron();
+            }, 250);
+        });
+
+        describeCron();
+    }
+
+    // Initialize validation
+    $('#validation-form').validate({
+        ignore: '.ignore, .select2-input',
+        focusInvalid: false,
+        rules: {
+            '#template_to': {
+                required: true,
+                email: true
+            },
+            'validation-email': {
+                required: true,
+                email: true
+            },
+            'validation-password': {
+                required: true,
+                minlength: 6,
+                maxlength: 20
+            },
+            'validation-password-confirmation': {
+                required: true,
+                minlength: 6,
+                equalTo: 'input[name="validation-password"]'
+            },
+            'validation-required': {
+                required: true
+            },
+            'validation-url': {
+                required: true,
+                url: true
+            },
+            'validation-phone': {
+                required: true,
+                phone_format: true
+            },
+            'validation-select': {
+                required: true
+            },
+            'validation-multiselect': {
+                required: true,
+                minlength: 2
+            },
+            'validation-select2': {
+                required: true
+            },
+            'validation-select2-multi': {
+                required: true,
+                minlength: 2
+            },
+            'validation-bs-tagsinput': {
+                required: true
+            },
+            'validation-text': {
+                required: true
+            },
+            'validation-file': {
+                required: true
+            },
+            'validation-switcher': {
+                required: true
+            },
+            'validation-radios': {
+                required: true
+            },
+            'validation-radios-custom': {
+                required: true
+            },
+            'validation-checkbox': {
+                required: true
+            },
+            'validation-checkbox-custom': {
+                required: true
+            },
+
+            // Checkbox groups
+            //
+
+            'validation-checkbox-group-1': {
+                require_from_group: [1, 'input[name="validation-checkbox-group-1"], input[name="validation-checkbox-group-2"]']
+            },
+            'validation-checkbox-group-2': {
+                require_from_group: [1, 'input[name="validation-checkbox-group-1"], input[name="validation-checkbox-group-2"]']
+            },
+
+            'validation-checkbox-custom-group-1': {
+                require_from_group: [1, 'input[name="validation-checkbox-custom-group-1"], input[name="validation-checkbox-custom-group-2"]']
+            },
+            'validation-checkbox-custom-group-2': {
+                require_from_group: [1, 'input[name="validation-checkbox-custom-group-1"], input[name="validation-checkbox-custom-group-2"]']
+            }
+        },
+
+        // Errors
+        //
+
+        errorPlacement: function errorPlacement(error, element) {
+            var $parent = $(element).parents('.form-group');
+
+            // Do not duplicate errors
+            if ($parent.find('.jquery-validation-error').length) { return; }
+
+            $parent.append(
+                error.addClass('jquery-validation-error small form-text invalid-feedback')
+            );
+        },
+        highlight: function (element) {
+            var $el = $(element);
+            var $parent = $el.parents('.form-check');
+            if ($parent.length > 0) {
+                $parent.addClass('is-invalid');
+            }
+            else {
+                $el.addClass('is-invalid');
+            }
+            // Select2 and Tagsinput
+            if ($el.hasClass('select2-hidden-accessible') || $el.attr('data-role') === 'tagsinput') {
+                $el.parent().addClass('is-invalid');
+            }
+        },
+        unhighlight: function (element) {
+            $(element).parents('.form-check').removeClass('is-invalid');
+        }
+    });
+</script>

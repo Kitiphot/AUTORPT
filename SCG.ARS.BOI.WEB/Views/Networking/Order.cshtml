@@ -1,0 +1,149 @@
+﻿@{
+    ViewBag.Title = "Networking";
+    Layout = "_NetworkingLayout";
+}
+
+@section OverrideStyles {
+    <style>
+        .summary-title {
+            width: 100%;
+            text-align: center;
+            font-size: 150%;
+            font-weight: bold;
+        }
+
+        .tender-text {
+            color: rgba(54, 162, 235, 1)
+        }
+
+        .request-text {
+            color: rgba(237, 125, 49, 1);
+        }
+
+        .future-text {
+            color: forestgreen;
+        }
+    </style>
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadSummaryGraph();
+            loadFleetSummaryGraph();
+        });
+
+        function loadSummaryGraph() {
+            var data = [80, 20];
+            genChart('#tender-panel', data);
+            data = [65, 35];
+            genChart('#request-panel', data);
+            data = [10, 90];
+            genChart('#future-panel', data);
+        }
+
+        function loadFleetSummaryGraph() {
+            var fleetCnt = Math.floor(Math.random() * 6);
+            var fleet = [
+                { id: 1, text: 'Fleet ปูน' }
+                , { id: 2, text: 'Fleet xxx' }
+                , { id: 3, text: 'Fleet ทดสอบ' }
+                , { id: 4, text: 'Fleet งง' }
+                , { id: 5, text: 'Fleet อะไร' }
+                , { id: 6, text: 'Fleet ยังไง' }
+                , { id: 7, text: 'Fleet เมื่อไหร่' }
+                , { id: 8, text: 'Fleet ทำไม' }
+                , { id: 9, text: 'Fleet จบ' }
+            ];
+            fleet = fleet.splice(0, 9 - fleetCnt);
+            console.log(fleetCnt);
+            fleet.forEach((fleetInfo, idx, array) => {
+                genFleetSummary(fleetInfo);
+            });
+        }
+
+        function genFleetSummary(fleetInfo) {
+            $('#fleet-summary').append('<div class="col-lg-4" id="fleet-' + fleetInfo.id + '-summary-panel"><div class="card"><div class="card-body"><div class="summary-title fleet-text">' + fleetInfo.text + '</div><canvas class="summary-graph"></canvas></div></div></div>');
+            var ranVal = Math.floor(Math.random() * 100);
+            data = [ranVal, 100 - ranVal];
+            genChart('#fleet-' + fleetInfo.id + '-summary-panel', data);
+        }
+
+        function genChart(controlID, data) {
+            var ctx = $(controlID + ' .summary-graph')[0].getContext('2d');
+
+            data = {
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(237, 125, 49, 0.6)',
+                    ],
+                }],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels: [
+                    'Tender',
+                    'Open'
+                ]
+            };
+
+            var chart = new Chart(ctx, {
+                //type: 'doughnut',
+                type: 'pie',
+                data: data,
+                options: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            });
+        }
+    </script>
+}
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card" id="tender-panel">
+                            <div class="card-body">
+                                <div class="summary-title tender-text">Tender Date (Today)</div>
+                                <canvas class="summary-graph"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4" id="request-panel">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="summary-title request-text">Unknown Request Date</div>
+                                <canvas class="summary-graph"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4" id="future-panel">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="summary-title future-text">ยังไม่ถึงกำหนดส่ง</div>
+                                <canvas class="summary-graph"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="row" id="fleet-summary">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,191 @@
+﻿<div class="row">
+    <div class="col-12 card-statistics">
+        <div id="ShipmentSummaryOverlay" class="overlay">
+            <div class="loader-wrap">
+                <div class="bar-loader">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        <h4 class="card-title mt-4">DN STATUS : <span id="reportHeader"></span></h4>
+        <div class="row" id="div_summary">
+            @*data-bind="foreach: summary">*@
+            <div class="col-12 col-sm-6 col-lg-3 mb-4 pointer">
+                <div class="card">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pointer" onclick="onSearch(null)">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color:rgba(52, 140, 235,0.9);color:white">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">จำนวน DN</h6>
+                                @*<h5 data-bind="text: formatCurrency(total_dn)"></h5>*@
+                                <h4 class="section-box-1">-</h4>
+                                <!--<div class="progress progress-xs">
+                <div class="progress-bar" role="progressbar" style="background-color:rgba(52, 140, 235,0.9);color:white"
+                     data-bind="attr: {'aria-valuenow': (total_dn/total_dn)*100,} , style: {width:(total_dn/total_dn)*100+'%'}"
+                     aria-valuemin="0" aria-valuemax="100"></div>-->
+                                <!--</div>-->
+                            </div>
+                            <div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                <div class="card">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pointer" onclick="onSearch('Tender')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color: rgba(235, 119, 52,0.9);color:white">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">จ่ายงาน</h6>
+                                <h4 class="section-box-2">-</h4>
+                                @*<h5 data-bind="text: formatCurrency(total_tender)"></h5>
+                <div class="progress progress-xs">
+                    <div class="progress-bar" role="progressbar" style="background-color: rgba(235, 119, 52,0.9);color:white"
+                         data-bind="attr: {'aria-valuenow': (total_tender/total_dn)*100} , style: {width:(total_tender/total_dn)*100+'%'}"
+                         aria-valuemin="0" aria-valuemax="100"></div>
+                </div>*@
+                            </div>
+                        </div>
+                        <div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                <div class="card">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pointer" onclick="onSearch('Accept')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color: rgba(127, 133, 129,0.9);color:white">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ตอบรับงาน</h6>
+                                <h4 class="section-box-3">-</h4>
+                                @*<h5 data-bind="text: formatCurrency(total_accept)"></h5>
+                <div class="progress progress-xs">
+                    <div class="progress-bar" role="progressbar" style="background-color: rgba(127, 133, 129,0.9);color:white"
+                         data-bind="attr: {'aria-valuenow': (total_accept/total_dn)*100} , style: {width:(total_accept/total_dn)*100+'%'}"
+                         aria-valuemin="0" aria-valuemax="100"></div>*@
+                                @*<div class="progress-bar bg-warning w-50" role="progressbar" aria-valuenow="25"
+                aria-valuemin="0" aria-valuemax="100"></div>*@
+
+                            </div>
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-2 mb-4">
+                <div class="card">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pointer" onclick="onSearch('GI')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn btn-rounded px-3 py-3 mr-2" style="background-color: rgba(255,205,80,0.9);color:white">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ตัดจ่าย</h6>
+                                <h4 class="section-box-4">-</h4>
+                                @*<h5 data-bind="text: formatCurrency(total_gi)"></h5>
+                <div class="progress progress-xs">
+                    <div class="progress-bar" role="progressbar" style="background-color: rgba(255,205,80,0.9);color: white"
+                         data-bind="attr: {'aria-valuenow': (total_gi/total_dn)*100,} , style: {width:(total_gi/total_dn)*100+'%'}"
+                         aria-valuemin="0" aria-valuemax="100"></div>
+                </div>*@
+                            </div>
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                <div class="card">
+                    <div class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pointer" onclick="onSearch('Complete Delivery')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn btn-success btn-rounded px-3 py-3 mr-2" style="background-color: rgba(57, 204, 123,0.9)">
+                                <i class="fas fa-shipping-fast md-18"></i>
+                            </div>
+                            <div class="mr-2">
+                                <h6 class="card-title">ส่งสินค้าถึงปลายทาง</h6>
+                                <h4 class="section-box-5">-</h4>
+                                @*<h5 data-bind="text: formatCurrency(total_delivery)"></h5>
+                <div class="progress progress-xs">
+                    <div class="progress-bar" role="progressbar" style="background-color: rgba(57, 204, 123,0.9)"
+                         data-bind="attr: {'aria-valuenow': (total_delivery/total_dn)*100,} , style: {width:(total_delivery/total_dn)*100+'%'}"
+                         aria-valuemin="0" aria-valuemax="100"></div>
+                </div>*@
+                            </div>
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

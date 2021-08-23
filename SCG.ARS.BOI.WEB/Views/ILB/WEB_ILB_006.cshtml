@@ -1,0 +1,284 @@
+﻿
+@{
+    ViewBag.Title = "Status การจองรถ";
+}
+@section OverrideStyles{
+    <style>
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable .percent {
+                padding: 0px !important;
+            }
+    </style>
+}
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/Chart.bundle.min.js"></script>
+    <script src="~/assets/vendor/chartjs/js/chartjs-plugin-annotation.min.js"></script>
+    <script src="~/assets/js/ilb.js"></script>
+    <script src="~/assets/js/uiHelpers.js"></script>
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        var screenID = 'WEB_ILB_006';
+        var isFirstLoad = 1;
+        var table = null;
+        var selected = [];
+        let column = [
+            { data: "hl_plan_id", name: "hl_plan_id", title: "HL Plan Id", autoWidth: true, className: "text-nowrap" },
+            { data: "status", name: "status", title: "Status", autoWidth: true, className: "text-nowrap" },
+            { data: "tendercompleted", name: "tendercompleted", title: "TenderCompleted", autoWidth: true, className: "text-nowrap" },
+            { data: "order_type", name: "order_type", title: "Order Type", autoWidth: true, className: "text-nowrap" },
+            { data: "customer_ref", name: "customer_ref", title: "Customer Ref.*", autoWidth: true, className: "text-nowrap" },
+            { data: "customer", name: "customer", title: "Customer*", autoWidth: true, className: "text-nowrap" },
+            { data: "exporter", name: "exporter", title: "Exporter", autoWidth: true, className: "text-nowrap" },
+            { data: "customer_address", name: "customer_address", title: "Customer Address", autoWidth: true, className: "text-nowrap" },
+            { data: "carrier_booking_no", name: "carrier_booking_no", title: "Carrier Booking No.*", autoWidth: true, className: "text-nowrap" },
+            { data: "customs_vendor", name: "customs_vendor", title: "Customs Vendor", autoWidth: true, className: "text-nowrap" },
+            { data: "contact", name: "contact", title: "Contact", autoWidth: true, className: "text-nowrap" },
+            { data: "freight_agent", name: "freight_agent", title: "Freight Agent*", autoWidth: true, className: "text-nowrap" },
+            { data: "forwarder", name: "forwarder", title: "Forwarder", autoWidth: true, className: "text-nowrap" },
+            { data: "fumigate", name: "fumigate", title: "Fumigate", autoWidth: true, className: "text-nowrap" },
+            { data: "survey", name: "survey", title: "Survey", autoWidth: true, className: "text-nowrap" },
+            { data: "invoice_no", name: "invoice_no", title: "Invoice No.", autoWidth: true, className: "text-nowrap" },
+            { data: "cargo", name: "cargo", title: "Cargo*", autoWidth: true, className: "text-nowrap" },
+            { data: "package", name: " package", title: "Package", autoWidth: true, className: "text-nowrap" },
+            { data: "cargo_weight", name: "cargo_weight", title: "Cargo Weight(Ton)", autoWidth: true, className: "text-nowrap", render: $.fn.dataTable.render.number(',', '.', 3) },
+            { data: "note", name: "note", title: "Note", autoWidth: true, className: "text-nowrap", render: $.fn.dataTable.render.ellipsis(50) },
+            { data: "port_country", name: "port_country", title: "Port/Country*", autoWidth: true, className: "text-nowrap" },
+            { data: "frd", name: " frd", title: "FRD*", autoWidth: true, className: "text-nowrap" },
+            { data: "feeder_vessel", name: "feeder_vessel", title: "Feeder Vessel*", autoWidth: true, className: "text-nowrap" },
+            { data: "ocean_vessel", name: "ocean_vessel", title: "Ocean Vessel", autoWidth: true, className: "text-nowrap" },
+            { data: "si_cutoff", name: " si_cutoff", title: "SI Cutoff", autoWidth: true, className: "text-nowrap" },
+            { data: "vgm_cutoff", name: "vgm_cutoff", title: "VGM Cutoff", autoWidth: true, className: "text-nowrap" },
+            { data: "etd", name: " etd", title: "ETD", autoWidth: true, className: "text-nowrap" },
+            { data: "eta", name: " eta", title: "ETA", autoWidth: true, className: "text-nowrap" },
+            { data: "code_paperless", name: "code_paperless", title: "Code Paperless", autoWidth: true, className: "text-nowrap" },
+            { data: "total_container", name: " total_container", title: "Total Container*", autoWidth: true, className: "text-nowrap" },
+            { data: "closing_datetime", name: "closing_datetime", title: "Closing Datetime*", autoWidth: true, className: "text-nowrap" },
+            { data: "cy_place", name: "cy_place", title: "CY Place*", autoWidth: true, className: "text-nowrap" },
+            { data: "cy_date", name: "cy_date", title: "CY Date*", autoWidth: true, className: "text-nowrap" },
+            { data: "container_qty", name: "container_qty", title: "Qty*", autoWidth: true, className: "text-nowrap" },
+            { data: "container_type", name: "container_type", title: "Container Type*", autoWidth: true, className: "text-nowrap" },
+            { data: "return_place", name: "return_place", title: "Return Place*", autoWidth: true, className: "text-nowrap" },
+            { data: "return_date", name: "return_date", title: "Return Date*", autoWidth: true, className: "text-nowrap" },
+            { data: "factory", name: " factory", title: "Factory*", autoWidth: true, className: "text-nowrap" },
+            { data: "contact", name: " contact", title: "Contact*", autoWidth: true, className: "text-nowrap" },
+            { data: "hl_carrier", name: "hl_carrier", title: "HL Carrier", autoWidth: true, className: "text-nowrap" },
+            { data: "shore", name: "shore", title: "Shore", autoWidth: true, className: "text-nowrap" },
+            { data: "qty", name: "qty", title: "Qty", autoWidth: true, className: "text-nowrap" },
+            { data: "truck_type", name: "truck_type", title: "Truck Type", autoWidth: true, className: "text-nowrap" },
+            { data: "truck_load_empty_container", name: "truck_load_empty_container", title: "Truck Load (Empty Container)", autoWidth: true, className: "text-nowrap" },
+            { data: "truck_load_full_container", name: "truck_load_full_container", title: "Truck Load (Full Container)", autoWidth: true, className: "text-nowrap" },
+        ];
+
+        var vm;
+        $(document).ready(function () {
+            initialControl()
+                .then(() => {
+                    return GetService();
+                })
+                .then(function () {
+                    uiHelpers.getDefaultCriteria(screenID).done((result) => { setCriteria(result.data) }).always(Search);
+                });
+        });
+
+        function init_datepicker() {
+            var start = moment().startOf('day');
+            var end = moment().add(2, 'days').startOf('day')
+
+            function cb(start, end) {
+                if (start.isSame(end)) {
+                    $('#daterange-tr01').html(uiHelpers.displayDate(start));
+                } else {
+                    $('#daterange-tr01').html(uiHelpers.displayDate(start) + '-' + uiHelpers.displayDate(end));
+                }
+            }
+
+            $('#daterange-tr01').daterangepicker({
+                startDate: start,
+                endDate: end,
+                locale: {
+                    format: uiHelpers.dateFormat.DayMonthYear
+                },
+                ranges: {
+                    'Next 3 Days': [moment().startOf('day'), moment().add(2, 'days').startOf('day')],
+                    'Next 5 Days': [moment().startOf('day'), moment().add(4, 'days').startOf('day')],
+                    'Next 7 Days': [moment().startOf('day'), moment().add(6, 'days').startOf('day')],
+                },
+                maxSpan: {
+                    'months': 1,
+                    'days': -1
+                }
+            }, cb);
+
+            cb(start, end);
+        }
+
+        function initialControl() {
+            init_datepicker();
+            return Promise.resolve();
+            //var jqxhr = $.post("/ILB/getViewTableColumnILB006")
+            //    .done(function (result) {
+            //        console.log(result);
+            //        column = result;
+            //        //uiHelpers.initDatepicker('#daterange-tr01', null, null);
+            //        init_datepicker();
+            //    })
+            //    .fail(function (e) {
+            //        console.log(e);
+            //    });
+            //return jqxhr;
+        }
+
+        function drawChart(request) {
+            var currentdate = new Date(request.selectStartDate);
+            generateGraph("#RPTILB006", '@Url.Action("ILB006_Summary_Chart", "ReportChart")', 'bar','วันที่','จำนวนการจอง'
+                , "status การจองรถ ประจำวันที่ : " + uiHelpers.displayFullDate(request.selectStartDate) + ' - ' + uiHelpers.displayFullDate(request.selectEndDate)
+                , "status การจองรถ ประจำวันที่ " + uiHelpers.displayFullDate(request.selectStartDate) + ' - ' + uiHelpers.displayFullDate(request.selectEndDate)
+                , 'top',
+                function (activePoint) {
+                    let date = activePoint._chart.data.labels[activePoint._index];
+                    ChartDrawTableDetail(getRequest(), date)
+                },
+                request
+            );
+        }
+        function ChartDrawTableDetail(request, date) {
+            date = moment(date, "DD-MM-YYYY");
+            request.selectStartDate = internalDate(date);
+            request.selectEndDate = internalDate(date);
+
+            if (date != null) {
+                let sectionSODetailText = document.getElementById('SODetailText');
+                sectionSODetailText.innerText = "รายละเอียดการจองรถ ประจำวันที่ " + uiHelpers.displayFullDate(date);
+                ILB006DrawTable(request);
+            }
+
+        }
+
+        function Search() {
+            uiHelpers.initCriteria(screenID, '#search-button', setCriteria, getRequest, Search);
+            //Monthly chart
+            drawChart(getRequest());
+            //Monthly Table
+            DrawTableDetail(getRequest());
+            var paramDate = $('#daterange-tr01').data('daterangepicker').startDate._d;
+            var paramEndDate = $('#daterange-tr01').data('daterangepicker').endDate._d;
+            var sectionreportHeader = document.getElementById('reportHeader');
+            if (paramEndDate === paramDate) {
+                sectionreportHeader.innerText = 'รายงานการจองรถ ประจำวันที่ ' + uiHelpers.displayFullDate(paramDate);
+            } else {
+                sectionreportHeader.innerText = 'รายงานการจองรถ ประจำวันที่ ' + uiHelpers.displayFullDate(paramDate) + ' - ' + uiHelpers.displayFullDate(paramEndDate);
+
+            }
+            //setBox();
+        }
+
+        function getSelectDate() {
+            var selectDate = $('#daterange-tr01').datepicker('getDate');
+            if (selectDate == null)
+                selectDate = new Date(moment());
+            return selectDate;
+        }
+
+        function setCriteria(data) {
+            if (data == null) return;
+            dt = new Date(data.criteria.selectStartDate);
+            $('#daterange-tr01').datepicker('setDate', dt);
+            $('#cboServiceGroup').val(data.criteria.selectServiceGroup).trigger('change');
+        }
+
+        //function getRequest() {
+        //    var selectDate = getSelectDate();
+        //    var serviceGroup = $('#cboService').select2('data').map(x => x.id);
+        //    var criteria = {
+        //        selectStartDate: internalDate(selectDate),
+        //        selectServiceGroup: serviceGroup
+        //    };
+        //    return criteria;
+        //}
+
+        function ILB006DrawTable(request) {
+            drawTable(request, "#SODetailOverlay", column, "/Report/RPTILB006_Report");
+        }
+        function DrawTableDetail(request) {
+            var selectDate = getSelectDate();
+            var sectionSODetailText = document.getElementById('SODetailText');
+            if (selectDate != null) sectionSODetailText.innerText = 'รายละเอียดการจองรถ ประจำวันที่ ' + uiHelpers.displayFullDate(request.selectStartDate) + ' - ' + uiHelpers.displayFullDate(request.selectEndDate);
+            ILB006DrawTable(request);
+        }
+
+
+
+    </script>
+}
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <h1>Report Status การจองรถ</h1>
+    @{
+        //await Html.RenderPartialAsync("_Common_ILB_Summarize_006");
+        await Html.RenderPartialAsync("_Common_ILB_Criteria_05");
+    }
+    <div class="row mt-4 mb-4" id="RPTILB006">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="RPTILB006Overlay" class="overlay section-loading">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                    <h4 class="card-title" id="RPTILB006Text"></h4>
+                    <div class="d-flex align-items-center">
+                        <div class="wrapper">
+                            <a href="#" id="downloadPdf" onclick="uiHelpers.downloadPDF('#chart','RPTILB006Text'); return false;" class="btn btn-link d-inline-flex font-weight-bold">
+                                <i class="icon-share-alt mr-1"></i>Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="RPTILB006Layout">
+                    <div id="RPTILB006Container" class="chart-container report-container">
+                        @*<canvas id="RPTILB006"></canvas>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="SODetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="SODetailOverlay" class="overlay section-loading">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title" id="SODetailText"></h4>
+                    <div class="table-responsive">
+                        <div class="dataTables_wrapper">
+                            <table id="dtList" class="table table-striped" style="width:100%"></table>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+<!-- Content End -->

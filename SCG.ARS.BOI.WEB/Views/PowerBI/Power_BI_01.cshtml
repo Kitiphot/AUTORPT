@@ -1,0 +1,177 @@
+﻿@{
+    ViewBag.Title = "Power BI Embedded";
+    //Layout = "";
+}
+<!-- Copyright (c) Microsoft Corporation.
+Licensed under the MIT license. -->
+@*section Styles{*@
+<link rel="stylesheet" href="/assets/vendor/select2/css/select2.min.css" />
+<link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css">
+<!--<link rel="stylesheet" href="css/index.css">-->
+<style>
+    /* Copyright (c) Microsoft Corporation.
+            Licensed under the MIT license. */
+
+    header {
+        background-color: #007FFF;
+        height: 75px;
+        width: 100%;
+    }
+
+        header > p {
+            color: #FFFFFF;
+            font: bold 1.6em "segoe ui", arial, sans-serif;
+            margin-left: 31px;
+            padding-top: 20px;
+        }
+
+    main {
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    #text-container > div > p {
+        font: 1.2em "segoe ui", arial, sans-serif;
+    }
+
+    #report-container {
+        height: calc(0.5625 * 61vw); /* 16:9 aspect ratio */
+    }
+
+    footer > p {
+        font: 1em "segoe ui", arial, sans-serif;
+    }
+
+    iframe {
+        border: none;
+    }
+
+    @@ media only screen and (max-width: 574px) {
+        #report-container {
+            height: calc(0.5625 * 100vw); /* 16:9 aspect ratio */
+        }
+    }
+
+    .select-ellipsis {
+        width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+        .select-ellipsis:hover {
+            overflow: visible;
+        }
+</style>
+@*}*@
+
+<main class="row">
+    
+    <section id="report-container" class="embed-container col-lg-offset-4 col-lg-7 col-md-offset-5 col-md-7 col-sm-offset-5 col-sm-7 mt-5">
+    </section>
+
+    <!-- Used to display report embed error messages -->
+    <section class="error-container m-5">
+    </section>
+</main>
+
+<script src="~/assets/vendor/jQuery/js/jquery-3.5.1.min.js"></script>
+    <script src="/assets/vendor/select2/js/select2.min.js"></script>
+@*section Scripts{*@
+<script src="https://npmcdn.com/es6-promise@3.2.1"></script>
+<script src="~/assets/vendor/PowerBI/js/powerbi.js"></script>
+<script>
+    // ----------------------------------------------------------------------------
+    // Copyright (c) Microsoft Corporation.
+    // Licensed under the MIT license.
+    // ----------------------------------------------------------------------------
+
+    $(document).ready(function () {
+        Embed();
+    });
+
+    function Embed() {
+        //$('#reportid').select2({
+        //    placeholder: "Report Id",
+        //    tags: true
+        //});
+
+        var models = window["powerbi-client"].models;
+        var reportContainer = $("#report-container").get(0);
+
+        // Initialize iframe for embedding report
+        powerbi.reset(reportContainer);
+        powerbi.bootstrap(reportContainer, { type: "report" });
+        let reportid = '493e9af7-e79b-4aa0-9a2f-cec26968e770' //Cement Bag: DN status // $('#reportid').val()
+        $.ajax({
+            type: "GET",
+            url: "/PowerBI/GetEmbedInfo",
+            type: 'POST',
+            data: { reportId: reportid },
+            success: function (data) {
+                embedData = $.parseJSON(data);
+                reportLoadConfig = {
+                    type: "report",
+                    tokenType: models.TokenType.Embed,
+                    accessToken: embedData.EmbedToken.Token,
+                    // You can embed different reports as per your need
+                    embedUrl: embedData.EmbedUrl,
+
+                    // Enable this setting to remove gray shoulders from embedded report
+                    // settings: {
+                    //     background: models.BackgroundType.Transparent
+                    // }
+                };
+
+                // Use the token expiry to regenerate Embed token for seamless end user experience
+                // Refer https://aka.ms/RefreshEmbedToken
+                tokenExpiry = embedData.EmbedToken.Expiration;
+
+                // Embed Power BI report when Access token and Embed URL are available
+                var report = powerbi.embed(reportContainer, reportLoadConfig);
+
+                // Clear any other loaded handler events
+                report.off("loaded");
+
+                // Triggers when a report schema is successfully loaded
+                report.on("loaded", function () {
+                    console.log("Report load successful");
+                });
+
+                // Clear any other rendered handler events
+                report.off("rendered");
+
+                // Triggers when a report is successfully embedded in UI
+                report.on("rendered", function () {
+                    console.log("Report render successful");
+                });
+
+                // Clear any other error handler events
+                report.off("error");
+
+                // Handle embed errors
+                report.on("error", function (event) {
+                    var errorMsg = event.detail;
+
+                    // Use errorMsg variable to log error in any destination of choice
+                    console.error(errorMsg);
+                    return;
+                });
+            },
+            error: function (err) {
+
+                // Show error container
+                var errorContainer = $(".error-container");
+                $(".embed-container").hide();
+                errorContainer.show();
+
+                // Format error message
+                var errMessageHtml = "<strong> Error Details: </strong> <br/>" + err.responseText;
+                errMessageHtml = errMessageHtml.split("\n").join("<br/>");
+
+                // Show error message on UI
+                errorContainer.append(errMessageHtml);
+            }
+        });
+    }
+</script>
+@*}*@

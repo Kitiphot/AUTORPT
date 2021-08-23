@@ -1,0 +1,272 @@
+﻿@model SCG.ARS.BOI.WEB.Models.ListMiscDataSelectionViewModel
+@{
+    ViewBag.Title = "Index";
+}
+
+@section Styles{
+    <style>
+        #view_report_table th, td {
+            border-left: 1px solid;
+            border-right: 1px solid;
+        }
+
+        table[aria-describedby="view_report_table_info"] thead th {
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTable {
+            margin: 0 !important;
+        }
+
+            .dataTables_wrapper .dataTable td {
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+            }
+
+            .dataTables_wrapper .dataTable .percent {
+                padding: 0px !important;
+            }
+    </style>
+}
+
+@section Scripts{
+
+    <script src="~/assets/js/SKIC.js"></script>
+
+    <script>
+        /*-----------------------*/
+        /*Initial on Webpage Load*/
+        /*-----------------------*/
+        $(document).ready(function () {
+            var loading = $('#criteria-loading-progress');
+            loading.show();
+
+            const dpicker = $('#daterange-99');
+
+            createShiptoDropDownList('ddlShipTo')
+                //.then(function (result) {
+                //    init_datepicker(dpicker, 'Yesterday');
+                //    loading.hide();
+                //    Search();
+                //})
+                .then(function (result) {
+                    return $.post("/Report/GetPKGLastWorkingDate");
+                })
+                .then(function (result) {
+                    var last_date = new Date(Date.parse(result.last_date));
+                    init_datepicker(dpicker, 'Yesterday', { maxSpan: { months: 1, days: -1 }, startDate: last_date, endDate: last_date });
+                })
+                .catch(function (error) {
+                    init_datepicker(dpicker, 'Yesterday', { maxSpan: { months: 1, days: -1 } });
+                })
+                .always(function () {
+                    loading.hide();
+                    Search();
+                });
+        });
+
+        function Search() {
+            DrawTableDetail();
+        }
+
+        function DrawTableDetail() {
+            var loading = $('#table-loading-progress');
+            loading.show();
+
+            var param = getDateRangeCriteria($('#daterange-99'));
+            param.shiptoId = $('#ddlShipTo').val();
+            param.xxx = $('#ddlShipTo').text();
+
+            $.post('@Url.Action("RPTPKG004_SwitchingModelReport", "Report")', param)
+                .done(function (result) {
+                    if ($.fn.dataTable.isDataTable('#view_report_table')) {
+                        var table = $('#view_report_table').DataTable();
+                        table.clear();
+                        $.each(result.data, function (idx, obj) {
+                            table.row.add(result.data[idx]);
+                        });
+                        table.draw();
+                    }
+                    else {
+
+                        $("#view_report_table").DataTable({
+                            scrollX: true,
+                            responsive: true,
+                            dom: 'lTf<"html5buttons"B>gtip',
+                            pageLength: 10,
+                            buttons: [
+                                'copy', 'excel'
+                            ],
+                            data: result.data,
+                            ordering: false,
+                            order: [],
+                            columns: [
+                                { "data": "carrier_id", visible: false },
+                                {
+                                    "data": "carrier_name",
+                                    className: 'text-nowrap'
+                                },
+                                {
+                                    data: "province",
+                                    //visible: false,
+                                },
+                                {
+                                    "data": "order_count",
+                                    className: 'text-nowrap',
+                                    render: function (data, type, row) {
+                                        if (row.carrier_id == -1) {
+                                            return "Plan";
+                                        } else if (row.carrier_id == -2) {
+                                            return "Actual";
+                                        } else {
+                                            return data;
+                                        }
+                                    }
+                                },
+                                {
+                                    data: 'backhaul_count',
+                                    className: 'text-nowrap' },
+                                {
+                                    'data': 'remain_truck',
+                                    className: 'text-nowrap',
+                                    render: function (data, type, row) {
+                                        if (row.carrier_id < 0) {
+                                            return "";
+                                        } else {
+                                            return data;
+                                        }
+                                    }
+                                },
+                                {
+                                    data: "sub_truck_type",
+                                    //visible: false,
+                                },
+                            ],
+                            "paging": false,
+                            "info": false
+                        });
+                    }
+                });
+            loading.hide();
+        }
+
+        function createShiptoDropDownList(ddlId) {
+            var jqxhr = $.post("/Report/GetBackhaulShiptoDropDownList")
+                .done(function (result) {
+                    var ddl = $('#' + ddlId);
+                    ddl.empty();
+                    if (result.status) {
+                        $.each(result.data, function (index, item) {
+                            ddl.append($('<option>').text(item.dataDisplay).attr('value', item.dataValue_Key));
+                        });
+
+                        ddl.select2({
+                            enableFiltering: true,
+                            placeholder: "Select All",
+                            allowClear: true
+                        });
+                    } else {
+                        toastr["error"](result.message);
+                    }
+                })
+                .fail(function (e) {
+                    console.log(e);
+                });
+            return jqxhr;
+        }
+
+    </script>
+}
+
+<input type="hidden" id="reporttype" />
+<!-- Content Start -->
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 card-statistics">
+            <h4 class="card-title">Switching Model</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div id="criteria-loading-progress" class="overlay">
+                    <div class="loader-wrap">
+                        <div class="bar-loader">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">เงื่อนไขการค้นหา</h4>
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="daterange-99">Date</label>
+                                <div class="col-sm-12">
+                                    <button id="daterange-99" class="btn btn-default dropdown-toggle md-btn-flat"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-group row">
+                                <label for="ddlShipTo">ปลายทาง</label>
+                                <div class="col-sm-12">
+                                    <select id="ddlShipTo" class="form-control" multiple="multiple"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="wrapper">
+                                <button class="btn btn-primary submit-btn with-arrow rounded-border mr-2 mb-4" onclick="Search();">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="ShipmentStatusDetail">
+        <div class="col-12">
+            <article class="card mb-4">
+                <div class="card-body">
+                    <div id="table-loading-progress" class="overlay">
+                        <div class="loader-wrap">
+                            <div class="bar-loader">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="card-title" id="ShipmentStatusDetailText"></h4>
+                    @*<div class="table-responsive">
+        <div class="dataTables_wrapper">*@
+                    <table class="table" id="view_report_table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Carrier id</th>
+                                <th>Carrier</th>
+                                <th>จังหวัด</th>
+                                <th>ขาไป</th>
+                                <th>ขากลับ</th>
+                                <th>รถเหลือ</th>
+                                <th>Sub Truck type</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    @*</div>
+        </div>*@
+                </div>
+            </article>
+        </div>
+    </div>
+</div>

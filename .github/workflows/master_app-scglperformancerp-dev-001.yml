@@ -53,5 +53,5 @@ jobs:
       with:
         app-name: 'app-scglperformancerp-dev-001'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_f91f2d6f784142e289ffe64c47184cd5 }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_ece4f72d1afb4951aa3e205c7d3cd86f }}
         package: .

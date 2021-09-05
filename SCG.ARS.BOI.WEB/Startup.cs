@@ -123,40 +123,41 @@ namespace SCG.ARS.BOI.WEB
 			services.AddScoped<DbContext, QaPKGContext>();
 			services.AddScoped<DbContext, ApplicationContext>();
 
-			services.AddEntityFrameworkNpgsql()
-				.AddDbContext<MasterContext>(options =>
-				{
-					options.UseNpgsql(Configuration.GetConnectionString("ARSConnection"));
-				})
-				.BuildServiceProvider();
+            services.AddEntityFrameworkNpgsql()
+                .AddDbContext<MasterContext>(options =>
+                {
+                    options.UseNpgsql(Configuration.GetConnectionString("ARSConnection"));
+                })
+                .BuildServiceProvider();
 
-			services.AddEntityFrameworkNpgsql()
-				.AddDbContext<QaWHContext>(options =>
-				{
-					options.UseNpgsql(Configuration.GetConnectionString("PDLakeConnection"));
-				})
-				.BuildServiceProvider();
+            services.AddEntityFrameworkNpgsql()
+                .AddDbContext<QaWHContext>(options =>
+                {
+                    options.UseNpgsql(Configuration.GetConnectionString("PDLakeConnection"));
+                })
+                .BuildServiceProvider();
 
-			services.AddEntityFrameworkNpgsql()
-				.AddDbContext<QaPKGContext>(options =>
-				{
-					options.UseNpgsql(Configuration.GetConnectionString("PDLakeConnection"));
-				})
-				.BuildServiceProvider();
+            services.AddEntityFrameworkNpgsql()
+                .AddDbContext<QaPKGContext>(options =>
+                {
+                    options.UseNpgsql(Configuration.GetConnectionString("PDLakeConnection"));
+                })
+                .BuildServiceProvider();
 
-			services.AddDbContext<ApplicationContext>(options =>
-			{
-				options.UseNpgsql(Configuration.GetConnectionString("PDLakeConnection"));
-			});
+            services.AddDbContext<ApplicationContext>(options =>
+            {
+                options.UseNpgsql(Configuration.GetConnectionString("PDLakeConnection"));
+            });
 
-			services.AddDbContext<SecurityDbContext>(options => {
-				options.UseNpgsql(Configuration.GetConnectionString("ARSConnection"));
-			});
+            services.AddDbContext<SecurityDbContext>(options =>
+            {
+                options.UseNpgsql(Configuration.GetConnectionString("ARSConnection"));
+            });
 
-			services.AddTransient<IMasterRepository, MasterRepository> ();
-			services.AddTransient<IReportRepository, ReportRepository> ();
-			services.AddTransient<IFunctionTemplateRepository, FunctionTemplateRepository> ();
-			services.AddTransient<ILogRepository, LogRepository> ();
+            services.AddTransient<IMasterRepository, MasterRepository>();
+			services.AddTransient<IReportRepository, ReportRepository>();
+			services.AddTransient<IFunctionTemplateRepository, FunctionTemplateRepository>();
+			services.AddTransient<ILogRepository, LogRepository>();
 
 			//Security 2020-08-17
 			services.AddTransient<IUserRepository, UserRepository>();
@@ -187,10 +188,10 @@ namespace SCG.ARS.BOI.WEB
 					Host = config.Host,
 					Port = config.Port,
 					EnableSsl = config.EnableSsl//,
-					//Credentials = new NetworkCredential(
-					//        config.Username,
-					//        config.Password
-					//    )
+												//Credentials = new NetworkCredential(
+												//        config.Username,
+												//        config.Password
+												//    )
 				};
 			});
 
@@ -227,13 +228,14 @@ namespace SCG.ARS.BOI.WEB
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 			});
 
-			IScheduler _scheduler = GetScheduler(services);
+			//IScheduler _scheduler = GetScheduler(services);
 
 			services.AddSingleton<Quartzmin.Services>(provider => {
 				var isEmpty = string.IsNullOrEmpty(_routePrefix);
 
-				var options = new QuartzminOptions {
-					Scheduler = _scheduler,
+				var options = new QuartzminOptions
+				{
+					//Scheduler = _scheduler,
 					VirtualPathRoot = isEmpty ? string.Empty : _routePrefix
 				};
 
@@ -270,7 +272,7 @@ namespace SCG.ARS.BOI.WEB
 
 			services.AddMemoryCache();
 
-			services.AddQuartzmin ();
+			services.AddQuartzmin();
 
 			services.AddIdentity<ApplicationUser, ApplicationRole>()
 				.AddEntityFrameworkStores<SecurityDbContext>()
@@ -344,15 +346,15 @@ namespace SCG.ARS.BOI.WEB
 
 			app.UseCookiePolicy();
 
-//#if !DEBUG
+			//#if !DEBUG
 			app.UseQuartzmin(_routePrefix);
-//#endif
+			//#endif
 
 			app.Use(async (context, next) =>
 			{
-				context.Response.Headers.Add("X-Frame-Options", "DENY");
-				context.Response.Headers["Server"] = "-";
-				context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+				//context.Response.Headers.Add("X-Frame-Options", "DENY");
+				//context.Response.Headers["Server"] = "-";
+				//context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
 				if (httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
 				{
@@ -365,9 +367,9 @@ namespace SCG.ARS.BOI.WEB
 					string username = httpContextAccessor.HttpContext.User.Identity.Name;
 					string cookieToken = context.Request.Cookies["CookieToken"];
 					var user = await usrMngr.FindByNameAsync(username);
-					
+
 					var isAdmin = await usrMngr.IsInRoleAsync(user, ss.GetAdminRole());
-					
+
 					//allow concurrent login for admin user.
 					//TODO: Remove when deploy production server
 					if (!pr.ValidateCookieToken(context.User.Identity.Name, cookieToken) && !isAdmin)
@@ -435,9 +437,9 @@ namespace SCG.ARS.BOI.WEB
 			//    jobType: typeof(EmailSchedulerJob),
 			//    cronExpression: "0/5 * * * * ?")); // run every 5 seconds
 
-			#if !DEBUG
+#if !DEBUG
 				factory.Start();
-			#endif
+#endif
 
 			//ITrigger trigger1 = TriggerBuilder.Create()
 			//            .WithIdentity("test trigger")

@@ -32,7 +32,7 @@ namespace SCG.ARS.BOI.WEB.Entities.QuartzDb
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseNpgsql("Host=auto-report-pg.ctg0nvlybzpq.ap-southeast-1.rds.amazonaws.com; Username =csi_all; Password =CSI_@ll; Database =qa_autoreport", x => x.UseNodaTime());
+                //optionsBuilder.UseNpgsql("Host=auto-report-pg.ctg0nvlybzpq.ap-southeast-1.rds.amazonaws.com; Username =csi_all; Password =CSI_@ll; Database =qa_autoreport", x => x.UseNodaTime());
             }
         }
 

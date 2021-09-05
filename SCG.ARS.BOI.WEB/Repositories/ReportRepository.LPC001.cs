@@ -65,12 +65,12 @@ namespace SCG.ARS.BOI.WEB.Repositories
                 //int daySearch;
                 dbConnection.Open();
                 var data = dbConnection.Query<RPTLPC001_ShipmentMonthlyStatusViewModel>($@"select dn_day,
-                    total_dn,
+                    0 as total_dn,
                     total_tender,
                     total_accept,
                     total_gi,
                     total_delivery
-                    from dom.getreport01_monthly_shipment(@business,@customer,@fleet,@shippingPoint,@shipToRegion,@matGroup,@orderType,@truckType,@plannerName,@orderStartDate::date,@orderEndDate::date)",
+                    from dom.getreport01_monthly_shipment(@business,null,@customer,@fleet,@shippingPoint,@shipToRegion,@matGroup,@orderType,@truckType,@plannerName,@orderStartDate::date,@orderEndDate::date,null)",
                     param:new
                     {
                         input.business,
@@ -184,12 +184,13 @@ namespace SCG.ARS.BOI.WEB.Repositories
             using (IDbConnection dbConnection = Connection)
             {
                 dbConnection.Open();
-                var data = dbConnection.Query<RPTLPC001_ShipmentDailyStatusViewModel>($@"select total_dn,
+                var data = dbConnection.Query<RPTLPC001_ShipmentDailyStatusViewModel>($@"select 
+                    0 as total_dn,
                     total_tender,
                     total_accept,
                     total_gi,
                     total_delivery
-                    from dom.getreport01_shipment_status(@business,@customer,@fleet,@shippingPoint,@shipToRegion,@matGroup,@orderType,@truckType,@plannerName,@orderStartDate::date,@orderEndDate::date)",
+                    from dom.getreport01_shipment_status(@business,null,@customer,@fleet,@shippingPoint,@shipToRegion,@matGroup,@orderType,@truckType,@plannerName,@orderStartDate::date,@orderEndDate::date,null)",
                     param:new
                     {
                         input.business,

@@ -32,3 +32,4 @@ stages:
         command: 'custom'
         custom: 'ef'
         arguments: '--version'
+    - task: PublishBuildArtifacts@1

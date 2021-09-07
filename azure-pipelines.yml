@@ -17,6 +17,7 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+    - task: PublishBuildArtifacts@1
     - task: UseDotNet@2
       inputs:
         version: '3.1.200'

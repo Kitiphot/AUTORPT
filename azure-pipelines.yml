@@ -33,11 +33,10 @@ stages:
         command: 'custom'
         custom: 'ef'
         arguments: '--version'
-    - task: AzureResourceGroupDeployment@1
+    - task: AzureResourceManagerTemplateDeployment@3
       inputs:
         connectionType: 'Azure Resource Manager'
         AzureSubscription: 'CBM-scgl-development (1d48905c-ed0a-4a27-8789-ceb03d64b8d6)'
         appType: 'webApp'
-        WebAppName:'app-scglperformancerp-dev-001'
         package: '$(System.DefaultWorkingDirectory)/_Kitiphot.AUTORPT'
 
